@@ -13,7 +13,6 @@ bool Database::connect()
 	if (!(mysql_real_connect(conn, host_name, user_name, password, db_name, port_num, socket_name, flags)))
 	{
 		return false;
-		//fprintf(stderr, "Error : %s [%d]", mysql_error(conn), mysql_errno(conn));
 	}
 	else {
 		return true;
