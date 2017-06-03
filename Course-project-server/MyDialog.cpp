@@ -9,6 +9,11 @@
 #define IDC_CHECKBOX1 0x8816
 #define IDC_CHECKBOX2 0x8817
 
+struct PARAMS{
+	ClientInfo* clientInfo;
+	char *name, *surname, *fathername, *group;
+};
+
 //Обслуживание очередного запроса будем выполнять в отдельном потоке
 DWORD WINAPI ThreadForReceive(LPVOID lpParam);
 //Ожидать запросы на соединение будем в отдельном потоке
@@ -42,25 +47,26 @@ BOOL InitListViewColumns(HWND hWndListView)
 	lvc.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT | LVCF_SUBITEM;
 
 	// Add the columns.
-	for (iCol = 0; iCol < /*C_COLUMNS*/3; iCol++)
+	for (iCol = 0; iCol < /*C_COLUMNS*/4; iCol++)
 	{
 		lvc.iSubItem = iCol;
 		lvc.pszText = szText;
 		switch (iCol) {
-		case 0:lvc.cx = 140; break;
-		case 1:lvc.cx = 130; break;
-		case 2:lvc.cx = 85; break;
+		case 0:lvc.cx = 190; break;//190
+		case 1:lvc.cx = 50; break;//50
+		case 2:lvc.cx = 50; break;//50
+		case 3:lvc.cx = 64; break;//50
 		}
 
 
-		if (iCol < 2)
+		if (iCol < 5)
 			lvc.fmt = LVCFMT_LEFT;  // Left-aligned column.
 		else
 			lvc.fmt = LVCFMT_RIGHT; // Right-aligned column.
 
 									// Load the names of the column headings from the string resources.
 		LoadString(NULL,
-			IDS_STRINGNAME + iCol,
+			IDS_NAME + iCol,
 			szText,
 			sizeof(szText) / sizeof(szText[0]));
 
@@ -71,7 +77,6 @@ BOOL InitListViewColumns(HWND hWndListView)
 
 	return TRUE;
 }
-////////////Еще не трогал
 BOOL InsertListViewItems(HWND hWndListView, int cItems)
 {
 	LVITEM lvI;
@@ -96,48 +101,50 @@ BOOL InsertListViewItems(HWND hWndListView, int cItems)
 
 	return TRUE;
 }
-//void HandleWM_NOTIFY(LPARAM lParam)
-//{
-//	NMLVDISPINFO* plvdi;
-//
-//	switch (((LPNMHDR)lParam)->code)
-//	{
-//	case LVN_GETDISPINFO:
-//
-//		plvdi = (NMLVDISPINFO*)lParam;
-//
-//		switch (plvdi->item.iSubItem)
-//		{
-//		case 0:
-//			plvdi->item.pszText = rgPetInfo[plvdi->item.iItem].szKind;
-//			break;
-//
-//		case 1:
-//			plvdi->item.pszText = rgPetInfo[plvdi->item.iItem].szBreed;
-//			break;
-//
-//		case 2:
-//			plvdi->item.pszText = rgPetInfo[plvdi->item.iItem].szPrice;
-//			break;
-//
-//		default:
-//			break;
-//		}
-//
-//		break;
-//
-//	}
-//	// NOTE: In addition to setting pszText to point to the item text, you could 
-//	// copy the item text into pszText using StringCchCopy. For example:
-//	//
-//	// StringCchCopy(plvdi->item.pszText, 
-//	//                         plvdi->item.cchTextMax, 
-//	//                         rgPetInfo[plvdi->item.iItem].szKind);
-//
-//	return;
-//}
+void HandleWM_NOTIFY(LPARAM lParam)
+{
+	NMLVDISPINFO* plvdi;
 
-///////////////////////////
+	switch (((LPNMHDR)lParam)->code)
+	{
+	case LVN_GETDISPINFO:
+
+		plvdi = (NMLVDISPINFO*)lParam;
+
+		switch (plvdi->item.iSubItem)
+		{
+		case 0:
+			StringCchCopy(plvdi->item.pszText, plvdi->item.cchTextMax, MyDialog::ptr->userListView[plvdi->item.iItem]->getFullName().c_str());
+			break;
+		case 1:
+			switch (MyDialog::ptr->userListView[plvdi->item.iItem]->getStatus()) {
+			case Status::CONNECTED:plvdi->item.pszText = "Connected"; break;
+			//case Status::NOT_CONNECTED:plvdi->item.pszText = "Not Connected"; break;
+			case Status::SUBMITTED:plvdi->item.pszText = "Submitted"; break;
+			}
+			break;
+		case 2: {
+			stringstream ss;
+			ss << fixed << setprecision(1) << MyDialog::ptr->userListView[plvdi->item.iItem]->getPercents();
+			ss << "%";
+			std::string message = ss.str();
+			StringCchCopy(plvdi->item.pszText, plvdi->item.cchTextMax, message.c_str());
+			break;
+		}
+		case 3:
+			plvdi->item.pszText = "0";
+			break;
+
+		default:
+			break;
+		}
+
+		break;
+
+	}
+	return;
+}
+
 void GetDesktopResolution(int& horizontal, int& vertical)
 {
 	RECT desktop;
@@ -225,17 +232,7 @@ BOOL CALLBACK DestoryChildCallback(HWND hwnd, LPARAM lParam) {
 	}
 	return TRUE;
 }
-VOID SetView(HWND hWndListView, DWORD dwView)
-{
-	// Retrieve the current window style. 
-	DWORD dwStyle = GetWindowLong(hWndListView, GWL_STYLE);
 
-	// Set the window style only if the view bits changed.
-	if ((dwStyle & LVS_TYPEMASK) != dwView)
-	{
-		SetWindowLong(hWndListView, GWL_STYLE, (dwStyle & ~LVS_TYPEMASK) | dwView);
-	}
-}
 HWND CreateListView(int x, int y, int width, int height, HWND *hwndParent)
 {
 	INITCOMMONCONTROLSEX icex;           // Structure for control initialization.
@@ -271,10 +268,9 @@ HWND& createEdit(int x, int y, int width, int height, HWND* parent, int id) {
 }
 HWND& createStatic(const char* text, int x, int y, int width, int height, HWND*parent, int style) {
 	HWND hStatic = CreateWindowEx(0, TEXT("STATIC"), TEXT(text), WS_CHILD | WS_VISIBLE |
-		WS_EX_CLIENTEDGE | style /*| WS_BORDER*/, /*ptr->windowWidth*/x, /*ptr->winowHeight*/y, width, height, *parent, 0, nullptr, 0);
-	return hStatic;//SS_CENTER
+		WS_EX_CLIENTEDGE | style , x, y, width, height, *parent, 0, nullptr, 0);
+	return hStatic;
 }
-
 HWND& createButton(const char* text, int x, int y, int width, int height, HWND* parent, int id, int style) {
 	HWND hButton = CreateWindowEx(0, TEXT("Button"), TEXT(text), WS_CHILD | WS_VISIBLE | WS_GROUP | style,
 		x, y, width, height, *parent, (HMENU)id, GetModuleHandle(NULL), 0);
@@ -285,6 +281,7 @@ HWND& createCheckBox(const char* text, int x, int y, int width, int height, HWND
 		x, y, width, height, *parent, (HMENU)id, GetModuleHandle(NULL), 0);
 	return hCkeckBox;
 }
+
 VOID MyDialog::OnBrowse()
 {
 	BROWSEINFO binfo = { 0 };
@@ -340,10 +337,6 @@ VOID MyDialog::checkAllFields() {
 		EnableWindow(MyDialog::ptr->hStart, TRUE);
 	else
 		EnableWindow(MyDialog::ptr->hStart, FALSE);
-
-	//TEXT str[40];
-	//SendMessage(hGroupCombo, CB_GETLBTEXT/*CB_GETLBTEXTLEN*/, nIndex, (LPARAM)s.c_str());
-
 }
 VOID MyDialog::createAllElements() {
 	hsGroup = createStatic("Группа: ", 30, 25, 50, 16, &ptr->hDialog, NULL);
@@ -351,7 +344,7 @@ VOID MyDialog::createAllElements() {
 	hsTime = createStatic("Время: ", 30, 105, 50, 16, &ptr->hDialog, NULL);
 	hsTest = createStatic("мин. ", 160, 105, 50, 22, &ptr->hDialog, NULL);
 
-	hPath = createEdit(170, 66, 220, 22, &ptr->hDialog, IDC_PATH);//сделать -30 от ширины полной
+	hPath = createEdit(170, 66, 220, 22, &ptr->hDialog, IDC_PATH);
 
 	hBrowse = createButton("Обзор..", 100, 66, 62, 22, &ptr->hDialog, IDC_BROWSE, NULL);
 	hStart = createButton("Start Quiz", 160, 390, 80, 22, &ptr->hDialog, IDC_START, WS_DISABLED);
@@ -366,16 +359,8 @@ VOID MyDialog::createAllElements() {
 	SendMessage(hTime, CB_ADDSTRING, 0, (LPARAM)"120");
 	SendMessage(hTime, CB_SETCURSEL, 0, NULL);
 
-	//hUserList = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("listbox"), nullptr,
-	//	WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_AUTOVSCROLL | WS_HSCROLL | LBS_NOTIFY | LBS_DISABLENOSCROLL, 30, 143, 355, 241, ptr->hDialog, (HMENU)IDC_USERLIST, NULL, NULL);//180 355
-	//ShowWindow(hUserList, FALSE);
 	hUserList = CreateListView(30, 143, 355, 241, &ptr->hDialog);
 	InitListViewColumns(hUserList);
-	//SetWindowTheme(hUserList, (LPCWSTR)"Explorer", NULL);
-	//Полученные из базы пользователи (группа)(groupStudents - вектор строк) и в цикле добавляем их в hGroupCombo   
-	/*for (int i = 0; i < groupStudents.size(); i++) {
-	SendMessage(hGroupCombo, CB_ADDSTRING, 0, (LPARAM)groupStudents[i].c_str());
-	}*/
 	
 	hCheckBox1 = createCheckBox("Randomize Questions", 205, 110, 140, 22, &ptr->hDialog, IDC_CHECKBOX1);
 
@@ -397,23 +382,14 @@ BOOL MyDialog::loginCheck() {
 			row = mysql_fetch_row(rset);
 			return FALSE;
 		}
-		//while ((row = mysql_fetch_row(rset)) != NULL) {
-		//	foundResult = TRUE;
-		//}
-		//if (!foundResult) {
-		//	//Неправильный логин или пароль, дать ещё попытку все ввести
-		//	
-		//}
 	}
 	mysql_free_result(rset);
 	return TRUE;
 }
 
-
 DWORD WINAPI DBconnect(LPVOID lpParam) {
 	if (MyDialog::ptr->getDB().connect()) {
 		mysql_query(MyDialog::ptr->getDB().getConnection(), "SET NAMES CP1251");
-		//MessageBox(MyDialog::ptr->hDialog, "Подсоединился к БД", "YES", MB_OK);
 		return 1;
 	}
 	else {
@@ -508,7 +484,8 @@ BOOL checkUserData(string &name, string &surname, string &fatherName, string &gr
 
 DWORD WINAPI ThreadForReceive(LPVOID lpParam)
 {
-	ClientInfo* ptrinfo = (ClientInfo*)lpParam;
+	PARAMS *params = (PARAMS*)lpParam;
+	ClientInfo* ptrinfo = params->clientInfo;
 	char szBuff[4096];
 	while (TRUE)
 	{
@@ -545,6 +522,17 @@ DWORD WINAPI ThreadForReceive(LPVOID lpParam)
 						if (!strcmp(szBuff, "<YES>")) {
 							strcpy_s(szBuff, "<OK>");
 							send(ptrinfo->socket, szBuff, strlen(szBuff) + 1, 0);
+							
+							string lookFor = params->surname;
+							lookFor += " "; 
+							lookFor += params->name;
+							lookFor += " ";
+							lookFor += params->fathername;
+							LVFINDINFO item = { LVFI_STRING, (LPCTSTR)lookFor.c_str()};
+							int indexUser = ListView_FindItem(MyDialog::ptr->getUserList(), -1, &item);
+							MyDialog::ptr->userListView.at(indexUser)->setStatus(Status::CONNECTED);
+							MyDialog::ptr->UpdateUserList(params->group);
+							
 							while (TRUE) {
 								result = recv(ptrinfo->socket, szBuff, 4096, 0);
 								if (!strcmp(szBuff, "<SUCCESSFUL_PERCENTS>")) {
@@ -552,16 +540,18 @@ DWORD WINAPI ThreadForReceive(LPVOID lpParam)
 									send(ptrinfo->socket, szBuff, strlen(szBuff) + 1, 0);
 
 									result = recv(ptrinfo->socket, szBuff, 4096, 0);
-									//в double конвертирую а затем в таблицу необходимо поместить
 									double percents = atof(szBuff);
-									string percentsToTable = to_string(percents);
-									percentsToTable += "%";
-									///////////????
-									//////////////////////////////////
+									MyDialog::ptr->userListView.at(indexUser)->setPercents(percents);
+									MyDialog::ptr->UpdateUserList(params->group);
+
 									strcpy_s(szBuff, "<OK>");
 									send(ptrinfo->socket, szBuff, strlen(szBuff) + 1, 0);
 								}
 								else if (!strcmp(szBuff, "<EXIT>")) {
+									//disconnected
+									MyDialog::ptr->userListView.at(indexUser)->setStatus(Status::SUBMITTED);
+									//внести изменение в базу время прохождения и дата
+									MyDialog::ptr->UpdateUserList(params->group);
 									send(ptrinfo->socket, szBuff, strlen(szBuff) + 1, 0);
 									break;
 								}
@@ -647,7 +637,23 @@ DWORD WINAPI ThreadForAccept(LPVOID lpParam)
 		
 		if (!checkUserData(name, surname, fatherName, group, clientinfo))
 			continue;//Если не прошел валидацию в ThreadForReceive не заходишь
-		HANDLE hThread = CreateThread(0, 0, ThreadForReceive, (LPVOID)&clientinfo, 0, 0);
+
+		PARAMS params;
+		params.clientInfo = &clientinfo;
+		int len = strlen(name.c_str());
+		params.name = new char[len + 1];
+		strcpy_s(params.name,len+1, name.c_str());
+		len = strlen(surname.c_str());
+		params.surname = new char[len + 1];
+		strcpy_s(params.surname, len + 1, surname.c_str());
+		len = strlen(fatherName.c_str());
+		params.fathername = new char[len + 1];
+		strcpy_s(params.fathername, len + 1, fatherName.c_str());
+		len = strlen(group.c_str());
+		params.group = new char[len + 1];
+		strcpy_s(params.group, len + 1, group.c_str());
+
+		HANDLE hThread = CreateThread(0, 0, ThreadForReceive, (LPVOID)&params, 0, 0);
 		CloseHandle(hThread);
 	}
 	closesocket(s);
@@ -655,10 +661,32 @@ DWORD WINAPI ThreadForAccept(LPVOID lpParam)
 	EnableWindow(MyDialog::ptr->gethStart(), TRUE);
 	return 0;
 }
+VOID MyDialog::UpdateUserList(char* ListItem) {
+	ListView_DeleteAllItems(hUserList);
+	//userListView.clear();
+	if (userListView.size() == 0) {
+		ssql << "select name from student where student.group='";
+		ssql << ListItem << "';";
+		sql = ssql.str();
+		ssql.str("");
+		if (!mysql_query(MyDialog::ptr->getDB().getConnection(), sql.c_str())) {
+			rset = mysql_use_result(MyDialog::ptr->getDB().getConnection());
+			while ((row = mysql_fetch_row(rset)) != NULL) {
+				userListView.push_back(new UserListView(row[0]));
+				//SendMessage(hUserList, CB_ADDSTRING, 0, (LPARAM)row[0]);
+			}
+			row = mysql_fetch_row(rset);
+		}
+		mysql_free_result(rset);
+	}
 
+	//Вызров этого метода после получения необходимых пользователей. И заполениния структуры.
+	InsertListViewItems(hUserList, userListView.size());
+	//Забираем имена всех учеников и бросаю их в UsersList
+}
 VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 {
-	if (id == IDC_LOGIN)//Когда ввел группу и добавил тест файл и нажал логин
+	if (id == IDC_LOGIN)
 	{
 		if (!loginCheck())
 			return;
@@ -668,7 +696,6 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		winowHeight = 475;
 		MoveWindow(hwnd, (horizontal - (horizontal / 2) - windowWidth / 2), (vertical - (vertical / 2) - winowHeight / 2), windowWidth, winowHeight, TRUE);
 		
-		//тут создаю новые элементы для окна и присваиваю их к HWND
 		createAllElements();
 
 		ssql << "select distinct student.group from student;";
@@ -730,24 +757,16 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		if (codeNotify == CBN_SELCHANGE) {
 			int ItemIndex = SendMessage((HWND)hGroupCombo, (UINT)CB_GETCURSEL,
 				(WPARAM)0, (LPARAM)0);
-			TCHAR  ListItem[256];
-			(TCHAR)SendMessage((HWND)hGroupCombo, (UINT)CB_GETLBTEXT,
+			TCHAR ListItem[256];
+			SendMessage((HWND)hGroupCombo, (UINT)CB_GETLBTEXT,
 				(WPARAM)ItemIndex, (LPARAM)ListItem);
+			int len = 0;
+			len = strlen(ListItem);
+			char * listIt = new char[len + 1];
+			sprintf(listIt, TEXT("%s"), ListItem);
 			checkAllFields();
-										/////////////////////////////Научиться работать с ListView
-			//ssql << "select name from student where student.group='";
-			//ssql << ListItem << "';";
-			//sql = ssql.str();
-			//ssql.str("");
-			//if (!mysql_query(db->getConnection(), sql.c_str())) {
-			//	rset = mysql_use_result(db->getConnection());
-			//	while ((row = mysql_fetch_row(rset)) != NULL) {
-			//		SendMessage(hUserList, CB_ADDSTRING, 0, (LPARAM)row[0]);
-			//	}
-			//	row = mysql_fetch_row(rset);
-			//}
-			//mysql_free_result(rset);
-			////Забираем имена всех учеников и бросаю их в UsersList
+
+			UpdateUserList(ListItem);
 		}
 	}
 	else if (id == IDC_BROWSE) {
@@ -778,16 +797,16 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 	}
 }
 
-BOOL CALLBACK MyDialog::DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK MyDialog::DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
 		HANDLE_MSG(hwnd, WM_CLOSE, ptr->Cls_OnClose);
 		HANDLE_MSG(hwnd, WM_INITDIALOG, ptr->Cls_OnInitDialog);
 		HANDLE_MSG(hwnd, WM_COMMAND, ptr->Cls_OnCommand);
-	/*case WM_NOTIFY:
-		if()
-		break;*/
+		case WM_NOTIFY:
+		HandleWM_NOTIFY(lParam);
+		break;
 	}
 	return FALSE;
 }

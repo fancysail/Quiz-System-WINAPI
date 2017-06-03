@@ -1,6 +1,8 @@
 #pragma once
 #include "header.h"
+#include "UserListView.h"
 #include "Database.h"
+#include <vector>
 
 class MyDialog
 {
@@ -8,7 +10,7 @@ public:
 	MyDialog(void);
 	~MyDialog(void);
 
-	static BOOL CALLBACK DlgProc(HWND hWnd, UINT mes, WPARAM wp, LPARAM lp);
+	static INT_PTR CALLBACK DlgProc(HWND hWnd, UINT mes, WPARAM wp, LPARAM lp);
 	static MyDialog*ptr;
 	VOID MessageAboutError(DWORD dwError);
 
@@ -20,6 +22,7 @@ public:
 	MYSQL_ROW row;
 	stringstream ssql;
 	string sql;
+	std::vector<UserListView*> userListView;
 private:
 	BOOL bStarted = FALSE;
 
@@ -54,6 +57,8 @@ public:
 	string getFileData() { return fileData; }
 	HWND& getCheckBox1() { return hCheckBox1; }
 	HWND& getCheckBox2() { return hCheckBox2; }
+	HWND& getUserList() { return hUserList; }
+	VOID UpdateUserList(char* ListItem);
 private:
 	VOID OnBrowse();
 	VOID rightExtension(char* dot);

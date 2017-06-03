@@ -147,6 +147,7 @@
     <ClInclude Include="header.h" />
     <ClInclude Include="MyDialog.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="UserListView.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Course-project-server.rc" />

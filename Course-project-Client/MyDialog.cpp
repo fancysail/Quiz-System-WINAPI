@@ -117,7 +117,7 @@ HWND& createButton(const char* text, INT x, INT y, INT width, INT height, HWND* 
 }
 VOID MyDialog::createAllElements(HWND hwnd) {
 	hListBox = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("listbox"), nullptr,
-		WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_AUTOVSCROLL | WS_HSCROLL | LBS_NOTIFY | LBS_DISABLENOSCROLL, 6, 0, 180, 400, hwnd, (HMENU)ID_LISTBOX, NULL, NULL);//180 355
+		WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_AUTOVSCROLL | WS_HSCROLL | LBS_NOTIFY | LBS_DISABLENOSCROLL, 6, 0, 180, 430, hwnd, (HMENU)ID_LISTBOX, NULL, NULL);//180 355
 	blistShown = TRUE;
 	SendMessage(hListBox, LB_SETHORIZONTALEXTENT, 500, NULL);
 	fillList();
@@ -127,11 +127,12 @@ VOID MyDialog::createAllElements(HWND hwnd) {
 	SetWindowText(hQuestionNumber, ("Question: " + std::to_string(1)).c_str());
 	hPercents = createStatic("0%", 420, 7, 50, 16, &ptr->hDialog);
 	SetWindowText(hPercents, "0%");
-	groupBox = createGroupBox(210, 20, 495, 80, &hwnd);
+
+	groupBox = createGroupBox(210, 57, 495, 80, &hwnd);//+37
 	hQuestion = createStatic(MyDialog::ptr->quiz.at(0)->getQuestion().c_str(), 4, 10, 485, 65, &groupBox);
 	hTimeLeft = createStatic(nullptr, 580, 7, 140, 16, &ptr->hDialog);
 	SetWindowText(hTimeLeft, "");
-	groupBox1 = createGroupBox(210, 100, 495, 210, &hwnd);
+	groupBox1 = createGroupBox(210, 137, 495, 210, &hwnd);//+37
 	//Установка радиобаттонов
 	/*hRadios[0] = CreateWindowEx(0, TEXT("BUTTON"), TEXT(MyDialog::ptr->quiz.at(0)->getChoiceAt(0).c_str()), WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON | WS_GROUP ,
 	6, 16, 480, 50, groupBox1, 0, GetModuleHandle(NULL), 0);
@@ -145,22 +146,39 @@ VOID MyDialog::createAllElements(HWND hwnd) {
 	}
 	//Edits для Radio Чтобы текс был в несколько строк
 	for (INT i = 0; i < 4; i++) {
-		hEditForRadios[i] = createEditControl(210 + 30, 100 + (16 + i * 46), 660, 46, &hwnd, ID_EDIT1 + i);
+		hEditForRadios[i] = createEditControl(210 + 30, 137 + (16 + i * 46), 660, 46, &hwnd, ID_EDIT1 + i);
 		SetWindowText(hEditForRadios[i], MyDialog::ptr->quiz.at(0)->getChoiceAt(i).c_str());
 	}
 
 	//Установка кнопок
-	buttons[0] = createButton("Reset", 210, 340, 80, 24, &ptr->hDialog, BUTTON_RESET);
-	buttons[1] = createButton("Review Questions", 300, 340, 120, 24, &ptr->hDialog, BUTTON_REVIEW);
-	buttons[2] = createButton("Previous", 430, 340, 100, 24, &ptr->hDialog, BUTTON_PREV);
-	buttons[3] = createButton("Next", 540, 340, 80, 24, &ptr->hDialog, BUTTON_NEXT);
-	buttons[4] = createButton("Submit", 630, 340, 75, 24, &ptr->hDialog, BUTTON_SUBMIT);
+	buttons[0] = createButton("Reset", 210, 377, 80, 24, &ptr->hDialog, BUTTON_RESET);
+	buttons[1] = createButton("Review Questions", 300, 377, 120, 24, &ptr->hDialog, BUTTON_REVIEW);
+	buttons[2] = createButton("Previous", 430, 377, 100, 24, &ptr->hDialog, BUTTON_PREV);
+	buttons[3] = createButton("Next", 540, 377, 80, 24, &ptr->hDialog, BUTTON_NEXT);
+	buttons[4] = createButton("Submit", 630, 377, 75, 24, &ptr->hDialog, BUTTON_SUBMIT);
 
 	EnableWindow(buttons[2], FALSE);
 
-	buttonChosen = createButton("ASD", 510, 10, 50, 20, &hwnd, ID_BUTTONCHOSEN, BS_OWNERDRAW);
-	TCHAR senderClass[256];
-	GetClassName((HWND)buttonChosen, senderClass, 256);
+	std::pair<HWND, BOOL> pair;
+	//for (int i = 0; i < MyDialog::ptr->getQuiz().size(); i++) {
+	//	HWND hButton = createButton(nullptr, i*30, 30, 20, 20, &hwnd, markFirst+i, BS_OWNERDRAW);//менять координаты в зависимости от окна
+	//	pair.first = &hButton;
+	//	pair.second = (BOOL)FALSE;
+	//	markButtons.push_back(pair);
+	//}
+
+	//for (int i = 0; i < MyDialog::ptr->getQuiz().size(); i++) {
+	//	HWND hButton = CreateWindow("BUTTON", "", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON /*| BS_NOTIFY*/ /*| CDRF_NOTIFYITEMDRAW*/,
+	//		14 + i * 30, 30, 20, 20, hwnd, (HMENU)markFirst + i, GetModuleHandle(NULL), NULL);
+	//	pair.first = hButton;
+	//	pair.second = (BOOL)FALSE;
+	//	markButtons.push_back(pair);
+	//}
+	//markLast = markFirst + (MyDialog::ptr->getQuiz().size() - 1) * 4;
+	//int a = 10001;
+	//HWND h = CreateWindow("BUTTON", "", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 0,
+	//	0, 150, 60, hwnd, (HMENU)a, GetModuleHandle(NULL), NULL);
+	//SendMessage(hwnd, WM_NOTIFY, NULL, NULL);
 
 	//Установка шрифта для всех элементов
 	EnumChildWindows(hwnd, (WNDENUMPROC)SetFont, (LPARAM)GetStockObject(DEFAULT_GUI_FONT));
@@ -230,11 +248,20 @@ VOID MyDialog::changedQuestion() {
 			quiz.at(m_index)->setUserAnswer(checked);
 			increaseCountUserAnswered();
 			changePercents();
+			//markButtons.at(m_index).second = TRUE;
+			//RedrawWindow(*markButtons.at(m_index).first, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+			//Сделать синим m_index
+			//Отправить сообщение hDialog - родителю 
+			//SendMessage(MyDialog::ptr->hDialog, WM_CTLCOLORBTN, (WPARAM)GetDC(markButtons.at(m_index).first), (LPARAM)markButtons.at(m_index).first);
+			//Возникает проблема неотрисовки.Видимо кисть возвращается не туда.
 		}
 		else if (quiz.at(m_index)->getUserAnswer() != NOT_CHECKED  &&  checked == NOT_CHECKED) {//в предыдущем вопросе очистил поле ответа когда там что-то было
 			quiz.at(m_index)->setUserAnswer(checked);
 			decreaseCountUserAnswered();
 			changePercents();
+			//markButtons.at(m_index).second = FALSE;
+			//RedrawWindow(*markButtons.at(m_index).first, NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+			//Сделать серым m_index
 		}
 		else if (quiz.at(m_index)->getUserAnswer() != NOT_CHECKED  &&  checked != NOT_CHECKED) {//в предыдущем вопросе выбрал вариант ответа когда там что-то было
 			quiz.at(m_index)->setUserAnswer(checked);
@@ -254,8 +281,16 @@ VOID MyDialog::changedQuestion() {
 
 	m_index = index;
 	
-	if (checked != NOT_CHECKED) SendMessage(hRadios[checked], BM_SETCHECK, BST_UNCHECKED, NULL);
-	if (quiz.at(m_index)->getUserAnswer() != NOT_CHECKED) SendMessage(hRadios[quiz.at(m_index)->getUserAnswer()], BM_SETCHECK, BST_CHECKED, NULL);
+	if (checked != NOT_CHECKED) { 
+		SendMessage(hRadios[checked], BM_SETCHECK, BST_UNCHECKED, NULL); 
+		//в мапе баттонов синих устнавливаю bool FALSE 
+		//RedrawWindow(blueButton[m_index], NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+	}
+	if (quiz.at(m_index)->getUserAnswer() != NOT_CHECKED) { 
+		SendMessage(hRadios[quiz.at(m_index)->getUserAnswer()], BM_SETCHECK, BST_CHECKED, NULL); 
+		//в мапе баттонов синих устнавливаю bool TRUE 
+		//RedrawWindow(blueButton[m_index], NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
+	}
 
 	SetWindowText(hQuestionNumber, ("Question: " + std::to_string(index + 1)).c_str());
 	SetWindowText(hQuestion, quiz.at(index)->getQuestion().c_str());
@@ -269,19 +304,22 @@ VOID MyDialog::toggleListBox() {
 		ShowWindow(hListBox, FALSE);
 		MoveWindow(hQuestionNumber, 10, 7, 100, 16, TRUE);//-200 x
 		MoveWindow(hPercents, 320, 7, 50, 16, TRUE);//-100 x
-		MoveWindow(groupBox, 14, 20, 695, 80, TRUE);//-200 x +200width
+		MoveWindow(groupBox, 14, 57, 695, 80, TRUE);//-200 x +200width						//////////////
 		MoveWindow(hQuestion, 4, 10, 685, 65, TRUE);//+200 width
-		MoveWindow(groupBox1, 14, 100, 695, 210, TRUE);//+200 width
+		MoveWindow(groupBox1, 14, 137, 695, 210, TRUE);//+200 width
 
-		MoveWindow(buttons[0], 44, 340, 80, 24, TRUE);//+200 width
-		MoveWindow(buttons[1], 159, 340, 120, 24, TRUE);//+200 width
-		MoveWindow(buttons[2], 314, 340, 100, 24, TRUE);//+200 width
-		MoveWindow(buttons[3], 450, 340, 120, 24, TRUE);//+200 width
-		MoveWindow(buttons[4], 604, 340, 75, 24, TRUE);//+200 width
+		MoveWindow(buttons[0], 44, 377, 80, 24, TRUE);//+200 width
+		MoveWindow(buttons[1], 159, 377, 120, 24, TRUE);//+200 width
+		MoveWindow(buttons[2], 314, 377, 100, 24, TRUE);//+200 width
+		MoveWindow(buttons[3], 450, 377, 120, 24, TRUE);//+200 width
+		MoveWindow(buttons[4], 604, 377, 75, 24, TRUE);//+200 width
 
 		for (INT i = 0; i < 4; i++) {
-			MoveWindow(hEditForRadios[i], 40, 100 + (16 + i * 45), 660, 46, TRUE);//+200 width
+			MoveWindow(hEditForRadios[i], 40, 137 + (16 + i * 45), 660, 46, TRUE);//+200 width
 		}
+		/*for (int i = 0; i < MyDialog::ptr->getQuiz().size(); i++) {
+			MoveWindow(markButtons.at(i).first, 14 + i * 30, 30, 20, 20, TRUE);
+		}*/
 
 		blistShown = FALSE;
 	}
@@ -289,19 +327,23 @@ VOID MyDialog::toggleListBox() {
 		ShowWindow(hListBox, TRUE);
 		MoveWindow(hQuestionNumber, 210, 7, 100, 16, TRUE);//-200 x
 		MoveWindow(hPercents, 420, 7, 50, 16, TRUE);//-100 x
-		MoveWindow(groupBox, 210, 20, 495, 80, TRUE);//-200 x +200width
+		MoveWindow(groupBox, 210, 57, 495, 80, TRUE);//-200 x +200width
 		MoveWindow(hQuestion, 4, 10, 485, 65, TRUE);//+200 width
-		MoveWindow(groupBox1, 210, 100, 495, 210, TRUE);//+200 width
+		MoveWindow(groupBox1, 210, 137, 495, 210, TRUE);//+200 width
 
-		MoveWindow(buttons[0], 210, 340, 80, 24, TRUE);//+200 width
-		MoveWindow(buttons[1], 300, 340, 120, 24, TRUE);//+200 width
-		MoveWindow(buttons[2], 430, 340, 100, 24, TRUE);//+200 width
-		MoveWindow(buttons[3], 540, 340, 80, 24, TRUE);//+200 width
-		MoveWindow(buttons[4], 630, 340, 75, 24, TRUE);//+200 width
+		MoveWindow(buttons[0], 210, 377, 80, 24, TRUE);//+200 width
+		MoveWindow(buttons[1], 300, 377, 120, 24, TRUE);//+200 width
+		MoveWindow(buttons[2], 430, 377, 100, 24, TRUE);//+200 width
+		MoveWindow(buttons[3], 540, 377, 80, 24, TRUE);//+200 width
+		MoveWindow(buttons[4], 630, 377, 75, 24, TRUE);//+200 width
 
 		for (INT i = 0; i < 4; i++) {
-			MoveWindow(hEditForRadios[i], 210 + 30,100 + (16 + i * 45), 460, 46, TRUE);//+200 width
+			MoveWindow(hEditForRadios[i], 210 + 30, 137 + (16 + i * 45), 460, 46, TRUE);//+200 width
 		}
+		/*for (int i = 0; i < MyDialog::ptr->getQuiz().size(); i++) {
+			MoveWindow(markButtons.at(i).first, 214 + i * 30, 30, 20, 20, TRUE);
+		}*/
+
 
 		if (IsWindowEnabled(buttons[2])) {
 			EnableWindow(buttons[2], FALSE);
@@ -455,22 +497,20 @@ BOOL MyDialog::Cls_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 	return TRUE;
 }
 VOID MyDialog::Cls_OnCommand(HWND hwnd, INT id, HWND hwndCtl, UINT codeNotify)
-{
-	switch (id) {
-	case ID_BUTTONCHOSEN:
-	{
-		/*INT a = MessageBox(hDialog, TEXT("Изменить цвет?"), "QUIZ", MB_YESNO);
-		if (a == IDYES) {
-
-		}*/
+{/*else if (codeNotify == WM_NOTIFY) {
+		MessageBox(hwnd, "DOLBAEB", "AGA", MB_OK);
+	}*/
+	/*if (id >= markFirst && id <= markLast){
+		if (id - markFirst != m_index * 4) {
+			SendMessage(hListBox, LB_SETCURSEL, (id - markFirst) / 4, 0);
+			changedQuestion();
+		}
 	}
-		break;
-	case BUTTON_REVIEW:
+	else*/ if (id == BUTTON_REVIEW) {
 		toggleListBox();
-	break;
-	case BUTTON_SUBMIT:
-	{
-		INT a = MessageBox(hDialog, TEXT("Завершить тест?"), "Тест", MB_YESNO );
+	}
+	else if (id == BUTTON_SUBMIT) {
+		INT a = MessageBox(hDialog, TEXT("Завершить тест?"), "Тест", MB_YESNO);
 		if (a == IDYES) {
 			bsubmitted = TRUE;
 			KillTimer(MyDialog::ptr->hDialog, ID_TIMER1);
@@ -481,50 +521,42 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, INT id, HWND hwndCtl, UINT codeNotify)
 			}
 		}
 	}
-	break;
-	case BUTTON_NEXT:
-	{
+	else if (id == BUTTON_NEXT) {
 		SendMessage(hListBox, LB_SETCURSEL, m_index + 1, NULL);
 		changedQuestion();
+		//SendMessage(MyDialog::ptr->hDialog, WM_CTLCOLORBTN, (WPARAM)GetDC(buttonChosen), (LPARAM)buttonChosen);
 	}
-	break;
-	case BUTTON_PREV:
-	{
+	else if (id == BUTTON_PREV) {
 		SendMessage(hListBox, LB_SETCURSEL, m_index - 1, NULL);
 		changedQuestion();
 	}
-	break;
-	case BUTTON_RESET:
-	{
+	else if (id == BUTTON_RESET) {
 		if (codeNotify == BN_CLICKED) {
 			for (INT i = 0; i < 4; i++) {
 				SendMessage(hRadios[i], BM_SETCHECK, BST_UNCHECKED, NULL);
 			}
 		}
 	}
-	break;
-	case ID_LISTBOX:
-	{
+	else if (id == ID_LISTBOX) {
 		if (codeNotify == LBN_DBLCLK) {
 			INT index = SendMessage(hListBox, LB_GETCURSEL, 0, 0);
-			if (index == m_index)
-				break;
-			changedQuestion();
+			if (index != m_index) {
+				changedQuestion();
+			}
 		}
 	}
-	break;
-	case IDC_LOGIN: {
+	else if (id == IDC_LOGIN) {
 		hConnectThread = CreateThread(NULL, 0, ThreadForConnect, this, 0, nullptr);
 		hReceiveThread = CreateThread(NULL, 0, ThreadForReceive, this, 0, nullptr);
 		WaitForSingleObject(hConnectThread, INFINITE);
 		WaitForSingleObject(hReceiveThread, INFINITE);
-		if (ptr->bconnected == FALSE) 
+		if (ptr->bconnected == FALSE)
 			return;
 		hStatsThread = CreateThread(NULL, 0, ThreadForStats, this, 0, nullptr);
 
 		EnumChildWindows(hDialog, DestoryChildCallback, NULL);
 		windowMinWidth = 740;//660
-		winowMinHeight = 420;//390
+		winowMinHeight = 457;//390
 		MoveWindow(hwnd, (horizontal - (horizontal / 2) - windowMinWidth / 2), (vertical - (vertical / 2) - winowMinHeight / 2), windowMinWidth, winowMinHeight, TRUE);
 
 		createAllElements(hwnd);
@@ -532,63 +564,135 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, INT id, HWND hwndCtl, UINT codeNotify)
 		SetTimer(hwnd, ID_TIMER1, 1000, (TIMERPROC)NULL);
 		blogged = TRUE;
 	}
-					break;
-	case IDC_NAME:
+	else if (id == IDC_NAME) {
 		GetWindowText(MyDialog::ptr->hName, MyDialog::ptr->m_name, 20);
 		toggleLogin();
-		break;
-	case IDC_SURNAME:
+	}
+	else if (id == IDC_SURNAME) {
 		GetWindowText(MyDialog::ptr->hSurname, MyDialog::ptr->m_surname, 20);
 		toggleLogin();
-		break;
-	case IDC_GROUP:
+	}
+	else if (id == IDC_GROUP) {
 		GetWindowText(MyDialog::ptr->hGroup, MyDialog::ptr->m_group, 20);
 		toggleLogin();
-		break;
-	case IDC_FATHERNAME:
+	}
+	else if (id == IDC_FATHERNAME) {
 		GetWindowText(MyDialog::ptr->hFatherName, MyDialog::ptr->m_fatherName, 20);
 		toggleLogin();
-		break;
 	}
 }
 
-BOOL CALLBACK MyDialog::DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK MyDialog::DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
+		/*case WM_NOTIFY:
+		{
+			MessageBox(MyDialog::ptr->hDialog, "Мужик ты крут", "Сообщение об ошибке", MB_OK | MB_ICONSTOP);
+
+			switch (((LPNMHDR)lParam)->code)
+			{
+				case NM_CUSTOMDRAW:
+				{
+					if (((LPNMHDR)lParam)->idFrom >= ptr->markFirst &&
+						((LPNMHDR)lParam)->idFrom <= ptr->markLast) {
+							{
+								LPNMCUSTOMDRAW lpnmCD = (LPNMCUSTOMDRAW)lParam;
+
+								switch (lpnmCD->dwDrawStage)
+								{
+								case CDDS_PREPAINT:
+
+									SetDCBrushColor(lpnmCD->hdc, RGB(0, 255, 0));
+									SetDCPenColor(lpnmCD->hdc, RGB(0, 255, 0));
+									SelectObject(lpnmCD->hdc, GetStockObject(DC_BRUSH));
+									SelectObject(lpnmCD->hdc, GetStockObject(DC_PEN));
+
+									RoundRect(lpnmCD->hdc, lpnmCD->rc.left + 3,
+										lpnmCD->rc.top + 3,
+										lpnmCD->rc.right - 3,
+										lpnmCD->rc.bottom - 3, 5, 5);
+
+									return TRUE;
+								}
+							}
+							break;
+					}
+				}
+			}
+			break;
+		}
+		break;*/
 		HANDLE_MSG(hwnd, WM_CLOSE, ptr->Cls_OnClose);
 		HANDLE_MSG(hwnd, WM_INITDIALOG, ptr->Cls_OnInitDialog);
 		HANDLE_MSG(hwnd, WM_COMMAND, ptr->Cls_OnCommand);
 		HANDLE_MSG(hwnd, WM_TIMER, ptr->Cls_OnTimer);
 		//HANDLE_MSG(hwnd, WM_SIZE, ptr->Cls_OnSize);	
-		case WM_CTLCOLORBTN:
-		{
-			if (MyDialog::ptr->isLogged()) {
-				TCHAR senderClass[256];
-				GetClassName((HWND)lParam, senderClass, 256);
-				if (!strcmp(senderClass, "Button")) {
-					HDC hdcStatic = (HDC)wParam;
+		//case WM_DRAWITEM:
+		//{
+		//	//if (MyDialog::ptr->isLogged()) {
+		//	//	TCHAR senderClass[256];
+		//	//	GetClassName((HWND)lParam, senderClass, 256);
+		//	//	if (!strcmp(senderClass, "Button")) {
+		//	//		HDC hdcStatic = (HDC)wParam;
+		//	//		for (int i = 0; i < MyDialog::ptr->getQuiz().size(); i++) {
+		//	//			if ((HWND)lParam == *MyDialog::ptr->markButtons.at(i).first)
+		//	//			{
+		//	//				if (MyDialog::ptr->markButtons.at(i).second) {
+		//	//					//SetBkColor(hdcStatic, RGB(0, 250, 0));
+		//	//					return (INT_PTR)CreateSolidBrush(RGB(30, 144, 255));
+		//	//				}
+		//	//				else {
+		//	//					//HBRUSH hbr = (HBRUSH)DefWindowProc(hDlg, iMessage, wParam, lParam);
+		//	//					/*static int color = 0;
+		//	//					color+=10;
+		//	//					if (color > 250) {
+		//	//					color = 0;
+		//	//					}*/
+		//	//					return (INT_PTR)CreateSolidBrush(RGB(255, 0, 0));
+		//	//				}
+		//	//			}
+		//	//		}
+		//	//		SetBkColor(hdcStatic, RGB(211, 211, 211));
+		//	//		return (INT_PTR)CreateSolidBrush(RGB(230, 230, 230));
+		//	//	}
+		//	//}
+		//	return TRUE;
+		//}
+		//break;
+		//case WM_CTLCOLORBTN:
+		//{
+		//	if (MyDialog::ptr->isLogged()) {
+		//		TCHAR senderClass[256];
+		//		GetClassName((HWND)lParam, senderClass, 256);
+		//		if (!strcmp(senderClass, "Button")) {
+		//			HDC hdcStatic = (HDC)wParam;
+		//			for (int i = 0; i < MyDialog::ptr->getQuiz().size(); i++) {
+		//				if ((HWND)lParam == *MyDialog::ptr->markButtons.at(i).first)
+		//				{
+		//					if (MyDialog::ptr->markButtons.at(i).second) {
+		//						//SetBkColor(hdcStatic, RGB(0, 250, 0));
+		//						return (INT_PTR)CreateSolidBrush(RGB(30, 144, 255));
+		//					}
+		//					else {
+		//						//HBRUSH hbr = (HBRUSH)DefWindowProc(hDlg, iMessage, wParam, lParam);
+		//						/*static int color = 0;
+		//						color+=10;
+		//						if (color > 250) {
+		//							color = 0;
+		//						}*/
+		//						return (INT_PTR)CreateSolidBrush(RGB(255, 0, 0));
+		//					}
+		//				}
+		//			}
+		//			SetBkColor(hdcStatic, RGB(211, 211, 211));
+		//			return (INT_PTR)CreateSolidBrush(RGB(230, 230, 230));
+		//		}
+		//	}
+		//}//синий	30,144,255	grey	211,211,211
+		//break;
 
 
-
-					if ((HWND)lParam == MyDialog::ptr->buttonChosen)
-					{
-						if (MyDialog::ptr->isSubmitted()) {
-							//SetBkColor(hdcStatic, RGB(0, 250, 0));
-							return (INT_PTR)CreateSolidBrush(RGB(30, 144, 255));
-						}
-						else {
-							return (INT_PTR)CreateSolidBrush(RGB(230, 230, 230));
-						}
-					}
-					else {
-						SetBkColor(hdcStatic, RGB(211, 211, 211));
-						return (INT_PTR)CreateSolidBrush(RGB(230, 230, 230));
-					}
-				}
-			}
-		}//синий	30,144,255	grey	211,211,211
-		break;
 		case WM_CTLCOLORSTATIC:
 		{
 			TCHAR senderClass[256];
@@ -598,18 +702,18 @@ BOOL CALLBACK MyDialog::DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM l
 				HDC hdcStatic = (HDC)wParam;
 
 				if (MyDialog::ptr->isSubmitted()) {
-					if (MyDialog::ptr->getQuiz().at(MyDialog::ptr->getIndex())->getUserAnswer() == 
+					if (MyDialog::ptr->getQuiz().at(MyDialog::ptr->getIndex())->getUserAnswer() ==
 						MyDialog::ptr->getQuiz().at(MyDialog::ptr->getIndex())->getRightAnswer()) {
 						//зеленый бэкграунд
 						if ((HWND)lParam == ptr->hEditForRadios[ptr->getQuiz().at(ptr->getIndex())->getUserAnswer()]) {
-							SetBkColor(hdcStatic, RGB(0, 235, 0));
-							return (INT_PTR)CreateSolidBrush(RGB(0, 235, 0));
+							SetBkColor(hdcStatic, RGB(102, 239, 97));
+							return (INT_PTR)CreateSolidBrush(RGB(102, 239, 97));
 						}
 					}
 					else if ((HWND)lParam == ptr->hEditForRadios[ptr->getQuiz().at(ptr->getIndex())->getUserAnswer()]) {
 						//красный бэкграунд
-						SetBkColor(hdcStatic, RGB(235, 0, 0));
-						return (INT_PTR)CreateSolidBrush(RGB(235, 0, 0));
+						SetBkColor(hdcStatic, RGB(246, 83, 83));
+						return (INT_PTR)CreateSolidBrush(RGB(246, 83, 83));
 					}
 				}
 				SetBkColor(hdcStatic, RGB(230, 230, 230));
@@ -617,7 +721,6 @@ BOOL CALLBACK MyDialog::DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM l
 			}
 		}
 		break;
-		
 	}
 	return FALSE;
 }

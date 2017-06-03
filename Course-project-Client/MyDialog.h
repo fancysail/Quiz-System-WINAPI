@@ -10,11 +10,17 @@ class MyDialog
 public:
 	MyDialog(VOID);
 public:
-	static BOOL CALLBACK DlgProc(HWND hWnd, UINT mes, WPARAM wp, LPARAM lp);
+	static INT_PTR CALLBACK DlgProc(HWND hWnd, UINT mes, WPARAM wp, LPARAM lp);
 	static MyDialog *ptr;
 	//defaultFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);HFONT defaultFont;
 	HANDLE hEvent;
-	HWND buttonChosen;
+	//HWND buttonChosen;
+
+	vector<std::pair<HWND, BOOL>> markButtons;
+	INT markFirst = 0x8824;
+	INT markLast = markFirst;
+	//HWND testButton;
+	HWND hButton;
 private:
 	//окно
 	HWND hDialog;

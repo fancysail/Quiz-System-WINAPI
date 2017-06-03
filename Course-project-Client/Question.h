@@ -18,7 +18,7 @@ public:
 	Question() { m_userAnswer = NOT_CHECKED; }
 
 	static void randomizeQuestions(vector<Question*> &q);
-	void randomizeChoices();
+	//void randomizeChoices();
 	string getQuestion() { return m_question; }
 	vector<string> getChoices() { return m_choices; }
 	string getChoiceAt(int i) { return m_choices.at(i); }

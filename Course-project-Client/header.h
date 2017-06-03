@@ -15,5 +15,7 @@
 #include <tchar.h>
 #include "resource1.h"
 #include <time.h>
+#include <Commctrl.h>
 
 #pragma comment(lib,"Ws2_32.lib")
+#pragma comment(lib, "comctl32.lib")

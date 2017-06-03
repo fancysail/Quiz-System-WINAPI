@@ -10,7 +10,6 @@ Question::Question(string question, string c1, string c2, string c3, string c4, 
 	m_userAnswer = NOT_CHECKED;
 }
 void Question::randomizeQuestions(vector<Question*> &q){
-	srand(time(NULL));
 	int r1;
 	int r2;
 	for (int i = 0; i < q.size(); i++) {
@@ -19,23 +18,25 @@ void Question::randomizeQuestions(vector<Question*> &q){
 		swap(q.at(r1), q.at(r2));
 	}
 }
-void Question::randomizeChoices() {
-	srand(time(NULL));
+void randomizeChoices(Question* q) {
 	int r1;
 	int r2;
 	for (int i = 0; i < 3; i++) {
 		r1 = rand() % 4;
 		r2 = rand() % 4;
-		if (getRightAnswer() == r1) {
-			setRightAnswer(r2);
+		if (q->getRightAnswer() == r1) {
+			q->setRightAnswer(r2);
 		}
-		else if (getRightAnswer() == r2) {
-			setRightAnswer(r1);
+		else if (q->getRightAnswer() == r2) {
+			q->setRightAnswer(r1);
 		}
-		swap(m_choices.at(r1), m_choices.at(r2));
+		string s1 = q->getChoices().at(r1);
+		q->setChoices(r1, q->getChoices().at(r2));
+		q->setChoices(r2, s1);
 	}
 }
 vector<Question*> Question::parseFile(string check, BOOL randQuestions) {
+	srand(time(NULL));
 	vector<Question*>questions;
 	rtrim(check);
 	int qPos1, qPos2, choicePos1, choicePos2, aPos1, aPos2;
@@ -57,7 +58,7 @@ vector<Question*> Question::parseFile(string check, BOOL randQuestions) {
 		question->addChoices(check.substr(aPos1 + 2, aPos2 - aPos1 - 2));
 		question->setRightAnswer(3);
 
-		question->randomizeChoices();
+		randomizeChoices(question);
 
 		questions.push_back(question);
 		if (check.size() - 2 == aPos2)

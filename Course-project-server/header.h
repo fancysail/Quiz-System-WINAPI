@@ -9,16 +9,16 @@
 #include <stdexcept>
 #include <fstream>
 #include <sstream>
-//#include <Uxtheme.h>
+#include <Strsafe.h>
+#include <iomanip> 
+#include <sstream>
 
 #include <tchar.h>
 #include <TlHelp32.h>
 #include <stdio.h>
 #include <Commctrl.h>
 
-
 #pragma comment(lib,"Ws2_32.lib")
 #pragma comment(lib, "comctl32.lib")
-//#pragma comment(lib,"UxTheme.lib")
 
 using namespace std;
