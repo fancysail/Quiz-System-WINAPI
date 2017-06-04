@@ -55,9 +55,9 @@ bool CALLBACK SetFont(HWND child, LPARAM font) {
 }
 BOOL CALLBACK DestoryChildCallback(HWND hwnd, LPARAM lParam) {
 	if (hwnd != NULL) {
-		if (hwnd != MyDialog::ptr->gethDialogue()) 
-		{ 
-			DestroyWindow(hwnd); 
+		if (hwnd != MyDialog::ptr->gethDialogue())
+		{
+			DestroyWindow(hwnd);
 		}
 	}
 	return TRUE;
@@ -91,7 +91,7 @@ VOID fillList() {
 }
 
 HWND& createEditControl(INT x, INT y, INT width, INT height, HWND* parent, INT id) {
-	HWND editControl = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", nullptr, WS_CHILD | WS_VISIBLE  | ES_READONLY | ES_MULTILINE | ES_WANTRETURN | WS_BORDER ,
+	HWND editControl = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", nullptr, WS_CHILD | WS_VISIBLE | ES_READONLY | ES_MULTILINE | ES_WANTRETURN | WS_BORDER,
 		x, y, width, height, *parent, (HMENU)id, nullptr, 0);
 	return editControl;
 }
@@ -102,22 +102,22 @@ HWND& createGroupBox(INT x, INT y, INT width, INT height, HWND* parent) {
 }
 HWND& createStatic(const char* text, INT x, INT y, INT width, INT height, HWND*parent) {
 	HWND hStatic = CreateWindowEx(0, TEXT("STATIC"), TEXT(text), WS_CHILD | WS_VISIBLE |
-		WS_EX_CLIENTEDGE | SS_CENTER , /*ptr->windowWidth*/x, /*ptr->winowHeight*/y, width, height, *parent, 0, nullptr, 0);
+		WS_EX_CLIENTEDGE | SS_CENTER, /*ptr->windowWidth*/x, /*ptr->winowHeight*/y, width, height, *parent, 0, nullptr, 0);
 	return hStatic;
 }
 HWND& createRadioButton(const char* text, INT x, INT y, INT width, INT height, HWND* parent) {
-	HWND hRadio = CreateWindowEx(0, TEXT("BUTTON"), TEXT(text), WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON ,
+	HWND hRadio = CreateWindowEx(0, TEXT("BUTTON"), TEXT(text), WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON,
 		x, y, width, height, *parent, 0, GetModuleHandle(NULL), 0);
 	return hRadio;
 }
-HWND& createButton(const char* text, INT x, INT y, INT width, INT height, HWND* parent, INT id,int style=0) {
-	HWND hButton = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("Button"), TEXT(text), WS_CHILD | WS_VISIBLE | WS_GROUP | style ,
+HWND& createButton(const char* text, INT x, INT y, INT width, INT height, HWND* parent, INT id, int style = 0) {
+	HWND hButton = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("Button"), TEXT(text), WS_CHILD | WS_VISIBLE | WS_GROUP | style,
 		x, y, width, height, *parent, (HMENU)id, GetModuleHandle(NULL), 0);
 	return hButton;
 }
 VOID MyDialog::createAllElements(HWND hwnd) {
 	hListBox = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("listbox"), nullptr,
-		WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_AUTOVSCROLL | WS_HSCROLL | LBS_NOTIFY | LBS_DISABLENOSCROLL, 6, 0, 180, 430, hwnd, (HMENU)ID_LISTBOX, NULL, NULL);//180 355
+		WS_CHILD | WS_VISIBLE | WS_VSCROLL | ES_AUTOVSCROLL | WS_HSCROLL | LBS_NOTIFY | LBS_DISABLENOSCROLL, 6, 0, 180, 430, hwnd, (HMENU)ID_LISTBOX, NULL, NULL);
 	blistShown = TRUE;
 	SendMessage(hListBox, LB_SETHORIZONTALEXTENT, 500, NULL);
 	fillList();
@@ -128,23 +128,18 @@ VOID MyDialog::createAllElements(HWND hwnd) {
 	hPercents = createStatic("0%", 420, 7, 50, 16, &ptr->hDialog);
 	SetWindowText(hPercents, "0%");
 
-	groupBox = createGroupBox(210, 57, 495, 80, &hwnd);//+37
+	groupBox = createGroupBox(210, 57, 495, 80, &hwnd);
 	hQuestion = createStatic(MyDialog::ptr->quiz.at(0)->getQuestion().c_str(), 4, 10, 485, 65, &groupBox);
 	hTimeLeft = createStatic(nullptr, 580, 7, 140, 16, &ptr->hDialog);
 	SetWindowText(hTimeLeft, "");
-	groupBox1 = createGroupBox(210, 137, 495, 210, &hwnd);//+37
+	groupBox1 = createGroupBox(210, 137, 495, 210, &hwnd);
 	//Установка радиобаттонов
-	/*hRadios[0] = CreateWindowEx(0, TEXT("BUTTON"), TEXT(MyDialog::ptr->quiz.at(0)->getChoiceAt(0).c_str()), WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON | WS_GROUP ,
-	6, 16, 480, 50, groupBox1, 0, GetModuleHandle(NULL), 0);
-	for (INT i = 1; i < 4; i++) {
-	hRadios[i] = createRadioButton(MyDialog::ptr->quiz.at(0)->getChoiceAt(i).c_str(), 6, 16 + i * 45, 660, 50, &groupBox1);
-	}*/
 	hRadios[0] = CreateWindowEx(0, TEXT("BUTTON"), nullptr, WS_CHILD | WS_VISIBLE | BS_AUTORADIOBUTTON | WS_GROUP,
 		6, 16, 14, 50, groupBox1, 0, GetModuleHandle(NULL), 0);
 	for (INT i = 1; i < 4; i++) {
 		hRadios[i] = createRadioButton(nullptr, 6, 16 + i * 45, 14, 50, &groupBox1);
 	}
-	//Edits для Radio Чтобы текс был в несколько строк
+	//Edits для Radio Чтобы текст был в несколько строк
 	for (INT i = 0; i < 4; i++) {
 		hEditForRadios[i] = createEditControl(210 + 30, 137 + (16 + i * 46), 660, 46, &hwnd, ID_EDIT1 + i);
 		SetWindowText(hEditForRadios[i], MyDialog::ptr->quiz.at(0)->getChoiceAt(i).c_str());
@@ -269,25 +264,25 @@ VOID MyDialog::changedQuestion() {
 		}
 		//quiz.at(m_index)->setUserAnswer(checked);
 	}
-	
+
 	//END Запомнил какой радиобаттон выбран в предыдущем вопросе
 
 
-	if (index == 0)  EnableWindow(buttons[2], FALSE); 
-	else EnableWindow(buttons[2], TRUE); 
+	if (index == 0)  EnableWindow(buttons[2], FALSE);
+	else EnableWindow(buttons[2], TRUE);
 
 	if (index == quiz.size() - 1) EnableWindow(buttons[3], FALSE);
 	else  EnableWindow(buttons[3], TRUE);
 
 	m_index = index;
-	
-	if (checked != NOT_CHECKED) { 
-		SendMessage(hRadios[checked], BM_SETCHECK, BST_UNCHECKED, NULL); 
+
+	if (checked != NOT_CHECKED) {
+		SendMessage(hRadios[checked], BM_SETCHECK, BST_UNCHECKED, NULL);
 		//в мапе баттонов синих устнавливаю bool FALSE 
 		//RedrawWindow(blueButton[m_index], NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 	}
-	if (quiz.at(m_index)->getUserAnswer() != NOT_CHECKED) { 
-		SendMessage(hRadios[quiz.at(m_index)->getUserAnswer()], BM_SETCHECK, BST_CHECKED, NULL); 
+	if (quiz.at(m_index)->getUserAnswer() != NOT_CHECKED) {
+		SendMessage(hRadios[quiz.at(m_index)->getUserAnswer()], BM_SETCHECK, BST_CHECKED, NULL);
 		//в мапе баттонов синих устнавливаю bool TRUE 
 		//RedrawWindow(blueButton[m_index], NULL, NULL, RDW_INVALIDATE | RDW_UPDATENOW);
 	}
@@ -302,23 +297,23 @@ VOID MyDialog::changedQuestion() {
 VOID MyDialog::toggleListBox() {
 	if (blistShown) {
 		ShowWindow(hListBox, FALSE);
-		MoveWindow(hQuestionNumber, 10, 7, 100, 16, TRUE);//-200 x
-		MoveWindow(hPercents, 320, 7, 50, 16, TRUE);//-100 x
-		MoveWindow(groupBox, 14, 57, 695, 80, TRUE);//-200 x +200width						//////////////
-		MoveWindow(hQuestion, 4, 10, 685, 65, TRUE);//+200 width
-		MoveWindow(groupBox1, 14, 137, 695, 210, TRUE);//+200 width
+		MoveWindow(hQuestionNumber, 10, 7, 100, 16, TRUE);
+		MoveWindow(hPercents, 320, 7, 50, 16, TRUE);
+		MoveWindow(groupBox, 14, 57, 695, 80, TRUE);
+		MoveWindow(hQuestion, 4, 10, 685, 65, TRUE);
+		MoveWindow(groupBox1, 14, 137, 695, 210, TRUE);
 
-		MoveWindow(buttons[0], 44, 377, 80, 24, TRUE);//+200 width
-		MoveWindow(buttons[1], 159, 377, 120, 24, TRUE);//+200 width
-		MoveWindow(buttons[2], 314, 377, 100, 24, TRUE);//+200 width
-		MoveWindow(buttons[3], 450, 377, 120, 24, TRUE);//+200 width
-		MoveWindow(buttons[4], 604, 377, 75, 24, TRUE);//+200 width
+		MoveWindow(buttons[0], 44, 377, 80, 24, TRUE);
+		MoveWindow(buttons[1], 159, 377, 120, 24, TRUE);
+		MoveWindow(buttons[2], 314, 377, 100, 24, TRUE);
+		MoveWindow(buttons[3], 450, 377, 120, 24, TRUE);
+		MoveWindow(buttons[4], 604, 377, 75, 24, TRUE);
 
 		for (INT i = 0; i < 4; i++) {
-			MoveWindow(hEditForRadios[i], 40, 137 + (16 + i * 45), 660, 46, TRUE);//+200 width
+			MoveWindow(hEditForRadios[i], 40, 137 + (16 + i * 45), 660, 46, TRUE);
 		}
 		/*for (int i = 0; i < MyDialog::ptr->getQuiz().size(); i++) {
-			MoveWindow(markButtons.at(i).first, 14 + i * 30, 30, 20, 20, TRUE);
+		MoveWindow(markButtons.at(i).first, 14 + i * 30, 30, 20, 20, TRUE);
 		}*/
 
 		blistShown = FALSE;
@@ -341,7 +336,7 @@ VOID MyDialog::toggleListBox() {
 			MoveWindow(hEditForRadios[i], 210 + 30, 137 + (16 + i * 45), 460, 46, TRUE);//+200 width
 		}
 		/*for (int i = 0; i < MyDialog::ptr->getQuiz().size(); i++) {
-			MoveWindow(markButtons.at(i).first, 214 + i * 30, 30, 20, 20, TRUE);
+		MoveWindow(markButtons.at(i).first, 214 + i * 30, 30, 20, 20, TRUE);
 		}*/
 
 
@@ -390,7 +385,7 @@ VOID MyDialog::Cls_OnTimer(HWND hwnd, UINT id) {
 			minutes--;
 			seconds = 59;
 		}
-		if (minutes < 0  && seconds == 59) {
+		if (minutes < 0 && seconds == 59) {
 			KillTimer(MyDialog::ptr->hDialog, ID_TIMER1);
 			SetWindowText(hTimeLeft, TEXT("Time left: 00:00"));
 			submitTest();
@@ -456,9 +451,22 @@ VOID MyDialog::Cls_OnSize(HWND hwnd, UINT State, INT cx, INT cy)
 }
 VOID MyDialog::Cls_OnClose(HWND hwnd)
 {
-	disconnectMsg();
-	disconnect();
-	EndDialog(hwnd, 0);
+	if (isLogged()) {
+		if (isSubmitted()) {
+			EndDialog(hwnd, 0);
+		}
+		else {
+			INT a = MessageBox(hDialog, TEXT("Завершить тест?"), "Quiz", MB_YESNO | MB_ICONQUESTION);
+			if (a == IDYES) {
+				disconnectMsg();
+				disconnect();
+				EndDialog(hwnd, 0);
+			}
+		}
+	}
+	else {
+		EndDialog(hwnd, 0);
+	}
 }
 BOOL MyDialog::Cls_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 {
@@ -498,88 +506,88 @@ BOOL MyDialog::Cls_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 }
 VOID MyDialog::Cls_OnCommand(HWND hwnd, INT id, HWND hwndCtl, UINT codeNotify)
 {/*else if (codeNotify == WM_NOTIFY) {
-		MessageBox(hwnd, "DOLBAEB", "AGA", MB_OK);
-	}*/
-	/*if (id >= markFirst && id <= markLast){
-		if (id - markFirst != m_index * 4) {
-			SendMessage(hListBox, LB_SETCURSEL, (id - markFirst) / 4, 0);
-			changedQuestion();
-		}
-	}
-	else*/ if (id == BUTTON_REVIEW) {
-		toggleListBox();
-	}
-	else if (id == BUTTON_SUBMIT) {
-		INT a = MessageBox(hDialog, TEXT("Завершить тест?"), "Тест", MB_YESNO);
-		if (a == IDYES) {
-			bsubmitted = TRUE;
-			KillTimer(MyDialog::ptr->hDialog, ID_TIMER1);
-			submitTest();
-			EnableWindow(buttons[0], FALSE);
-			for (INT i = 0; i < 4; i++) {
-				EnableWindow(hRadios[i], FALSE);
-			}
-		}
-	}
-	else if (id == BUTTON_NEXT) {
-		SendMessage(hListBox, LB_SETCURSEL, m_index + 1, NULL);
-		changedQuestion();
-		//SendMessage(MyDialog::ptr->hDialog, WM_CTLCOLORBTN, (WPARAM)GetDC(buttonChosen), (LPARAM)buttonChosen);
-	}
-	else if (id == BUTTON_PREV) {
-		SendMessage(hListBox, LB_SETCURSEL, m_index - 1, NULL);
-		changedQuestion();
-	}
-	else if (id == BUTTON_RESET) {
-		if (codeNotify == BN_CLICKED) {
-			for (INT i = 0; i < 4; i++) {
-				SendMessage(hRadios[i], BM_SETCHECK, BST_UNCHECKED, NULL);
-			}
-		}
-	}
-	else if (id == ID_LISTBOX) {
-		if (codeNotify == LBN_DBLCLK) {
-			INT index = SendMessage(hListBox, LB_GETCURSEL, 0, 0);
-			if (index != m_index) {
-				changedQuestion();
-			}
-		}
-	}
-	else if (id == IDC_LOGIN) {
-		hConnectThread = CreateThread(NULL, 0, ThreadForConnect, this, 0, nullptr);
-		hReceiveThread = CreateThread(NULL, 0, ThreadForReceive, this, 0, nullptr);
-		WaitForSingleObject(hConnectThread, INFINITE);
-		WaitForSingleObject(hReceiveThread, INFINITE);
-		if (ptr->bconnected == FALSE)
-			return;
-		hStatsThread = CreateThread(NULL, 0, ThreadForStats, this, 0, nullptr);
+ MessageBox(hwnd, "DOLBAEB", "AGA", MB_OK);
+ }*/
+ /*if (id >= markFirst && id <= markLast){
+ if (id - markFirst != m_index * 4) {
+ SendMessage(hListBox, LB_SETCURSEL, (id - markFirst) / 4, 0);
+ changedQuestion();
+ }
+ }
+ else*/ if (id == BUTTON_REVIEW) {
+	 toggleListBox();
+ }
+ else if (id == BUTTON_SUBMIT) {
+	 INT a = MessageBox(hDialog, TEXT("Завершить тест?"), "Тест", MB_YESNO);
+	 if (a == IDYES) {
+		 bsubmitted = TRUE;
+		 KillTimer(MyDialog::ptr->hDialog, ID_TIMER1);
+		 submitTest();
+		 EnableWindow(buttons[0], FALSE);
+		 for (INT i = 0; i < 4; i++) {
+			 EnableWindow(hRadios[i], FALSE);
+		 }
+	 }
+ }
+ else if (id == BUTTON_NEXT) {
+	 SendMessage(hListBox, LB_SETCURSEL, m_index + 1, NULL);
+	 changedQuestion();
+	 //SendMessage(MyDialog::ptr->hDialog, WM_CTLCOLORBTN, (WPARAM)GetDC(buttonChosen), (LPARAM)buttonChosen);
+ }
+ else if (id == BUTTON_PREV) {
+	 SendMessage(hListBox, LB_SETCURSEL, m_index - 1, NULL);
+	 changedQuestion();
+ }
+ else if (id == BUTTON_RESET) {
+	 if (codeNotify == BN_CLICKED) {
+		 for (INT i = 0; i < 4; i++) {
+			 SendMessage(hRadios[i], BM_SETCHECK, BST_UNCHECKED, NULL);
+		 }
+	 }
+ }
+ else if (id == ID_LISTBOX) {
+	 if (codeNotify == LBN_DBLCLK) {
+		 INT index = SendMessage(hListBox, LB_GETCURSEL, 0, 0);
+		 if (index != m_index) {
+			 changedQuestion();
+		 }
+	 }
+ }
+ else if (id == IDC_LOGIN) {
+	 hConnectThread = CreateThread(NULL, 0, ThreadForConnect, this, 0, nullptr);
+	 hReceiveThread = CreateThread(NULL, 0, ThreadForReceive, this, 0, nullptr);
+	 WaitForSingleObject(hConnectThread, INFINITE);
+	 WaitForSingleObject(hReceiveThread, INFINITE);
+	 if (ptr->bconnected == FALSE)
+		 return;
+	 hStatsThread = CreateThread(NULL, 0, ThreadForStats, this, 0, nullptr);
 
-		EnumChildWindows(hDialog, DestoryChildCallback, NULL);
-		windowMinWidth = 740;//660
-		winowMinHeight = 457;//390
-		MoveWindow(hwnd, (horizontal - (horizontal / 2) - windowMinWidth / 2), (vertical - (vertical / 2) - winowMinHeight / 2), windowMinWidth, winowMinHeight, TRUE);
+	 EnumChildWindows(hDialog, DestoryChildCallback, NULL);
+	 windowMinWidth = 740;
+	 winowMinHeight = 457;
+	 MoveWindow(hwnd, (horizontal - (horizontal / 2) - windowMinWidth / 2), (vertical - (vertical / 2) - winowMinHeight / 2), windowMinWidth, winowMinHeight, TRUE);
 
-		createAllElements(hwnd);
+	 createAllElements(hwnd);
 
-		SetTimer(hwnd, ID_TIMER1, 1000, (TIMERPROC)NULL);
-		blogged = TRUE;
-	}
-	else if (id == IDC_NAME) {
-		GetWindowText(MyDialog::ptr->hName, MyDialog::ptr->m_name, 20);
-		toggleLogin();
-	}
-	else if (id == IDC_SURNAME) {
-		GetWindowText(MyDialog::ptr->hSurname, MyDialog::ptr->m_surname, 20);
-		toggleLogin();
-	}
-	else if (id == IDC_GROUP) {
-		GetWindowText(MyDialog::ptr->hGroup, MyDialog::ptr->m_group, 20);
-		toggleLogin();
-	}
-	else if (id == IDC_FATHERNAME) {
-		GetWindowText(MyDialog::ptr->hFatherName, MyDialog::ptr->m_fatherName, 20);
-		toggleLogin();
-	}
+	 SetTimer(hwnd, ID_TIMER1, 1000, (TIMERPROC)NULL);
+	 blogged = TRUE;
+ }
+ else if (id == IDC_NAME) {
+	 GetWindowText(MyDialog::ptr->hName, MyDialog::ptr->m_name, 20);
+	 toggleLogin();
+ }
+ else if (id == IDC_SURNAME) {
+	 GetWindowText(MyDialog::ptr->hSurname, MyDialog::ptr->m_surname, 20);
+	 toggleLogin();
+ }
+ else if (id == IDC_GROUP) {
+	 GetWindowText(MyDialog::ptr->hGroup, MyDialog::ptr->m_group, 20);
+	 toggleLogin();
+ }
+ else if (id == IDC_FATHERNAME) {
+	 GetWindowText(MyDialog::ptr->hFatherName, MyDialog::ptr->m_fatherName, 20);
+	 toggleLogin();
+ }
 }
 
 INT_PTR CALLBACK MyDialog::DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -588,39 +596,39 @@ INT_PTR CALLBACK MyDialog::DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARA
 	{
 		/*case WM_NOTIFY:
 		{
-			MessageBox(MyDialog::ptr->hDialog, "Мужик ты крут", "Сообщение об ошибке", MB_OK | MB_ICONSTOP);
+		MessageBox(MyDialog::ptr->hDialog, "Мужик ты крут", "Сообщение об ошибке", MB_OK | MB_ICONSTOP);
 
-			switch (((LPNMHDR)lParam)->code)
-			{
-				case NM_CUSTOMDRAW:
-				{
-					if (((LPNMHDR)lParam)->idFrom >= ptr->markFirst &&
-						((LPNMHDR)lParam)->idFrom <= ptr->markLast) {
-							{
-								LPNMCUSTOMDRAW lpnmCD = (LPNMCUSTOMDRAW)lParam;
+		switch (((LPNMHDR)lParam)->code)
+		{
+		case NM_CUSTOMDRAW:
+		{
+		if (((LPNMHDR)lParam)->idFrom >= ptr->markFirst &&
+		((LPNMHDR)lParam)->idFrom <= ptr->markLast) {
+		{
+		LPNMCUSTOMDRAW lpnmCD = (LPNMCUSTOMDRAW)lParam;
 
-								switch (lpnmCD->dwDrawStage)
-								{
-								case CDDS_PREPAINT:
+		switch (lpnmCD->dwDrawStage)
+		{
+		case CDDS_PREPAINT:
 
-									SetDCBrushColor(lpnmCD->hdc, RGB(0, 255, 0));
-									SetDCPenColor(lpnmCD->hdc, RGB(0, 255, 0));
-									SelectObject(lpnmCD->hdc, GetStockObject(DC_BRUSH));
-									SelectObject(lpnmCD->hdc, GetStockObject(DC_PEN));
+		SetDCBrushColor(lpnmCD->hdc, RGB(0, 255, 0));
+		SetDCPenColor(lpnmCD->hdc, RGB(0, 255, 0));
+		SelectObject(lpnmCD->hdc, GetStockObject(DC_BRUSH));
+		SelectObject(lpnmCD->hdc, GetStockObject(DC_PEN));
 
-									RoundRect(lpnmCD->hdc, lpnmCD->rc.left + 3,
-										lpnmCD->rc.top + 3,
-										lpnmCD->rc.right - 3,
-										lpnmCD->rc.bottom - 3, 5, 5);
+		RoundRect(lpnmCD->hdc, lpnmCD->rc.left + 3,
+		lpnmCD->rc.top + 3,
+		lpnmCD->rc.right - 3,
+		lpnmCD->rc.bottom - 3, 5, 5);
 
-									return TRUE;
-								}
-							}
-							break;
-					}
-				}
-			}
-			break;
+		return TRUE;
+		}
+		}
+		break;
+		}
+		}
+		}
+		break;
 		}
 		break;*/
 		HANDLE_MSG(hwnd, WM_CLOSE, ptr->Cls_OnClose);
@@ -693,34 +701,34 @@ INT_PTR CALLBACK MyDialog::DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARA
 		//break;
 
 
-		case WM_CTLCOLORSTATIC:
+	case WM_CTLCOLORSTATIC:
+	{
+		TCHAR senderClass[256];
+		GetClassName((HWND)lParam, senderClass, 256);
+		if (!strcmp(senderClass, "Edit"))
 		{
-			TCHAR senderClass[256];
-			GetClassName((HWND)lParam, senderClass, 256);
-			if (!strcmp(senderClass, "Edit"))
-			{
-				HDC hdcStatic = (HDC)wParam;
+			HDC hdcStatic = (HDC)wParam;
 
-				if (MyDialog::ptr->isSubmitted()) {
-					if (MyDialog::ptr->getQuiz().at(MyDialog::ptr->getIndex())->getUserAnswer() ==
-						MyDialog::ptr->getQuiz().at(MyDialog::ptr->getIndex())->getRightAnswer()) {
-						//зеленый бэкграунд
-						if ((HWND)lParam == ptr->hEditForRadios[ptr->getQuiz().at(ptr->getIndex())->getUserAnswer()]) {
-							SetBkColor(hdcStatic, RGB(102, 239, 97));
-							return (INT_PTR)CreateSolidBrush(RGB(102, 239, 97));
-						}
-					}
-					else if ((HWND)lParam == ptr->hEditForRadios[ptr->getQuiz().at(ptr->getIndex())->getUserAnswer()]) {
-						//красный бэкграунд
-						SetBkColor(hdcStatic, RGB(246, 83, 83));
-						return (INT_PTR)CreateSolidBrush(RGB(246, 83, 83));
+			if (MyDialog::ptr->isSubmitted()) {
+				if (MyDialog::ptr->getQuiz().at(MyDialog::ptr->getIndex())->getUserAnswer() ==
+					MyDialog::ptr->getQuiz().at(MyDialog::ptr->getIndex())->getRightAnswer()) {
+					//зеленый бэкграунд
+					if ((HWND)lParam == ptr->hEditForRadios[ptr->getQuiz().at(ptr->getIndex())->getUserAnswer()]) {
+						SetBkColor(hdcStatic, RGB(102, 239, 97));
+						return (INT_PTR)CreateSolidBrush(RGB(102, 239, 97));
 					}
 				}
-				SetBkColor(hdcStatic, RGB(230, 230, 230));
-				return (INT_PTR)CreateSolidBrush(RGB(230, 230, 230));
+				else if ((HWND)lParam == ptr->hEditForRadios[ptr->getQuiz().at(ptr->getIndex())->getUserAnswer()]) {
+					//красный бэкграунд
+					SetBkColor(hdcStatic, RGB(246, 83, 83));
+					return (INT_PTR)CreateSolidBrush(RGB(246, 83, 83));
+				}
 			}
+			SetBkColor(hdcStatic, RGB(230, 230, 230));
+			return (INT_PTR)CreateSolidBrush(RGB(230, 230, 230));
 		}
-		break;
+	}
+	break;
 	}
 	return FALSE;
 }
@@ -757,39 +765,38 @@ DWORD WINAPI ThreadForConnect(LPVOID lpParam)
 	char buf[300];
 
 	char szBuff[100] = "<CHECK_STUDENT>";
-	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0); //Отправил запрос
-	INT result = recv(ptr->getClientInfo().socket, szBuff, 100, 0);//Принял ОК
+	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0);
+	INT result = recv(ptr->getClientInfo().socket, szBuff, 100, 0);
 
 	sprintf_s(szBuff, "%s", ptr->getName());
-	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0); //Отправил Имя
-	result = recv(ptr->getClientInfo().socket, szBuff, 100, 0);//Принял ОК
+	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0);
+	result = recv(ptr->getClientInfo().socket, szBuff, 100, 0);
 
 	sprintf_s(szBuff, "%s", ptr->getSurname());
-	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0); //Отправил Фамилию
-	result = recv(ptr->getClientInfo().socket, szBuff, 100, 0);//Принял ОК
+	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0);
+	result = recv(ptr->getClientInfo().socket, szBuff, 100, 0);
 
 	sprintf_s(szBuff, "%s", ptr->getFatherName());
-	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0); //Отправил Отчество
-	result = recv(ptr->getClientInfo().socket, szBuff, 100, 0);//Принял ОК
+	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0);
+	result = recv(ptr->getClientInfo().socket, szBuff, 100, 0);
 
 	sprintf_s(szBuff, "%s", ptr->getGroup());
-	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0); //Отправил Группу
-	result = recv(ptr->getClientInfo().socket, szBuff, 100, 0);//Принял Ответ если Да - то ничего не делаем если нет, то отключаемся
+	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0);
+	result = recv(ptr->getClientInfo().socket, szBuff, 100, 0);
 
 	if (!strcmp(szBuff, "<OK>")) {
 		//Пользователь существует и ещё не сдавал ничего.
-		//MessageBox(MyDialog::ptr->hDialog, "Мужик ты крут", "Сообщение об ошибке", MB_OK | MB_ICONSTOP);
 		ptr->setConnected(TRUE);
 	}
 	else if (!strcmp(szBuff, "<ALREADY_PASSED>")) {
-		shutdown(ptr->getClientInfo().socket, SD_BOTH); // SD_BOTH запрещает как прием, так и отправку данных
+		shutdown(ptr->getClientInfo().socket, SD_BOTH);
 		closesocket(ptr->getClientInfo().socket);
 		WSACleanup();
 		ptr->setConnected(FALSE);
 		MessageBox(NULL, "Вы уже сдавали тест!", "Сообщение об ошибке", MB_OK | MB_ICONSTOP | MB_DEFAULT_DESKTOP_ONLY);
 	}
 	else if (!strcmp(szBuff, "<DOESNT_EXIST>")) {
-		shutdown(ptr->getClientInfo().socket, SD_BOTH); // SD_BOTH запрещает как прием, так и отправку данных
+		shutdown(ptr->getClientInfo().socket, SD_BOTH);
 		closesocket(ptr->getClientInfo().socket);
 		WSACleanup();
 		ptr->setConnected(FALSE);
@@ -805,43 +812,43 @@ DWORD WINAPI ThreadForReceive(LPVOID lpParam)
 	if (!ptr->isConnected())
 		return 0;
 	char szBuff[4096] = "<QUIZ_REQUEST>";
-	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0); //Отправил запрос
+	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0);
 
-	INT result = recv(ptr->getClientInfo().socket, szBuff, 4096, 0);//Принял QUIZ
-	ptr->setQuiz(Question::parseFile(szBuff,ptr->isRandQuestions()));//Проверять запарсился или нет!
+	INT result = recv(ptr->getClientInfo().socket, szBuff, 4096, 0);
+	ptr->setQuiz(Question::parseFile(szBuff, ptr->isRandQuestions()));
 	strcpy_s(szBuff, "<QUIZ_RECEIVED>");
-	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0); //Отправил запрос
+	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0);
 
-	result = recv(ptr->getClientInfo().socket, szBuff, 4096, 0);//Принял Time
+	result = recv(ptr->getClientInfo().socket, szBuff, 4096, 0);
 	INT time = atoi(szBuff);
 	ptr->setQuizTime(time);
 	strcpy_s(szBuff, "<TIME_RECEIVED>");
-	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0); //Отправил запрос
+	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0);
 
 	result = recv(ptr->getClientInfo().socket, szBuff, 4096, 0);
 	if (!strcmp(szBuff, "<RANDOMIZE_QUESTIONS>")) {
 		strcpy_s(szBuff, "<YES>");
-		send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0); //Отправил запрос
-		result = recv(ptr->getClientInfo().socket, szBuff, 4096, 0);//Принял OK
+		send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0);
+		result = recv(ptr->getClientInfo().socket, szBuff, 4096, 0);
 		if (!strcmp(szBuff, "<CHECKED>")) {
 			ptr->setRandQuestions(TRUE);
 			strcpy_s(szBuff, "<YES>");
-			send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0); //Отправил запрос
+			send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0);
 		}
 		else if (!strcmp(szBuff, "<NOT_CHECKED>")) {
 			ptr->setRandQuestions(FALSE);
 			strcpy_s(szBuff, "<YES>");
-			send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0); //Отправил запрос
+			send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0);
 		}
 		else {
 			//Не получилось что-то
 		}
 	}
-	result = recv(ptr->getClientInfo().socket, szBuff, 4096, 0);//Принял OK
+	result = recv(ptr->getClientInfo().socket, szBuff, 4096, 0);
 	if (!strcmp(szBuff, "<OK>")) {
 		return 0;
 	}
- 	return 1;
+	return 1;
 }
 DWORD WINAPI ThreadForStats(LPVOID lpParam)
 {
@@ -851,7 +858,7 @@ DWORD WINAPI ThreadForStats(LPVOID lpParam)
 	while (!ptr->isSubmitted()) {
 		WaitForSingleObject(ptr->hEvent, INFINITE);
 		strcpy_s(szBuff, "<SUCCESSFUL_PERCENTS>");
-		send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0); //Отправил запрос
+		send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0);
 		result = recv(ptr->getClientInfo().socket, szBuff, 4096, 0);
 		if (!strcmp(szBuff, "<OK>")) {
 			INT scored = ptr->checkResult();

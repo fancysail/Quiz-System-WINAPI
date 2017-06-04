@@ -12,7 +12,6 @@ public:
 public:
 	static INT_PTR CALLBACK DlgProc(HWND hWnd, UINT mes, WPARAM wp, LPARAM lp);
 	static MyDialog *ptr;
-	//defaultFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);HFONT defaultFont;
 	HANDLE hEvent;
 	//HWND buttonChosen;
 
@@ -49,7 +48,7 @@ private:
 	//строка со временем
 	string m_stime;
 	//При изменении размера экрана используется.Подумать нужно ли мне это?
-	RECT rRect1;																
+	RECT rRect1;
 	TCHAR m_name[20], m_surname[20], m_group[20], m_fatherName[20];
 	CONST TCHAR m_serverIpAddres[10] = "127.0.0.1";
 public:

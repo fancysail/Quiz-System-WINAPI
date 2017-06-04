@@ -532,7 +532,7 @@ DWORD WINAPI ThreadForReceive(LPVOID lpParam)
 							int indexUser = ListView_FindItem(MyDialog::ptr->getUserList(), -1, &item);
 							MyDialog::ptr->userListView.at(indexUser)->setStatus(Status::CONNECTED);
 							MyDialog::ptr->UpdateUserList(params->group);
-							
+							double percents;
 							while (TRUE) {
 								result = recv(ptrinfo->socket, szBuff, 4096, 0);
 								if (!strcmp(szBuff, "<SUCCESSFUL_PERCENTS>")) {
@@ -540,7 +540,7 @@ DWORD WINAPI ThreadForReceive(LPVOID lpParam)
 									send(ptrinfo->socket, szBuff, strlen(szBuff) + 1, 0);
 
 									result = recv(ptrinfo->socket, szBuff, 4096, 0);
-									double percents = atof(szBuff);
+									percents = atof(szBuff);
 									MyDialog::ptr->userListView.at(indexUser)->setPercents(percents);
 									MyDialog::ptr->UpdateUserList(params->group);
 
@@ -551,6 +551,19 @@ DWORD WINAPI ThreadForReceive(LPVOID lpParam)
 									//disconnected
 									MyDialog::ptr->userListView.at(indexUser)->setStatus(Status::SUBMITTED);
 									//внести изменение в базу время прохождения и дата
+									MyDialog::ptr->ssql << "UPDATE student SET student.Result = '";
+									MyDialog::ptr->ssql << percents << "'" << "where id = '";
+									MyDialog::ptr->ssql << indexUser + 1 << "'";
+									MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
+									MyDialog::ptr->ssql.str("");
+									mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str());
+
+									MyDialog::ptr->ssql << "UPDATE student SET student.Date = curdate() where id = '";
+									MyDialog::ptr->ssql<<indexUser+1<<"'";
+									MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
+									MyDialog::ptr->ssql.str("");
+									mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str());
+									
 									MyDialog::ptr->UpdateUserList(params->group);
 									send(ptrinfo->socket, szBuff, strlen(szBuff) + 1, 0);
 									break;

@@ -18,13 +18,12 @@ public:
 	Question() { m_userAnswer = NOT_CHECKED; }
 
 	static void randomizeQuestions(vector<Question*> &q);
-	//void randomizeChoices();
 	string getQuestion() { return m_question; }
 	vector<string> getChoices() { return m_choices; }
 	string getChoiceAt(int i) { return m_choices.at(i); }
 	int getRightAnswer() { return m_rightAnswer; }
 	int getUserAnswer() { return m_userAnswer; }
-	
+
 	void setQuestion(string question) { m_question = question; }
 	void setChoices(int n, string choice) { m_choices.at(n) = choice; }
 	void setRightAnswer(int a) { m_rightAnswer = a; }
