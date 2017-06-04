@@ -15,19 +15,19 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="h\Database.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="h\header.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="h\MyDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="h\UserListView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="resource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="header.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="MyDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Database.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UserListView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -37,13 +37,13 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Main.cpp">
+    <ClCompile Include="cpp\MyDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MyDialog.cpp">
+    <ClCompile Include="cpp\Database.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Database.cpp">
+    <ClCompile Include="cpp\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

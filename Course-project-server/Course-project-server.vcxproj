@@ -143,19 +143,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Database.h" />
-    <ClInclude Include="header.h" />
-    <ClInclude Include="MyDialog.h" />
+    <ClInclude Include="h\Database.h" />
+    <ClInclude Include="h\header.h" />
+    <ClInclude Include="h\MyDialog.h" />
+    <ClInclude Include="h\UserListView.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="UserListView.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Course-project-server.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Database.cpp" />
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="MyDialog.cpp" />
+    <ClCompile Include="cpp\Database.cpp" />
+    <ClCompile Include="cpp\Main.cpp" />
+    <ClCompile Include="cpp\MyDialog.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
