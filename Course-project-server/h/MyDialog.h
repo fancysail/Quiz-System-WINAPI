@@ -42,7 +42,7 @@ private:
 	HWND hsGroup, hsTest, hsTime;    //НЕ ИСПОЛЬЗУЮТСЯ!Могут понадобиться, если буду растягивать окно.Можно использовать GetDlgItem и идентификаторы, а HWND удалить
 	HWND hGroupCombo, hBrowse, hPath, hTime, hStart, hUserList; //вводимые поля нового окна
 	HWND hName, hSurname, hPassword, hLogin;//вводимые поля старого окна
-	HWND hCheckBox1, hCheckBox2;
+	HWND hCheckBox1;
 
 	Database& db = Database::Instance();
 
@@ -56,7 +56,6 @@ public:
 	Database& getDB() { return db; }
 	string getFileData() { return fileData; }
 	HWND& getCheckBox1() { return hCheckBox1; }
-	HWND& getCheckBox2() { return hCheckBox2; }
 	HWND& getUserList() { return hUserList; }
 	VOID UpdateUserList(char* ListItem);
 private:

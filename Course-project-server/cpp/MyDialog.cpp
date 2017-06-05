@@ -468,11 +468,28 @@ BOOL checkUserData(string &name, string &surname, string &fatherName, string &gr
 				closesocket(clientinfo.socket);
 			}
 			else {
-				strcpy_s(szBuff, "<OK>");
-				send(clientinfo.socket, szBuff, strlen(szBuff) + 1, 0);
-				MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);
-				mysql_free_result(MyDialog::ptr->rset);
-				return TRUE;
+				//Сделать проверку не зашел ли с другого компа в этот же момент.В userListView проверить status
+				string lookFor = surname;
+				lookFor += " ";
+				lookFor += name;
+				lookFor += " ";
+				lookFor += fatherName;
+				LVFINDINFO item = { LVFI_STRING, (LPCTSTR)lookFor.c_str() };
+				int indexUser = ListView_FindItem(MyDialog::ptr->getUserList(), -1, &item);
+				if (MyDialog::ptr->userListView.at(indexUser)->getStatus() == Status::NOT_CONNECTED) {
+					strcpy_s(szBuff, "<OK>");
+					send(clientinfo.socket, szBuff, strlen(szBuff) + 1, 0);
+					MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);
+					mysql_free_result(MyDialog::ptr->rset);
+					return TRUE;
+				}
+				else {
+					strcpy_s(szBuff, "<ALREADY_LOGGED>");
+					send(clientinfo.socket, szBuff, strlen(szBuff) + 1, 0);
+					MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);
+					mysql_free_result(MyDialog::ptr->rset);
+					return FALSE;
+				}
 			}
 		}
 
@@ -760,6 +777,10 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 
 		EnableWindow(hStart, FALSE);
 		bStarted = TRUE;
+		EnableWindow(hGroupCombo, FALSE);
+		EnableWindow(hBrowse, FALSE);
+		EnableWindow(hCheckBox1, FALSE);
+		EnableWindow(hTime, FALSE);
 	}
 	else if (id == IDC_TIME) {
 		if (codeNotify == CBN_SELCHANGE) {

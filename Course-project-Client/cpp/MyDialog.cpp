@@ -482,7 +482,6 @@ BOOL MyDialog::Cls_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 		ShowWindow(window, SW_NORMAL);
 		SendMessage(window, WM_SYSCOMMAND, SC_MAXIMIZE, NULL);*/
 		EndDialog(hwnd, 0);
-
 	}
 	GetDesktopResolution(horizontal, vertical);
 	RECT rect;
@@ -801,6 +800,13 @@ DWORD WINAPI ThreadForConnect(LPVOID lpParam)
 		WSACleanup();
 		ptr->setConnected(FALSE);
 		MessageBox(NULL, "Такой пользователь не существует!", "Сообщение об ошибке", MB_OK | MB_ICONSTOP | MB_DEFAULT_DESKTOP_ONLY);
+	}
+	else if (!strcmp(szBuff, "<ALREADY_LOGGED>")) {
+		shutdown(ptr->getClientInfo().socket, SD_BOTH);
+		closesocket(ptr->getClientInfo().socket);
+		WSACleanup();
+		ptr->setConnected(FALSE);
+		MessageBox(NULL, "Пользователь с такими данными уже сдаёт тест!", "Сообщение об ошибке", MB_OK | MB_ICONSTOP | MB_DEFAULT_DESKTOP_ONLY);
 	}
 
 	return 1;
