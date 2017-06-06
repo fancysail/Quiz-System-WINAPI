@@ -40,7 +40,8 @@ private:
 
 	INT m_countUserAnswered;
 	INT horizontal, vertical;
-	INT windowMinWidth, winowMinHeight;
+	INT windowMinWidth = 383;
+	INT winowMinHeight = 252;
 	//“екущий вопрос
 	INT m_index;
 	//врем€ полученное с сервера

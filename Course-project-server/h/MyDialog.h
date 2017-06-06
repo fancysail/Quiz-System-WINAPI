@@ -49,21 +49,29 @@ private:
 	HANDLE hDbconnect;//HANDLE нити в которой создается подключение к ДБ
 	WSADATA wsd;
 public:
+	TCHAR* getName() { return m_name; }
+	TCHAR* getSurname() { return m_surname; }
+	TCHAR* getPassword() { return m_password; }
+	TCHAR* getGroup() { return m_group; }
+	TCHAR* getPath() { return m_path; }
 	TCHAR* getTime() { return m_time; }
+
 	HWND& gethDialogue() { return hDialog; }
+	HWND& gethLogin() { return hLogin; }
 	HWND& gethStart() { return hStart; }
 	WSADATA& getWSD() { return wsd; }
 	Database& getDB() { return db; }
 	string getFileData() { return fileData; }
 	HWND& getCheckBox1() { return hCheckBox1; }
 	HWND& getUserList() { return hUserList; }
+	HWND& gethGroupCombo() { return hGroupCombo; }
+	HWND& gethTime() { return hTime; }
+
+	BOOL isStarted() { return bStarted; }
 	VOID UpdateUserList(char* ListItem);
 private:
 	VOID OnBrowse();
-	VOID rightExtension(char* dot);
-	VOID checkLogin();
 	VOID createAllElements();
-	VOID checkAllFields();
 	BOOL loginCheck();
 };
 

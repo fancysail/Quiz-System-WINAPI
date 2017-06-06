@@ -410,45 +410,56 @@ VOID MyDialog::Cls_OnTimer(HWND hwnd, UINT id) {
 		m_stime.clear();
 	}
 }
-VOID MyDialog::Cls_OnSize(HWND hwnd, UINT State, INT cx, INT cy)
-{
-	INT parts[] = { cx / 4 * 3, -1 };
-	GetClientRect(hDialog, &rRect1);
-	if (blogged) {
-		if (rRect1.right < 644) {
-			rRect1.right = windowMinWidth;
-		}
-		if (rRect1.bottom < 351) {
-			rRect1.bottom = winowMinHeight;
-		}
-		MoveWindow(hDialog, rRect1.left, rRect1.top, rRect1.right, rRect1.bottom - rRect1.top, TRUE);
-	}
-	else {
-		if (rRect1.right < 384) {
-			rRect1.right = 384;
-		}
-		if (rRect1.bottom < 208) {
-			rRect1.bottom = 208;
-		}
-		MoveWindow(hDialog, rRect1.left, rRect1.top, rRect1.right, rRect1.bottom - rRect1.top, TRUE);
-		return;
-	}
-
-
-
-	//if (windowMinWidth)
-	//SendMessage(hStatus_Bar, SB_SETPARTS, 2, (LPARAM)&parts);
-	//
-	//MoveWindow(hTimeLeft, rRect1.left, rRect1.top, rRect1.right, rRect1.bottom - rRect1.top, TRUE);
-	/*if (bWord_Wrap == TRUE) {  }
-	else
-	{
-	if (bStatus_Bar == TRUE) { MoveWindow(hEdit1, rRect1.left, rRect1.top, rRect1.right, rRect1.bottom - rRect1.top - 19, TRUE); }
-	else { MoveWindow(hEdit1, rRect1.left, rRect1.top, rRect1.right, rRect1.bottom - rRect1.top, TRUE); }
-	}
-
-	SendMessage(hStatus_Bar, WM_SIZE, 0, 0);*/
-}
+//VOID MyDialog::Cls_OnSize(HWND hwnd, UINT State, INT cx, INT cy)//761x1160  395x686        399X   291Y
+//{
+//
+//	if (!isLogged()) {
+//		/*GetClientRect(hDialog, &rRect1);
+//		cx = windowMinWidth;
+//		cy = winowMinHeight;*/
+//		//GetWindowRect(hDialog, &rRect1);
+//		SetWindowPos(hwnd, NULL, 0, 0, 399, 291, SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE);
+//		//MoveWindow(hDialog, rRect1.left, rRect1.top, 399, 291, FALSE);
+//	}
+//
+//	//INT a = MessageBox(hDialog, TEXT("Завершить тест?"), "Quiz", MB_YESNO | MB_ICONQUESTION);
+//	/*if (blogged) {
+//	INT parts[] = { cx / 4 * 3, -1 };
+//	GetClientRect(hDialog, &rRect1);
+//		if (rRect1.right < 644) {
+//			rRect1.right = windowMinWidth;
+//		}
+//		if (rRect1.bottom < 351) {
+//			rRect1.bottom = winowMinHeight;
+//		}
+//		MoveWindow(hDialog, rRect1.left, rRect1.top, rRect1.right, rRect1.bottom - rRect1.top, TRUE);
+//	}
+//	else {
+//		if (rRect1.right < 384) {
+//			rRect1.right = 384;
+//		}
+//		if (rRect1.bottom < 208) {
+//			rRect1.bottom = 208;
+//		}
+//		MoveWindow(hDialog, rRect1.left, rRect1.top, rRect1.right, rRect1.bottom - rRect1.top, TRUE);
+//		return;
+//	}*/
+//
+//
+//
+//	//if (windowMinWidth)
+//	//SendMessage(hStatus_Bar, SB_SETPARTS, 2, (LPARAM)&parts);
+//	//
+//	//MoveWindow(hTimeLeft, rRect1.left, rRect1.top, rRect1.right, rRect1.bottom - rRect1.top, TRUE);
+//	/*if (bWord_Wrap == TRUE) {  }
+//	else
+//	{
+//	if (bStatus_Bar == TRUE) { MoveWindow(hEdit1, rRect1.left, rRect1.top, rRect1.right, rRect1.bottom - rRect1.top - 19, TRUE); }
+//	else { MoveWindow(hEdit1, rRect1.left, rRect1.top, rRect1.right, rRect1.bottom - rRect1.top, TRUE); }
+//	}
+//
+//	SendMessage(hStatus_Bar, WM_SIZE, 0, 0);*/
+//}
 VOID MyDialog::Cls_OnClose(HWND hwnd)
 {
 	if (isLogged()) {
@@ -488,8 +499,8 @@ BOOL MyDialog::Cls_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 	GetWindowRect(hwnd, &rect);
 	INT widthRect = rect.right - rect.left;
 	INT heightRect = rect.bottom - rect.top;
-	windowMinWidth = widthRect;
-	winowMinHeight = heightRect;
+	//windowMinWidth = widthRect;
+	//winowMinHeight = heightRect;
 	MoveWindow(hwnd, (horizontal - (horizontal / 2) - widthRect / 2), (vertical - (vertical / 2) - heightRect / 2), widthRect, heightRect, TRUE);
 
 	hDialog = hwnd;
@@ -500,7 +511,7 @@ BOOL MyDialog::Cls_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 	hFatherName = GetDlgItem(hwnd, IDC_FATHERNAME);
 
 	hEvent = CreateEvent(NULL, FALSE, FALSE, "{26E73077-4596-4321-9AA1-BC25CA222ABC}");
-
+	//MoveWindow(hDialog, rRect1.left, rRect1.top, rRect1.right, rRect1.bottom - rRect1.top, FALSE);
 	return TRUE;
 }
 VOID MyDialog::Cls_OnCommand(HWND hwnd, INT id, HWND hwndCtl, UINT codeNotify)
