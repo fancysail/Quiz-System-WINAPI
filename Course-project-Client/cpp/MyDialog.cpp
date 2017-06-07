@@ -14,6 +14,7 @@
 #define ID_BUTTONCHOSEN 0x8824
 using namespace std;
 
+INT MyDialog::seconds = 0;
 MyDialog* MyDialog::ptr = NULL;
 /*ќтправл€ю на сервер на сколько вопрос ответил правильно(в процентах)
 на текущий момент при каждом изменении ответа*/
@@ -183,6 +184,12 @@ VOID MyDialog::createAllElements(HWND hwnd) {
 VOID MyDialog::disconnectMsg() {
 	char SZbuff[100] = "<EXIT>";
 	send(getClientInfo().socket, SZbuff, strlen(SZbuff) + 1, 0);
+	int result = recv(ptr->getClientInfo().socket, SZbuff, 100, 0);
+	if (!strcmp(SZbuff, "<OK>")) {
+		//отправл€ю врем€
+		wsprintf(SZbuff, TEXT("%s:%s"), to_string(m_itime), to_string(seconds));
+		send(getClientInfo().socket, SZbuff, strlen(SZbuff) + 1, 0);
+	}
 }
 VOID MyDialog::disconnect() {
 	if (isConnected()) {
@@ -378,14 +385,12 @@ VOID MyDialog::submitTest() {
 VOID MyDialog::Cls_OnTimer(HWND hwnd, UINT id) {
 	if (id == ID_TIMER1) {
 		//MessageBox(MyDialog::ptr->hDialog, TEXT("TIMER"), "—ообщение об ошибке", MB_OK | MB_ICONSTOP);
-		static INT minutes = m_itime;
-		static INT seconds = 0;
 		seconds--;
 		if (seconds <= 0) {
-			minutes--;
+			m_itime--;
 			seconds = 59;
 		}
-		if (minutes < 0 && seconds == 59) {
+		if (m_itime < 0 && seconds == 59) {
 			KillTimer(MyDialog::ptr->hDialog, ID_TIMER1);
 			SetWindowText(hTimeLeft, TEXT("Time left: 00:00"));
 			submitTest();
@@ -398,8 +403,8 @@ VOID MyDialog::Cls_OnTimer(HWND hwnd, UINT id) {
 		}
 		m_stime = "Time left ";
 
-		if (minutes > 9) m_stime += to_string(minutes);
-		else m_stime += "0" + to_string(minutes);
+		if (m_itime > 9) m_stime += to_string(m_itime);
+		else m_stime += "0" + to_string(m_itime);
 
 		m_stime += ":";
 

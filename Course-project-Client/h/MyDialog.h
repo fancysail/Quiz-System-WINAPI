@@ -45,7 +45,8 @@ private:
 	//Текущий вопрос
 	INT m_index;
 	//время полученное с сервера
-	INT m_itime;
+	static INT m_itime;
+	static INT seconds;
 	//строка со временем
 	string m_stime;
 	//При изменении размера экрана используется.Подумать нужно ли мне это?

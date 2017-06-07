@@ -565,6 +565,11 @@ DWORD WINAPI ThreadForReceive(LPVOID lpParam)
 									send(ptrinfo->socket, szBuff, strlen(szBuff) + 1, 0);
 								}
 								else if (!strcmp(szBuff, "<EXIT>")) {
+									strcpy_s(szBuff, "<OK>");
+									send(ptrinfo->socket, szBuff, strlen(szBuff) + 1, 0);
+									result = recv(ptrinfo->socket, szBuff, 4096, 0);
+									//принимаю время прохождения
+									MyDialog::ptr->userListView.at(indexUser)->setDate(szBuff);
 									MyDialog::ptr->userListView.at(indexUser)->setStatus(Status::SUBMITTED);
 
 									MyDialog::ptr->ssql << "UPDATE student SET student.Result = '";
@@ -575,12 +580,13 @@ DWORD WINAPI ThreadForReceive(LPVOID lpParam)
 									mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str());
 
 									MyDialog::ptr->ssql << "UPDATE student SET student.Date = curdate() where id = '";
-									MyDialog::ptr->ssql<<indexUser+1<<"'";
+									MyDialog::ptr->ssql << indexUser + 1 << "'";
 									MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
 									MyDialog::ptr->ssql.str("");
 									mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str());
-									
+
 									MyDialog::ptr->UpdateUserList(params->group);
+									strcpy_s(szBuff, "<EXIT>");
 									send(ptrinfo->socket, szBuff, strlen(szBuff) + 1, 0);
 									break;
 								}
