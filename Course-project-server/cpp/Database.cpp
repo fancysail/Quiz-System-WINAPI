@@ -2,7 +2,7 @@
 #include "../h/Database.h"
 char* Database::host_name = "localhost";
 char* Database::user_name = "root";
-char* Database::password = ""; 
+char* Database::password = "admin"; 
 char* Database::db_name = "it_step";
 unsigned int Database::port_num = 3306;
 char* Database::socket_name = NULL;

@@ -3,6 +3,33 @@
 #include "UserListView.h"
 #include "Database.h"
 #include <vector>
+//#include "Quiz.h"
+#include "headerForQuizCreator.h"
+class MyDialog;
+class Quiz
+{
+public:
+	MyDialog*ptrMyDialog;
+	HWND hCreateQuiz,hChooseQuiz,hQuestion, hAnswer, hChoice2, hChoice3, hChoice4, hAdd, hPlus, hDialog;
+
+	void MessageAboutError(DWORD dwError);
+	BOOL Cls_OnInitDialog(HWND hWnd, HWND hWndFocus, LPARAM lParam);
+	void Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify);
+	void Cls_OnClose(HWND hWnd);
+	string m_path;
+
+	void AddQuestion();
+	void addQuiz(char* quizName);
+	void enableAdd();
+	//void updateQuizCombo(HWND& h);
+public:
+	static Quiz* ptr;
+	
+	Quiz();
+	Quiz(MyDialog*p);
+	~Quiz(void);
+	static INT_PTR CALLBACK DlgProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
+};
 
 class MyDialog
 {
@@ -26,7 +53,7 @@ public:
 private:
 	BOOL bStarted = FALSE;
 
-	TCHAR m_path[60];TCHAR m_group[40];
+	TCHAR m_group[40];
 	TCHAR m_name[20];
 	TCHAR m_surname[20];
 	TCHAR m_password[20];
@@ -53,9 +80,9 @@ public:
 	TCHAR* getSurname() { return m_surname; }
 	TCHAR* getPassword() { return m_password; }
 	TCHAR* getGroup() { return m_group; }
-	TCHAR* getPath() { return m_path; }
 	TCHAR* getTime() { return m_time; }
 
+	HWND& gethPath() { return hPath; }
 	HWND& gethDialogue() { return hDialog; }
 	HWND& gethLogin() { return hLogin; }
 	HWND& gethStart() { return hStart; }
@@ -70,7 +97,6 @@ public:
 	BOOL isStarted() { return bStarted; }
 	VOID UpdateUserList(char* ListItem);
 private:
-	VOID OnBrowse();
 	VOID createAllElements();
 	BOOL loginCheck();
 };

@@ -45,7 +45,8 @@ private:
 	//“екущий вопрос
 	INT m_index;
 	//врем€ полученное с сервера
-	static INT m_itime;
+	static INT m_minutes;
+	INT m_minutesCopy;
 	static INT seconds;
 	//строка со временем
 	string m_stime;
@@ -55,7 +56,7 @@ private:
 	CONST TCHAR m_serverIpAddres[10] = "127.0.0.1";
 public:
 	VOID setQuiz(vector<Question*> q) { quiz = q; }
-	VOID setQuizTime(INT m) { m_itime = m; }
+	VOID setQuizTime(INT m) { m_minutes = m; m_minutesCopy = m; }
 	VOID setConnected(BOOL b) { bconnected = b; }
 	VOID setSubmitted(BOOL b) { bsubmitted = b; }
 	VOID setRandQuestions(BOOL b) { brandQuestions = b; }
@@ -64,7 +65,8 @@ public:
 	//Ќомер текущего вопроса
 	INT getIndex() { return m_index; }
 	INT getCountUserAnswered() { return m_countUserAnswered; }
-	INT getQuizTime() { return m_itime; }
+	INT getQuizTime() { return m_minutesCopy; }
+	INT getSpentTime() { return m_minutes; }
 	TCHAR* getName() { return m_name; }
 	TCHAR* getSurname() { return m_surname; }
 	TCHAR* getFatherName() { return m_fatherName; }

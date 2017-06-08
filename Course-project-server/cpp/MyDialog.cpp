@@ -8,6 +8,7 @@
 #define IDC_LISTVIEW 0x8815
 #define IDC_CHECKBOX1 0x8816
 #define IDC_CHECKBOX2 0x8817
+#define IDC_CREATE_QUIZ 0x8818
 
 struct PARAMS{
 	ClientInfo* clientInfo;
@@ -30,6 +31,21 @@ BOOL checkUserData(string &name, string &surname, string &fatherName, string &gr
 
 
 MyDialog* MyDialog::ptr = NULL;
+void updateQuizCombo(HWND& h) {
+	SendMessage(h, CB_RESETCONTENT, NULL, NULL);
+
+	MyDialog::ptr->ssql << "select * from quizes;";
+	MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
+	MyDialog::ptr->ssql.str("");
+	if (!mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str())) {
+		MyDialog::ptr->rset = mysql_use_result(MyDialog::ptr->getDB().getConnection());
+		while ((MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset)) != NULL) {
+			SendMessage(h, CB_ADDSTRING, 0, (LPARAM)MyDialog::ptr->row[1]);
+		}
+		MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);
+	}
+	mysql_free_result(MyDialog::ptr->rset);
+}
 BOOL CALLBACK SetFont(HWND child, LPARAM font) {
 	SendMessage(child, WM_SETFONT, font, TRUE);
 	return TRUE;
@@ -131,7 +147,7 @@ void HandleWM_NOTIFY(LPARAM lParam)
 			break;
 		}
 		case 3:
-			plvdi->item.pszText = "0";
+			StringCchCopy(plvdi->item.pszText, plvdi->item.cchTextMax, MyDialog::ptr->userListView[plvdi->item.iItem]->getTimeSpent().c_str());
 			break;
 
 		default:
@@ -184,7 +200,6 @@ BOOL MyDialog::Cls_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 	hPassword = GetDlgItem(hDialog, IDC_PASSWORD);
 	hLogin = GetDlgItem(hDialog, IDC_LOGIN);
 
-	wsprintf(m_path, "");
 	wsprintf(m_group, "");
 	wsprintf(m_name, "");
 	wsprintf(m_surname, "");
@@ -279,28 +294,6 @@ HWND& createCheckBox(const char* text, int x, int y, int width, int height, HWND
 		x, y, width, height, *parent, (HMENU)id, GetModuleHandle(NULL), 0);
 	return hCkeckBox;
 }
-
-VOID MyDialog::OnBrowse()
-{
-	BROWSEINFO binfo = { 0 };
-	binfo.hwndOwner = hDialog;
-	binfo.ulFlags = BIF_NEWDIALOGSTYLE | BIF_EDITBOX | BIF_BROWSEINCLUDEFILES;
-	binfo.lpszTitle = "Choose file..";
-	LPITEMIDLIST ptr = SHBrowseForFolder(&binfo);
-	if (ptr)
-	{
-		char path[MAX_PATH];
-		SHGetPathFromIDList(ptr, path);
-		if (strlen(path) > 59) {
-			wsprintf(MyDialog::ptr->m_path, TEXT(""));
-			throw std::runtime_error("File path is too long.\nLengh of filename should not be longer than 59 characters.");
-		}
-		if (strlen(path)>2) {
-			wsprintf(MyDialog::ptr->m_path, TEXT(""));
-			wsprintf(MyDialog::ptr->m_path, TEXT("%s"), path);
-		}
-	}
-}
 VOID rightExtension(TCHAR* m_path,char* dot) {
 	int len = lstrlen(m_path);
 	dot[0] = m_path[len - 4];
@@ -330,27 +323,35 @@ VOID toggleStart() {
 		EnableWindow(MyDialog::ptr->gethStart(), FALSE);
 		return;
 	}
+	nIndex = SendMessage(MyDialog::ptr->gethPath(), CB_GETCURSEL, 0, 0);
+	if (nIndex == CB_ERR) {
+		EnableWindow(MyDialog::ptr->gethStart(), FALSE);
+		return;
+	}
 
 	GetWindowText(MyDialog::ptr->gethTime(), MyDialog::ptr->getTime(), 8);
 
-	if (lstrlen(MyDialog::ptr->getPath()) > 3 && lstrlen(MyDialog::ptr->getTime()) > 0)
+	if (lstrlen(MyDialog::ptr->getTime()) > 0)
 		EnableWindow(MyDialog::ptr->gethStart(), TRUE);
 	else
 		EnableWindow(MyDialog::ptr->gethStart(), FALSE);
 }
 VOID MyDialog::createAllElements() {
-	hsGroup = createStatic("Group: ", 30, 25, 50, 16, &ptr->hDialog, NULL);
-	hsTest = createStatic("Test: ", 30, 65, 50, 16, &ptr->hDialog, NULL);
-	hsTime = createStatic("Time: ", 30, 105, 50, 16, &ptr->hDialog, NULL);
-	hsTest = createStatic("min. ", 160, 105, 50, 22, &ptr->hDialog, NULL);
+	hStart = createButton("Create Quiz..", windowWidth/2 - 60, 15, 120, 22, &ptr->hDialog, IDC_CREATE_QUIZ,NULL);
 
-	hPath = createEdit(170, 66, 220, 22, &ptr->hDialog, IDC_PATH);
+	hsGroup = createStatic("Group: ", 30, 25+25, 50, 16, &ptr->hDialog, NULL);
+	hsTest = createStatic("Test: ", 30, 65 + 25, 50, 16, &ptr->hDialog, NULL);
+	hsTime = createStatic("Time: ", 30, 105 + 25, 50, 16, &ptr->hDialog, NULL);
+	hsTest = createStatic("min. ", 160, 105 + 25, 50, 22, &ptr->hDialog, NULL);
 
-	hBrowse = createButton("Browse..", 100, 66, 62, 22, &ptr->hDialog, IDC_BROWSE, NULL);
-	hStart = createButton("Start Quiz", 160, 390, 80, 22, &ptr->hDialog, IDC_START, WS_DISABLED);
+	hPath = createCombo(100, 66+25, 290, 100, &ptr->hDialog, IDC_PATH);
+	updateQuizCombo(hPath);
 
-	hGroupCombo = createCombo(100, 25, 290, 100, &ptr->hDialog, IDC_GROUPCOMBO);
-	hTime = createCombo(100, 102, 50, 110, &ptr->hDialog, IDC_TIME);
+	//hBrowse = createButton("Browse..", 100, 66+25, 62, 22, &ptr->hDialog, IDC_BROWSE, NULL);
+	hStart = createButton("Start Quiz", 160, 390 + 35, 80, 22, &ptr->hDialog, IDC_START, WS_DISABLED);
+
+	hGroupCombo = createCombo(100, 25+25, 290, 100, &ptr->hDialog, IDC_GROUPCOMBO);
+	hTime = createCombo(100, 102 + 25, 50, 110, &ptr->hDialog, IDC_TIME);
 	SendMessage(hTime, CB_ADDSTRING, 0, (LPARAM)"1");
 	SendMessage(hTime, CB_ADDSTRING, 0, (LPARAM)"15");
 	SendMessage(hTime, CB_ADDSTRING, 0, (LPARAM)"30");
@@ -359,16 +360,16 @@ VOID MyDialog::createAllElements() {
 	SendMessage(hTime, CB_ADDSTRING, 0, (LPARAM)"120");
 	SendMessage(hTime, CB_SETCURSEL, 0, NULL);
 
-	hUserList = createListView(30, 143, 355, 241, &ptr->hDialog);
+	hUserList = createListView(30, 143 + 25, 355, 241, &ptr->hDialog);
 	InitListViewColumns(hUserList);
 	
-	hCheckBox1 = createCheckBox("Randomize Questions", 205, 110, 140, 22, &ptr->hDialog, IDC_CHECKBOX1);
+	hCheckBox1 = createCheckBox("Randomize Questions", 205, 110 + 25, 140, 22, &ptr->hDialog, IDC_CHECKBOX1);
 
 	EnumChildWindows(hDialog, (WNDENUMPROC)SetFont, (LPARAM)GetStockObject(DEFAULT_GUI_FONT));
 }
 BOOL MyDialog::loginCheck() {
 	WaitForSingleObject(hDbconnect, INFINITE);
-	ssql << "select Name,Password,teacher.Group from teacher where name='";
+	/*ssql << "select Name,Password,teacher.Group from teacher where name='";
 	ssql << m_name << " " << m_surname << "' AND Password = '";
 	ssql << m_password << "';";
 	sql = ssql.str();
@@ -382,7 +383,7 @@ BOOL MyDialog::loginCheck() {
 			return FALSE;
 		}
 	}
-	mysql_free_result(rset);
+	mysql_free_result(rset);*/
 	return TRUE;
 }
 
@@ -569,7 +570,7 @@ DWORD WINAPI ThreadForReceive(LPVOID lpParam)
 									send(ptrinfo->socket, szBuff, strlen(szBuff) + 1, 0);
 									result = recv(ptrinfo->socket, szBuff, 4096, 0);
 									//принимаю время прохождения
-									MyDialog::ptr->userListView.at(indexUser)->setDate(szBuff);
+									MyDialog::ptr->userListView.at(indexUser)->setTimeSpent(szBuff);
 									MyDialog::ptr->userListView.at(indexUser)->setStatus(Status::SUBMITTED);
 
 									MyDialog::ptr->ssql << "UPDATE student SET student.Result = '";
@@ -580,6 +581,14 @@ DWORD WINAPI ThreadForReceive(LPVOID lpParam)
 									mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str());
 
 									MyDialog::ptr->ssql << "UPDATE student SET student.Date = curdate() where id = '";
+									MyDialog::ptr->ssql << indexUser + 1 << "'";
+									MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
+									MyDialog::ptr->ssql.str("");
+									mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str());
+
+									MyDialog::ptr->ssql << "UPDATE student SET student.Time = '";
+									MyDialog::ptr->ssql << szBuff << "'";
+									MyDialog::ptr->ssql << "where id = '";
 									MyDialog::ptr->ssql << indexUser + 1 << "'";
 									MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
 									MyDialog::ptr->ssql.str("");
@@ -725,7 +734,7 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		//Remove all alements from the window
 		EnumChildWindows(hDialog, DestoryChildCallback, NULL);
 		windowWidth = 430;
-		winowHeight = 475;
+		winowHeight = 500;
 		MoveWindow(hwnd, (horizontal - (horizontal / 2) - windowWidth / 2), (vertical - (vertical / 2) - winowHeight / 2), windowWidth, winowHeight, TRUE);
 		
 		createAllElements();
@@ -760,18 +769,33 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			MessageAboutError(WSAGetLastError());
 			return;
 		}
-		ifs.open(m_path);
-		if (ifs.is_open()) {
-			ifs.seekg(0, std::ios::end);
-			fileData.reserve(ifs.tellg());
-			ifs.seekg(0, std::ios::beg);
-			fileData.assign((std::istreambuf_iterator<char>(ifs)),
-				std::istreambuf_iterator<char>());
-			ifs.close();
+		int ItemIndex = SendMessage((HWND)hPath, (UINT)CB_GETCURSEL,
+			(WPARAM)0, (LPARAM)0);
+		TCHAR quizName[60];
+		SendMessage((HWND)hPath, (UINT)CB_GETLBTEXT,
+			(WPARAM)ItemIndex, (LPARAM)quizName);
+		ssql << "select question, wrongAnswer2, wrongAnswer3, wrongAnswer4, rightAnswer ";
+		ssql << "from questions where quizId = (select id from quizes where name = '";
+		ssql << quizName;
+		ssql << "');";
+		sql = ssql.str();
+		ssql.str("");
+		if (!mysql_query(MyDialog::ptr->getDB().getConnection(), sql.c_str())) {
+			rset = mysql_use_result(MyDialog::ptr->getDB().getConnection());
+			sql = "";
+			while ((row = mysql_fetch_row(rset)) != NULL) {
+				ssql << "~q" << row[0] << "q~";
+				ssql << "~!" << row[1] << "!~";
+				ssql << "~!" << row[2] << "!~";
+				ssql << "~!" << row[3] << "!~";
+				ssql << "~^" << row[4] << "^~";
+				sql += ssql.str();
+				ssql.str("");
+			}
+			row = mysql_fetch_row(rset);
 		}
-		else {
-			MessageBox(hDialog, TEXT("Cannot open a file"), "Error", MB_ICONERROR);
-		}
+		mysql_free_result(rset);
+		fileData = sql;
 		HANDLE hThread = CreateThread(0, 0, ThreadForAccept, nullptr, 0, 0);
 		CloseHandle(hThread);
 
@@ -781,6 +805,7 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		EnableWindow(hBrowse, FALSE);
 		EnableWindow(hCheckBox1, FALSE);
 		EnableWindow(hTime, FALSE);
+		EnableWindow(hPath, FALSE);
 	}
 	else if (id == IDC_TIME) {
 		if (codeNotify == CBN_SELCHANGE) {
@@ -803,7 +828,16 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			UpdateUserList(ListItem);
 		}
 	}
-	else if (id == IDC_BROWSE) {
+	else if (id == IDC_CREATE_QUIZ) {
+		Quiz dlg(ptr);
+		DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG3), hwnd, Quiz::DlgProc);
+	}
+	else if (id == IDC_PATH) {
+		if (codeNotify == CBN_SELCHANGE) {
+			toggleStart();
+		}
+	}
+	/*else if (id == IDC_BROWSE) {
 		try {
 			ptr->OnBrowse();
 		}
@@ -828,7 +862,7 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			SetWindowText(hPath, m_path);
 			toggleStart();
 		}
-	}
+	}*/
 }
 
 INT_PTR CALLBACK MyDialog::DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -843,4 +877,156 @@ INT_PTR CALLBACK MyDialog::DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARA
 		break;
 	}
 	return FALSE;
+}
+
+
+
+
+
+
+
+
+
+Quiz* Quiz::ptr = NULL;
+
+void Quiz::Cls_OnClose(HWND hWnd) { EndDialog(hWnd, NULL); }
+void Quiz::enableAdd() {
+	int ItemIndex = SendMessage((HWND)hChooseQuiz, (UINT)CB_GETCURSEL,
+		(WPARAM)0, (LPARAM)0);
+	int lQ = SendMessage(hQuestion, WM_GETTEXTLENGTH, 0, 0);
+	int lA = SendMessage(hAnswer, WM_GETTEXTLENGTH, 0, 0);
+	int lC2 = SendMessage(hChoice2, WM_GETTEXTLENGTH, 0, 0);
+	int lC3 = SendMessage(hChoice3, WM_GETTEXTLENGTH, 0, 0);
+	int lC4 = SendMessage(hChoice4, WM_GETTEXTLENGTH, 0, 0);
+	if (ItemIndex != CB_ERR && lQ != 0 && lA != 0 && lC2 != 0 && lC3 != 0 && lC4 != 0)
+		EnableWindow(hAdd, TRUE);
+	else EnableWindow(hAdd, FALSE);
+}
+void Quiz::MessageAboutError(DWORD dwError)
+{
+	LPVOID lpMsgBuf = NULL;
+	TCHAR szBuf[80];
+	BOOL fOK = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM//флаг сообщает функции, что нужна строка, соответствующая коду ошибки, определённому в системе
+		| FORMAT_MESSAGE_ALLOCATE_BUFFER, NULL,//нужно выделить соответствующий блок памяти для хранения текста
+		dwError,//код ошибки
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),//язык, на котором выводится описание ошибки (язык пользователя по умолчанию)
+		(LPTSTR)&lpMsgBuf,//адрес выделенного блока памяти записывается в эту переменную
+		0,//минимальный размер буфера для выделения памяти
+		NULL);
+	if (lpMsgBuf != NULL)
+	{
+		wsprintf(szBuf, TEXT("Ошибка %d: %s"), dwError, lpMsgBuf);
+		MessageBox(hDialog, szBuf, TEXT("Сообщение об ошибке"), MB_OK | MB_ICONSTOP);
+		LocalFree(lpMsgBuf);
+	}
+}
+Quiz::Quiz(MyDialog*p) 
+{ 
+	ptr = this;
+	Quiz::ptrMyDialog = p; 
+}
+Quiz::Quiz(void)
+{
+	ptr = this;
+}
+Quiz::~Quiz(void)
+{
+	ptr = nullptr;
+}
+BOOL Quiz::Cls_OnInitDialog(HWND hWnd, HWND hWndFocus, LPARAM lParam)
+{
+	hDialog = hWnd;
+	hCreateQuiz = GetDlgItem(hWnd, IDC_CREATEQUIZ);
+	hChooseQuiz = GetDlgItem(hWnd, IDC_CHOOSEQUIZ);
+	hQuestion = GetDlgItem(hWnd, IDC_QUESTION);
+	hAnswer = GetDlgItem(hWnd, IDC_ANSWER);
+	hChoice2 = GetDlgItem(hWnd, IDC_CHOICE2);
+	hChoice3 = GetDlgItem(hWnd, IDC_CHOICE3);
+	hChoice4 = GetDlgItem(hWnd, IDC_CHOICE4);
+	hAdd = GetDlgItem(hWnd, IDC_ADD);
+	hPlus = GetDlgItem(hWnd, IDC_PLUSBUTTON);
+
+
+	updateQuizCombo(hChooseQuiz);
+
+	/*HBITMAP hbit = LoadBitmap(GetModuleHandle(NULL), "C:\\Users\\mmari\\Desktop\\Course-work\\Quiz-System-WINAPI\\Course-project-server\\plusBMP.bmp");
+	SendMessage(hPlus, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit);*/
+
+	return TRUE;
+}
+void Quiz::addQuiz(char* quizName) {
+	MyDialog::ptr->ssql << "INSERT INTO quizes(name) VALUES('";
+	MyDialog::ptr->ssql << quizName << "')";
+	MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
+	MyDialog::ptr->ssql.str("");
+	mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str());
+}
+void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
+{
+	switch (id) {
+	case IDC_CHOOSEQUIZ:
+	case IDC_QUESTION:
+	case IDC_ANSWER:
+	case IDC_CHOICE2:
+	case IDC_CHOICE3:
+	case IDC_CHOICE4: {
+		enableAdd();
+	}
+					  break;
+	case IDC_ADD:
+		AddQuestion();
+		break;
+	case IDC_PLUSBUTTON:
+		TCHAR quizName[40];
+		GetWindowText(hCreateQuiz, quizName, 40);
+		addQuiz(quizName);
+		updateQuizCombo(MyDialog::ptr->gethPath());
+		updateQuizCombo(hChooseQuiz);
+		SendMessageA(hCreateQuiz, WM_SETTEXT, WPARAM(0), LPARAM(""));
+		break;
+	}
+}
+
+
+INT_PTR CALLBACK Quiz::DlgProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+	switch (Message)
+	{
+		HANDLE_MSG(hWnd, WM_INITDIALOG, ptr->Cls_OnInitDialog);
+		HANDLE_MSG(hWnd, WM_COMMAND, ptr->Cls_OnCommand);
+		HANDLE_MSG(hWnd, WM_CLOSE, ptr->Cls_OnClose);
+	}
+
+	return FALSE;
+}
+void Quiz::AddQuestion() {
+	int ItemIndex = SendMessage((HWND)hChooseQuiz, (UINT)CB_GETCURSEL,
+		(WPARAM)0, (LPARAM)0);
+	TCHAR ListItem[256];
+	SendMessage((HWND)hChooseQuiz, (UINT)CB_GETLBTEXT,
+		(WPARAM)ItemIndex, (LPARAM)ListItem);
+
+	char help[200];
+	ptrMyDialog->ssql << "insert into questions ";
+	GetWindowText(hQuestion, help, 200);
+	ptrMyDialog->ssql << "SET questions.question = '" << help << "',";
+	GetWindowText(hAnswer, help, 200);
+	ptrMyDialog->ssql << "questions.rightAnswer = '" << help << "',";
+	GetWindowText(hChoice2, help, 200);
+	ptrMyDialog->ssql << "questions.wrongAnswer2 = '" << help << "',";
+	GetWindowText(hChoice3, help, 200);
+	ptrMyDialog->ssql << "questions.wrongAnswer3 = '" << help << "',";
+	GetWindowText(hChoice4, help, 200);
+	ptrMyDialog->ssql << "questions.wrongAnswer4 = '" << help << "',";
+	ptrMyDialog->ssql << "questions.quizId = (select id from quizes WHERE quizes.name = '" << ListItem << "');";
+
+	ptrMyDialog->sql = ptrMyDialog->ssql.str();
+	ptrMyDialog->ssql.str("");
+	mysql_query(ptrMyDialog->getDB().getConnection(), ptrMyDialog->sql.c_str());
+	
+	SendMessageA(hQuestion, WM_SETTEXT, WPARAM(0), LPARAM(""));
+	SendMessageA(hAnswer, WM_SETTEXT, WPARAM(0), LPARAM(""));
+	SendMessageA(hChoice2, WM_SETTEXT, WPARAM(0), LPARAM(""));
+	SendMessageA(hChoice3, WM_SETTEXT, WPARAM(0), LPARAM(""));
+	SendMessageA(hChoice4, WM_SETTEXT, WPARAM(0), LPARAM(""));
 }

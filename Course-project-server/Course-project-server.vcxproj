@@ -143,6 +143,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="h\headerForQuizCreator.h" />
     <ClInclude Include="h\Database.h" />
     <ClInclude Include="h\header.h" />
     <ClInclude Include="h\MyDialog.h" />
