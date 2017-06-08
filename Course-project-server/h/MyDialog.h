@@ -34,6 +34,7 @@ public:
 class MyDialog
 {
 public:
+	INT quizID = -1;
 	MyDialog(void);
 	~MyDialog(void);
 

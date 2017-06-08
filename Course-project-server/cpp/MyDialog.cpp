@@ -10,6 +10,7 @@
 #define IDC_CHECKBOX2 0x8817
 #define IDC_CREATE_QUIZ 0x8818
 
+
 struct PARAMS{
 	ClientInfo* clientInfo;
 	char *name, *surname, *fathername, *group;
@@ -176,13 +177,7 @@ BOOL MyDialog::Cls_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 	if (dwAnswer == WAIT_TIMEOUT)
 	{
 		MessageBox(hwnd, TEXT("The program is already running!"), TEXT("Admin Quiz"), MB_OK | MB_ICONINFORMATION);
-		/*HWND window = FindWindow("#32770", "Admin Quiz");
-		ShowWindow(window, SW_RESTORE);
-		SetForegroundWindow(window);
-		ShowWindow(window, SW_NORMAL);
-		SendMessage(window, WM_SYSCOMMAND, SC_MAXIMIZE, NULL);*/
 		EndDialog(hwnd, 0);
-		
 	}
 	GetDesktopResolution(horizontal, vertical);
 
@@ -347,7 +342,6 @@ VOID MyDialog::createAllElements() {
 	hPath = createCombo(100, 66+25, 290, 100, &ptr->hDialog, IDC_PATH);
 	updateQuizCombo(hPath);
 
-	//hBrowse = createButton("Browse..", 100, 66+25, 62, 22, &ptr->hDialog, IDC_BROWSE, NULL);
 	hStart = createButton("Start Quiz", 160, 390 + 35, 80, 22, &ptr->hDialog, IDC_START, WS_DISABLED);
 
 	hGroupCombo = createCombo(100, 25+25, 290, 100, &ptr->hDialog, IDC_GROUPCOMBO);
@@ -369,7 +363,7 @@ VOID MyDialog::createAllElements() {
 }
 BOOL MyDialog::loginCheck() {
 	WaitForSingleObject(hDbconnect, INFINITE);
-	/*ssql << "select Name,Password,teacher.Group from teacher where name='";
+	ssql << "select Name,Password,teacher.Group from teacher where name='";
 	ssql << m_name << " " << m_surname << "' AND Password = '";
 	ssql << m_password << "';";
 	sql = ssql.str();
@@ -383,7 +377,7 @@ BOOL MyDialog::loginCheck() {
 			return FALSE;
 		}
 	}
-	mysql_free_result(rset);*/
+	mysql_free_result(rset);
 	return TRUE;
 }
 
@@ -395,8 +389,8 @@ DWORD WINAPI DBconnect(LPVOID lpParam) {
 	else {
 		MessageBox(MyDialog::ptr->gethDialogue(), "No database connection!", "Error", MB_ICONERROR);
 		exit(1);
-		return 0;
 	}
+	return 0;
 }
 
 MyDialog::MyDialog(void)
@@ -442,7 +436,8 @@ VOID receiveUserData(string &name, string &surname, string &fatherName, string &
 }
 BOOL checkUserData(string &name, string &surname, string &fatherName, string &group, ClientInfo & clientinfo) {
 	char szBuff[100];
-	MyDialog::ptr->ssql << "select Name,student.Group,student.Date from student where name='";
+	INT studId = -1;
+	MyDialog::ptr->ssql << "select student.id,student.Name,student.Group from student where name='";
 	MyDialog::ptr->ssql << surname << " " << name << " " << fatherName << "'";
 	MyDialog::ptr->ssql << "AND student.Group='" << group << "';";
 	MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
@@ -455,41 +450,66 @@ BOOL checkUserData(string &name, string &surname, string &fatherName, string &gr
 			send(clientinfo.socket, szBuff, strlen(szBuff) + 1, 0);
 			shutdown(clientinfo.socket, SD_BOTH); // SD_BOTH запрещает как прием, так и отправку данных
 			closesocket(clientinfo.socket);
+			MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);
+			mysql_free_result(MyDialog::ptr->rset);
 		}
 		else {
 			//Student connected
 			//If passed already
-			
+			studId = atoi(MyDialog::ptr->row[0]);
+			mysql_free_result(MyDialog::ptr->rset);
 
-			if (MyDialog::ptr->row[2] != NULL) {
-				////«начит уже —давал тест
-				strcpy(szBuff, "<ALREADY_PASSED>");
-				send(clientinfo.socket, szBuff, strlen(szBuff) + 1, 0);
-				shutdown(clientinfo.socket, SD_BOTH); // SD_BOTH запрещает как прием, так и отправку данных
-				closesocket(clientinfo.socket);
-			}
-			else {
-				//If connected from another pc or erased date field in database
-				string lookFor = surname;
-				lookFor += " ";
-				lookFor += name;
-				lookFor += " ";
-				lookFor += fatherName;
-				LVFINDINFO item = { LVFI_STRING, (LPCTSTR)lookFor.c_str() };
-				int indexUser = ListView_FindItem(MyDialog::ptr->getUserList(), -1, &item);
-				if (MyDialog::ptr->userListView.at(indexUser)->getStatus() == Status::NOT_CONNECTED) {
+			MyDialog::ptr->ssql << "select results.date from results where results.idStudent = '" << studId << "' ";
+			MyDialog::ptr->ssql << "AND results.idQuiz = '" << MyDialog::ptr->quizID << "';";
+			MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
+			MyDialog::ptr->ssql.str("");
+
+			if (!mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str())) {
+				MyDialog::ptr->rset = mysql_use_result(MyDialog::ptr->getDB().getConnection());
+
+				if ((MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset)) == NULL) {//Never passed no record in results table yet
+					MyDialog::ptr->ssql << "INSERT INTO results(results.idQuiz,results.idStudent) VALUES('";
+					MyDialog::ptr->ssql << MyDialog::ptr->quizID << "','" << studId << "');";
+					MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
+					MyDialog::ptr->ssql.str("");
+					mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str());
+
 					strcpy_s(szBuff, "<OK>");
 					send(clientinfo.socket, szBuff, strlen(szBuff) + 1, 0);
 					MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);
 					mysql_free_result(MyDialog::ptr->rset);
 					return TRUE;
 				}
-				else {
-					strcpy_s(szBuff, "<ALREADY_LOGGED>");
+				else if (MyDialog::ptr->row[0] != NULL) {//Record exists, and Date field is filled
+					strcpy(szBuff, "<ALREADY_PASSED>");
 					send(clientinfo.socket, szBuff, strlen(szBuff) + 1, 0);
-					MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);
-					mysql_free_result(MyDialog::ptr->rset);
-					return FALSE;
+					shutdown(clientinfo.socket, SD_BOTH); // SD_BOTH запрещает как прием, так и отправку данных
+					closesocket(clientinfo.socket);
+				}
+				else {//Record exists, and Date field is empty
+					//If connected from another pc or erased date field in database
+					string lookFor = surname;
+					lookFor += " ";
+					lookFor += name;
+					lookFor += " ";
+					lookFor += fatherName;
+					LVFINDINFO item = { LVFI_STRING, (LPCTSTR)lookFor.c_str() };
+					int indexUser = ListView_FindItem(MyDialog::ptr->getUserList(), -1, &item);
+
+					if (MyDialog::ptr->userListView.at(indexUser)->getStatus() == Status::NOT_CONNECTED) {//Retake
+						strcpy_s(szBuff, "<OK>");
+						send(clientinfo.socket, szBuff, strlen(szBuff) + 1, 0);
+						MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);
+						mysql_free_result(MyDialog::ptr->rset);
+						return TRUE;
+					}
+					else {//Taking right now
+						strcpy_s(szBuff, "<ALREADY_LOGGED>");
+						send(clientinfo.socket, szBuff, strlen(szBuff) + 1, 0);
+						MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);
+						mysql_free_result(MyDialog::ptr->rset);
+						return FALSE;
+					}
 				}
 			}
 		}
@@ -569,27 +589,34 @@ DWORD WINAPI ThreadForReceive(LPVOID lpParam)
 									strcpy_s(szBuff, "<OK>");
 									send(ptrinfo->socket, szBuff, strlen(szBuff) + 1, 0);
 									result = recv(ptrinfo->socket, szBuff, 4096, 0);
-									//принимаю врем€ прохождени€
+									//receiving spent time
 									MyDialog::ptr->userListView.at(indexUser)->setTimeSpent(szBuff);
 									MyDialog::ptr->userListView.at(indexUser)->setStatus(Status::SUBMITTED);
 
-									MyDialog::ptr->ssql << "UPDATE student SET student.Result = '";
-									MyDialog::ptr->ssql << percents << "'" << "where id = '";
-									MyDialog::ptr->ssql << indexUser + 1 << "'";
+									MyDialog::ptr->ssql << "UPDATE results SET results.score = '";
+									MyDialog::ptr->ssql << percents << "'" << "where results.idStudent = '";
+									MyDialog::ptr->ssql << indexUser + 1 << "' ";
+									MyDialog::ptr->ssql << "AND results.idQuiz = '";
+									MyDialog::ptr->ssql << MyDialog::ptr->quizID << "';";
 									MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
 									MyDialog::ptr->ssql.str("");
 									mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str());
 
-									MyDialog::ptr->ssql << "UPDATE student SET student.Date = curdate() where id = '";
-									MyDialog::ptr->ssql << indexUser + 1 << "'";
+									MyDialog::ptr->ssql << "UPDATE results SET results.date = curdate() ";
+									MyDialog::ptr->ssql << "where results.idStudent = '";
+									MyDialog::ptr->ssql << indexUser + 1 << "' ";
+									MyDialog::ptr->ssql << "AND results.idQuiz = '";
+									MyDialog::ptr->ssql << MyDialog::ptr->quizID << "';";
 									MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
 									MyDialog::ptr->ssql.str("");
 									mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str());
 
-									MyDialog::ptr->ssql << "UPDATE student SET student.Time = '";
+									MyDialog::ptr->ssql << "UPDATE results SET results.Time = '";
 									MyDialog::ptr->ssql << szBuff << "'";
-									MyDialog::ptr->ssql << "where id = '";
-									MyDialog::ptr->ssql << indexUser + 1 << "'";
+									MyDialog::ptr->ssql << "where results.idStudent = '";
+									MyDialog::ptr->ssql << indexUser + 1 << "' ";
+									MyDialog::ptr->ssql << "AND results.idQuiz = '";
+									MyDialog::ptr->ssql << MyDialog::ptr->quizID << "';";
 									MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
 									MyDialog::ptr->ssql.str("");
 									mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str());
@@ -738,7 +765,7 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		MoveWindow(hwnd, (horizontal - (horizontal / 2) - windowWidth / 2), (vertical - (vertical / 2) - winowHeight / 2), windowWidth, winowHeight, TRUE);
 		
 		createAllElements();
-
+																			/////Ќе помню уже, но вроде этот участок не нужен
 		ssql << "select distinct student.group from student;";
 		sql = ssql.str();
 		ssql.str("");
@@ -750,6 +777,7 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			row = mysql_fetch_row(rset);
 		}
 		mysql_free_result(rset);
+																			/////Ќе помню уже, но вроде этот участок не нужен
 	}
 	else if (id == IDC_NAME) {
 		GetWindowText(MyDialog::ptr->hName, MyDialog::ptr->m_name, 20);
@@ -794,8 +822,22 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			}
 			row = mysql_fetch_row(rset);
 		}
-		mysql_free_result(rset);
 		fileData = sql;
+		mysql_free_result(rset);
+
+		ssql << "select quizes.id from quizes where quizes.name = '";
+		ssql << quizName << "'" << ";";
+		sql = ssql.str();
+		ssql.str("");
+		if (!mysql_query(MyDialog::ptr->getDB().getConnection(), sql.c_str())) {
+			rset = mysql_use_result(MyDialog::ptr->getDB().getConnection());
+			while ((row = mysql_fetch_row(rset)) != NULL) {
+				quizID = atoi(row[0]);
+			}
+			row = mysql_fetch_row(rset);
+		}
+		mysql_free_result(rset);
+
 		HANDLE hThread = CreateThread(0, 0, ThreadForAccept, nullptr, 0, 0);
 		CloseHandle(hThread);
 
@@ -831,38 +873,13 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 	else if (id == IDC_CREATE_QUIZ) {
 		Quiz dlg(ptr);
 		DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG3), hwnd, Quiz::DlgProc);
+		updateQuizCombo(MyDialog::ptr->hPath);
 	}
 	else if (id == IDC_PATH) {
 		if (codeNotify == CBN_SELCHANGE) {
 			toggleStart();
 		}
 	}
-	/*else if (id == IDC_BROWSE) {
-		try {
-			ptr->OnBrowse();
-		}
-		catch (const std::exception& ex) {
-			EnableWindow(MyDialog::ptr->hStart, FALSE);
-			MessageBox(hDialog, TEXT(ex.what()), "Error", MB_ICONERROR);
-			return;
-		}
-		int len = lstrlen(MyDialog::ptr->m_path);
-		if (len == 0)
-			return;
-		char dot[5];
-		rightExtension(MyDialog::ptr->m_path, dot);
-		if (strcmp(dot, ".txt")) {
-			string l = "Wrong file extension: ";
-			l += dot;
-			MessageBox(hDialog, TEXT(l.c_str()), "Error", MB_ICONERROR);
-			EnableWindow(MyDialog::ptr->hStart, FALSE);
-			SetWindowText(hPath, "");
-		}
-		else {
-			SetWindowText(hPath, m_path);
-			toggleStart();
-		}
-	}*/
 }
 
 INT_PTR CALLBACK MyDialog::DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -949,7 +966,8 @@ BOOL Quiz::Cls_OnInitDialog(HWND hWnd, HWND hWndFocus, LPARAM lParam)
 
 	updateQuizCombo(hChooseQuiz);
 
-	/*HBITMAP hbit = LoadBitmap(GetModuleHandle(NULL), "C:\\Users\\mmari\\Desktop\\Course-work\\Quiz-System-WINAPI\\Course-project-server\\plusBMP.bmp");
+	/*HBITMAP hbit;
+	hbit = (HBITMAP)LoadImage(NULL, "C:\\Users\\mmari\\Desktop\\Course-work\\Quiz-System-WINAPI\\Course-project-server\\cross.bmp",IMAGE_BITMAP,0,0,LR_LOADFROMFILE);
 	SendMessage(hPlus, BM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hbit);*/
 
 	return TRUE;
@@ -979,6 +997,9 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 	case IDC_PLUSBUTTON:
 		TCHAR quizName[40];
 		GetWindowText(hCreateQuiz, quizName, 40);
+		if (lstrlen(quizName) == 0) {
+			break;
+		}
 		addQuiz(quizName);
 		updateQuizCombo(MyDialog::ptr->gethPath());
 		updateQuizCombo(hChooseQuiz);
