@@ -157,25 +157,6 @@ VOID MyDialog::createAllElements(HWND hwnd) {
 	EnableWindow(buttons[2], FALSE);
 
 	std::pair<HWND, BOOL> pair;
-	//for (int i = 0; i < MyDialog::ptr->getQuiz().size(); i++) {
-	//	HWND hButton = createButton(nullptr, i*30, 30, 20, 20, &hwnd, markFirst+i, BS_OWNERDRAW);//мен€ть координаты в зависимости от окна
-	//	pair.first = &hButton;
-	//	pair.second = (BOOL)FALSE;
-	//	markButtons.push_back(pair);
-	//}
-
-	//for (int i = 0; i < MyDialog::ptr->getQuiz().size(); i++) {
-	//	HWND hButton = CreateWindow("BUTTON", "", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON /*| BS_NOTIFY*/ /*| CDRF_NOTIFYITEMDRAW*/,
-	//		14 + i * 30, 30, 20, 20, hwnd, (HMENU)markFirst + i, GetModuleHandle(NULL), NULL);
-	//	pair.first = hButton;
-	//	pair.second = (BOOL)FALSE;
-	//	markButtons.push_back(pair);
-	//}
-	//markLast = markFirst + (MyDialog::ptr->getQuiz().size() - 1) * 4;
-	//int a = 10001;
-	//HWND h = CreateWindow("BUTTON", "", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, 0,
-	//	0, 150, 60, hwnd, (HMENU)a, GetModuleHandle(NULL), NULL);
-	//SendMessage(hwnd, WM_NOTIFY, NULL, NULL);
 
 	//”становка шрифта дл€ всех элементов
 	EnumChildWindows(hwnd, (WNDENUMPROC)SetFont, (LPARAM)GetStockObject(DEFAULT_GUI_FONT));
@@ -188,9 +169,19 @@ VOID MyDialog::disconnectMsg() {
 	int result = recv(ptr->getClientInfo().socket, SZbuff, 100, 0);
 	if (!strcmp(SZbuff, "<OK>")) {
 		//отправл€ю врем€
+		string t;
 		INT spentMinutes = getQuizTime() - getSpentTime()-1;
 		INT spentSeconds = 60 - seconds;
-		wsprintf(SZbuff, TEXT("%s:%s"), to_string(spentMinutes).c_str(), to_string(spentSeconds).c_str());
+		if (spentMinutes < 10) {
+			t += "0";
+		}
+		t += to_string(spentMinutes);
+		t += ":";
+		if (spentSeconds < 10) {
+			t += "0";
+		}
+		t += to_string(spentSeconds);
+		wsprintf(SZbuff, TEXT("%s"), t.c_str());
 		send(getClientInfo().socket, SZbuff, strlen(SZbuff) + 1, 0);
 	}
 }

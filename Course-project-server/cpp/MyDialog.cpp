@@ -450,8 +450,6 @@ BOOL checkUserData(string &name, string &surname, string &fatherName, string &gr
 			send(clientinfo.socket, szBuff, strlen(szBuff) + 1, 0);
 			shutdown(clientinfo.socket, SD_BOTH); // SD_BOTH запрещает как прием, так и отправку данных
 			closesocket(clientinfo.socket);
-			MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);
-			mysql_free_result(MyDialog::ptr->rset);
 		}
 		else {
 			//Student connected
@@ -734,22 +732,23 @@ DWORD WINAPI ThreadForAccept(LPVOID lpParam)
 }
 VOID MyDialog::UpdateUserList(char* ListItem) {
 	ListView_DeleteAllItems(hUserList);
-	//userListView.clear();
-	if (userListView.size() == 0) {
-		ssql << "select name from student where student.group='";
-		ssql << ListItem << "';";
-		sql = ssql.str();
-		ssql.str("");
-		if (!mysql_query(MyDialog::ptr->getDB().getConnection(), sql.c_str())) {
-			rset = mysql_use_result(MyDialog::ptr->getDB().getConnection());
-			while ((row = mysql_fetch_row(rset)) != NULL) {
-				userListView.push_back(new UserListView(row[0]));
-				//SendMessage(hUserList, CB_ADDSTRING, 0, (LPARAM)row[0]);
-			}
-			row = mysql_fetch_row(rset);
-		}
-		mysql_free_result(rset);
+	if (!MyDialog::ptr->isStarted()) {
+		userListView.clear();
 	}
+	ssql << "select name from student where student.group='";
+	ssql << ListItem << "';";
+	sql = ssql.str();
+	ssql.str("");
+	if (!mysql_query(MyDialog::ptr->getDB().getConnection(), sql.c_str())) {
+		rset = mysql_use_result(MyDialog::ptr->getDB().getConnection());
+		while ((row = mysql_fetch_row(rset)) != NULL) {
+			if (!MyDialog::ptr->isStarted()) {
+				userListView.push_back(new UserListView(row[0]));
+			}
+		}
+		row = mysql_fetch_row(rset);
+	}
+	mysql_free_result(rset);
 	InsertListViewItems(hUserList, userListView.size());
 }
 VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
