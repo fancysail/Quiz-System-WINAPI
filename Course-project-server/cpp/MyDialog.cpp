@@ -363,7 +363,7 @@ VOID MyDialog::createAllElements() {
 }
 BOOL MyDialog::loginCheck() {
 	WaitForSingleObject(hDbconnect, INFINITE);
-	ssql << "select Name,Password,teacher.Group from teacher where name='";
+	ssql << "select Name,Password from teacher where name='";
 	ssql << m_name << " " << m_surname << "' AND Password = '";
 	ssql << m_password << "';";
 	sql = ssql.str();
@@ -765,8 +765,10 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		MoveWindow(hwnd, (horizontal - (horizontal / 2) - windowWidth / 2), (vertical - (vertical / 2) - winowHeight / 2), windowWidth, winowHeight, TRUE);
 		
 		createAllElements();
-																			/////Ќе помню уже, но вроде этот участок не нужен
-		ssql << "select distinct student.group from student;";
+
+		ssql << "select distinct groups.name from groups where groups.teacherId = (";
+		ssql<<"select teacher.id from teacher where teacher.name = '";
+		ssql << m_name << " " << m_surname << "');";
 		sql = ssql.str();
 		ssql.str("");
 		if (!mysql_query(db.getConnection(), sql.c_str())) {
@@ -777,7 +779,7 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			row = mysql_fetch_row(rset);
 		}
 		mysql_free_result(rset);
-																			/////Ќе помню уже, но вроде этот участок не нужен
+
 	}
 	else if (id == IDC_NAME) {
 		GetWindowText(MyDialog::ptr->hName, MyDialog::ptr->m_name, 20);
