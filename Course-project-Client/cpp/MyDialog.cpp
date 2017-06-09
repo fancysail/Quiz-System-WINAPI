@@ -17,13 +17,15 @@ using namespace std;
 INT MyDialog::m_minutes = 0;
 INT MyDialog::seconds = 0;
 MyDialog* MyDialog::ptr = NULL;
-/*ќтправл€ю на сервер на сколько вопрос ответил правильно(в процентах)
-на текущий момент при каждом изменении ответа*/
+/*Sending quantity of correct answers(in percents)
+To the present moment with each change of the answer*/
 DWORD WINAPI ThreadForStats(LPVOID lpParam);
-//ѕолучаю необходимые дл€ начала теста данные
+//Receiving necessary for start data
 DWORD WINAPI ThreadForReceive(LPVOID lpParam);
-//—оедин€юсь с сервером и отправл€ю свои данные, которые там валидируютс€
+//Sending data on server for validation
 DWORD WINAPI ThreadForConnect(LPVOID lpParam);
+//Synchronized timer.
+DWORD WINAPI ThreadForTimer(LPVOID lpParam);
 
 MyDialog::MyDialog(VOID)
 {
@@ -352,39 +354,6 @@ VOID MyDialog::submitTest() {
 	MessageBox(NULL, c_message, "Test Result", MB_OK | MB_ICONINFORMATION);
 	RedrawWindow(hDialog, NULL, NULL, RDW_INVALIDATE);
 }
-
-VOID MyDialog::Cls_OnTimer(HWND hwnd, UINT id) {
-	if (id == ID_TIMER1) {
-		seconds--;
-		if (seconds <= 0) {
-			m_minutes--;
-			seconds = 59;
-		}
-		if (m_minutes < 0 && seconds == 59) {
-			KillTimer(MyDialog::ptr->hDialog, ID_TIMER1);
-			SetWindowText(hTimeLeft, TEXT("Time left: 00:00"));
-			submitTest();
-			EnableWindow(buttons[0], FALSE);
-			for (INT i = 0; i < 4; i++) {
-				EnableWindow(hRadios[i], FALSE);
-			}
-			bsubmitted = TRUE;
-			return;
-		}
-		m_stime = "Time left ";
-
-		if (m_minutes > 9) m_stime += to_string(m_minutes);
-		else m_stime += "0" + to_string(m_minutes);
-
-		m_stime += ":";
-
-		if (seconds > 9) m_stime += to_string(seconds);
-		else m_stime += "0" + to_string(seconds);
-
-		SetWindowText(hTimeLeft, TEXT(m_stime.c_str()));
-		m_stime.clear();
-	}
-}
 VOID MyDialog::Cls_OnClose(HWND hwnd)
 {
 	if (isLogged()) {
@@ -487,7 +456,6 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, INT id, HWND hwndCtl, UINT codeNotify)
 
 		createAllElements(hwnd);
 
-		SetTimer(hwnd, ID_TIMER1, 1000, (TIMERPROC)NULL);
 		blogged = TRUE;
 	}
 	else if (id == IDC_NAME) {
@@ -515,7 +483,6 @@ INT_PTR CALLBACK MyDialog::DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARA
 		HANDLE_MSG(hwnd, WM_CLOSE, ptr->Cls_OnClose);
 		HANDLE_MSG(hwnd, WM_INITDIALOG, ptr->Cls_OnInitDialog);
 		HANDLE_MSG(hwnd, WM_COMMAND, ptr->Cls_OnCommand);
-		HANDLE_MSG(hwnd, WM_TIMER, ptr->Cls_OnTimer);
 	case WM_CTLCOLORSTATIC:
 	{
 		TCHAR senderClass[256];
@@ -644,6 +611,9 @@ DWORD WINAPI ThreadForReceive(LPVOID lpParam)
 	result = recv(ptr->getClientInfo().socket, szBuff, 4096, 0);
 	INT time = atoi(szBuff);
 	ptr->setQuizTime(time);
+	
+	CreateThread(NULL, 0, ThreadForTimer, ptr, 0, nullptr);
+	
 	strcpy_s(szBuff, "<TIME_RECEIVED>");
 	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0);
 
@@ -703,5 +673,52 @@ DWORD WINAPI ThreadForStats(LPVOID lpParam)
 			}
 		}
 	}
+	return 0;
+}
+DWORD WINAPI ThreadForTimer(LPVOID lpParam) {
+	MyDialog* ptr = (MyDialog*)lpParam;
+	HANDLE hTimer = NULL;
+	LARGE_INTEGER liDueTime;
+
+	liDueTime.QuadPart = -10000000LL;
+	hTimer = CreateWaitableTimer(NULL, TRUE, NULL);
+
+	while (true) {
+		SetWaitableTimer(hTimer, &liDueTime, 0, NULL, NULL, 0);
+		if (ptr->isSubmitted())
+			break;
+		if (WaitForSingleObject(hTimer, INFINITE) == WAIT_OBJECT_0)
+		{
+			ptr->getSeconds()--;
+			if (ptr->getSeconds() <= 0) {
+				ptr->getm_minutes()--;
+				ptr->getSeconds() = 59;
+			}
+			if (ptr->getm_minutes() < 0 && ptr->getSeconds() == 59) {
+				SetWindowText(ptr->gethTimeLeft(), TEXT("Time left 00:00"));
+				ptr->submitTest();
+				EnableWindow(ptr->gethButtons()[0], FALSE);
+				for (INT i = 0; i < 4; i++) {
+					EnableWindow(ptr->gethRadios()[i], FALSE);
+				}
+				ptr->setSubmitted(TRUE);
+				break;
+			}
+			ptr->setm_stime("Time left ");
+
+			if (ptr->getm_minutes() > 9) ptr->getm_stime() += to_string(ptr->getm_minutes());
+			else ptr->getm_stime() += "0" + to_string(ptr->getm_minutes());
+
+			ptr->getm_stime() += ":";
+
+			if (ptr->getSeconds() > 9) ptr->getm_stime() += to_string(ptr->getSeconds());
+			else ptr->getm_stime() += "0" + to_string(ptr->getSeconds());
+
+			SetWindowText(ptr->gethTimeLeft(), TEXT(ptr->getm_stime().c_str()));
+			ptr->getm_stime().clear();
+		}
+	}
+	CancelWaitableTimer(hTimer);
+	CloseHandle(hTimer);
 	return 0;
 }

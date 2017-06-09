@@ -10,6 +10,16 @@ class MyDialog
 public:
 	MyDialog(VOID);
 public:
+	HWND& gethTimeLeft() { return hTimeLeft; }
+	void setm_stime(char *s) { m_stime = s; }
+	void setsubmitted(bool b) { bsubmitted = b; }
+	string& getm_stime() { return m_stime; }
+	VOID submitTest();
+	INT& getSeconds() { return seconds; }
+	INT& getm_minutes() { return m_minutes; }
+	HWND* gethRadios() { return hRadios; }
+	HWND* gethButtons() { return buttons; }
+public:
 	static INT_PTR CALLBACK DlgProc(HWND hWnd, UINT mes, WPARAM wp, LPARAM lp);
 	static MyDialog *ptr;
 	HANDLE hEvent;
@@ -95,11 +105,8 @@ private:
 	VOID changePercents();
 	VOID changedQuestion();
 	VOID toggleListBox();
-	VOID submitTest();
 	VOID countCurrentAnswer();
 
-	VOID Cls_OnSize(HWND hwnd, UINT State, INT cx, INT cy);
-	VOID Cls_OnTimer(HWND hwnd, UINT id);
 	VOID Cls_OnCommand(HWND hwnd, INT id, HWND hwndCtl, UINT codeNotify);
 	VOID Cls_OnClose(HWND hwnd);
 	BOOL Cls_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam);
