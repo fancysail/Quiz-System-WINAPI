@@ -274,7 +274,7 @@ VOID MyDialog::changedQuestion() {
 	if (quiz.at(m_index)->getUserAnswer() != NOT_CHECKED) {
 		SendMessage(hRadios[quiz.at(m_index)->getUserAnswer()], BM_SETCHECK, BST_CHECKED, NULL);
 	}
-
+	
 	SetWindowText(hQuestionNumber, ("Question: " + std::to_string(index + 1)).c_str());
 	SetWindowText(hQuestion, quiz.at(index)->getQuestion().c_str());
 
@@ -600,10 +600,10 @@ DWORD WINAPI ThreadForReceive(LPVOID lpParam)
 	WaitForSingleObject(ptr->gethConnect(), INFINITE);
 	if (!ptr->isConnected())
 		return 0;
-	char szBuff[4096] = "<QUIZ_REQUEST>";
+	char szBuff[8192] = "<QUIZ_REQUEST>";
 	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0);
 
-	INT result = recv(ptr->getClientInfo().socket, szBuff, 4096, 0);
+	INT result = recv(ptr->getClientInfo().socket, szBuff, 8192, 0);
 	ptr->setQuiz(Question::parseFile(szBuff, ptr->isRandQuestions()));
 	strcpy_s(szBuff, "<QUIZ_RECEIVED>");
 	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0);
@@ -647,6 +647,7 @@ DWORD WINAPI ThreadForStats(LPVOID lpParam)
 	MyDialog* ptr = (MyDialog*)lpParam;
 	char szBuff[4096];
 	int result;
+	SetEvent(ptr->hEvent);
 	while (!ptr->isSubmitted()) {
 		WaitForSingleObject(ptr->hEvent, INFINITE);
 		strcpy_s(szBuff, "<SUCCESSFUL_PERCENTS>");

@@ -23,23 +23,18 @@ public:
 	static INT_PTR CALLBACK DlgProc(HWND hWnd, UINT mes, WPARAM wp, LPARAM lp);
 	static MyDialog *ptr;
 	HANDLE hEvent;
-	//HWND buttonChosen;
 
 	vector<std::pair<HWND, BOOL>> markButtons;
 	INT markFirst = 0x8824;
 	INT markLast = markFirst;
-	//HWND testButton;
-	HWND hButton;
 private:
-	//окно
 	HWND hDialog;
-	//элементы второго окна
+	//second window
 	HWND hListBox, hQuestionNumber, groupBox, hQuestion, hTimeLeft, groupBox1, hPercents;
-	//элементы второго окна
+	//second window
 	HWND hRadios[4], hEditForRadios[4], buttons[5];
-	//элементы  первого окна
+	//first window
 	HWND hName, hSurname, hFatherName, hGroup, hLogin;
-	//Все вопросы и ответы
 	vector<Question*> quiz;
 
 	BOOL bconnected, bsubmitted, blogged, blistShown, brandQuestions;
@@ -52,16 +47,14 @@ private:
 	INT horizontal, vertical;
 	INT windowMinWidth = 383;
 	INT winowMinHeight = 252;
-	//Текущий вопрос
+	//current question
 	INT m_index;
-	//время полученное с сервера
+	//time from server
 	static INT m_minutes;
 	INT m_minutesCopy;
 	static INT seconds;
-	//строка со временем
+	//time string
 	string m_stime;
-	//При изменении размера экрана используется.Подумать нужно ли мне это?
-	RECT rRect1;
 	TCHAR m_name[20], m_surname[20], m_group[20], m_fatherName[20];
 	CONST TCHAR m_serverIpAddres[10] = "127.0.0.1";
 public:
@@ -72,7 +65,7 @@ public:
 	VOID setRandQuestions(BOOL b) { brandQuestions = b; }
 
 	CONST TCHAR* getServerIp() { return m_serverIpAddres; }
-	//Номер текущего вопроса
+	//current question number
 	INT getIndex() { return m_index; }
 	INT getCountUserAnswered() { return m_countUserAnswered; }
 	INT getQuizTime() { return m_minutesCopy; }

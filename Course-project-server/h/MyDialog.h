@@ -3,7 +3,6 @@
 #include "UserListView.h"
 #include "Database.h"
 #include <vector>
-//#include "Quiz.h"
 #include "headerForQuizCreator.h"
 class MyDialog;
 class Quiz
@@ -19,9 +18,8 @@ public:
 	string m_path;
 
 	void AddQuestion();
-	void addQuiz(char* quizName);
+	void addQuiz(const char* quizName);
 	void enableAdd();
-	//void updateQuizCombo(HWND& h);
 public:
 	static Quiz* ptr;
 	
@@ -67,14 +65,13 @@ private:
 	INT windowWidth, winowHeight;
 
 	HWND hDialog;
-	HWND hsGroup, hsTest, hsTime;    //НЕ ИСПОЛЬЗУЮТСЯ!Могут понадобиться, если буду растягивать окно.Можно использовать GetDlgItem и идентификаторы, а HWND удалить
-	HWND hGroupCombo, hBrowse, hPath, hTime, hStart, hUserList; //вводимые поля нового окна
-	HWND hName, hSurname, hPassword, hLogin;//вводимые поля старого окна
+	HWND hGroupCombo, hBrowse, hPath, hTime, hStart, hUserList; //new window
+	HWND hName, hSurname, hPassword, hLogin;//old window
 	HWND hCheckBox1;
 
 	Database& db = Database::Instance();
-
-	HANDLE hDbconnect;//HANDLE нити в которой создается подключение к ДБ
+	//thread handle
+	HANDLE hDbconnect;
 	WSADATA wsd;
 public:
 	TCHAR* getName() { return m_name; }
@@ -89,7 +86,7 @@ public:
 	HWND& gethStart() { return hStart; }
 	WSADATA& getWSD() { return wsd; }
 	Database& getDB() { return db; }
-	string getFileData() { return fileData; }
+	string& getFileData() { return fileData; }
 	HWND& getCheckBox1() { return hCheckBox1; }
 	HWND& getUserList() { return hUserList; }
 	HWND& gethGroupCombo() { return hGroupCombo; }

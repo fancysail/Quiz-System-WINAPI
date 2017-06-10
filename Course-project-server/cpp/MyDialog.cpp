@@ -334,10 +334,10 @@ VOID toggleStart() {
 VOID MyDialog::createAllElements() {
 	hStart = createButton("Create Quiz..", windowWidth/2 - 60, 15, 120, 22, &ptr->hDialog, IDC_CREATE_QUIZ,NULL);
 
-	hsGroup = createStatic("Group: ", 30, 25+25, 50, 16, &ptr->hDialog, NULL);
-	hsTest = createStatic("Test: ", 30, 65 + 25, 50, 16, &ptr->hDialog, NULL);
-	hsTime = createStatic("Time: ", 30, 105 + 25, 50, 16, &ptr->hDialog, NULL);
-	hsTest = createStatic("min. ", 160, 105 + 25, 50, 22, &ptr->hDialog, NULL);
+	createStatic("Group: ", 30, 25+25, 50, 16, &ptr->hDialog, NULL);
+	createStatic("Test: ", 30, 65 + 25, 50, 16, &ptr->hDialog, NULL);
+	createStatic("Time: ", 30, 105 + 25, 50, 16, &ptr->hDialog, NULL);
+	createStatic("min. ", 160, 105 + 25, 50, 22, &ptr->hDialog, NULL);
 
 	hPath = createCombo(100, 66+25, 290, 100, &ptr->hDialog, IDC_PATH);
 	updateQuizCombo(hPath);
@@ -534,7 +534,8 @@ DWORD WINAPI ThreadForReceive(LPVOID lpParam)
 			return 0;
 		}
 		if (!strcmp(szBuff, "<QUIZ_REQUEST>")) {
-			send(ptrinfo->socket, MyDialog::ptr->getFileData().c_str(), strlen(MyDialog::ptr->getFileData().c_str()) + 1, 0);
+			const char* file = MyDialog::ptr->getFileData().c_str();//8192
+			send(ptrinfo->socket, file, strlen(file) + 1, 0);
 			result = recv(ptrinfo->socket, szBuff, 4096, 0);
 			if (!strcmp(szBuff, "<QUIZ_RECEIVED>")) {
 				strcpy_s(szBuff, MyDialog::ptr->getTime());
@@ -813,11 +814,11 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 			rset = mysql_use_result(MyDialog::ptr->getDB().getConnection());
 			sql = "";
 			while ((row = mysql_fetch_row(rset)) != NULL) {
-				ssql << "~q" << row[0] << "q~";
-				ssql << "~!" << row[1] << "!~";
-				ssql << "~!" << row[2] << "!~";
-				ssql << "~!" << row[3] << "!~";
-				ssql << "~^" << row[4] << "^~";
+				ssql << "'/~q/'" << row[0] << "'/q~/'";
+				ssql << "'/~!/'" << row[1] << "'/!~/'";
+				ssql << "'/~!/'" << row[2] << "'/!~/'";
+				ssql << "'/~!/'" << row[3] << "'/!~/'";
+				ssql << "'/~^/'" << row[4] << "'/^~/'";
 				sql += ssql.str();
 				ssql.str("");
 			}
@@ -973,7 +974,7 @@ BOOL Quiz::Cls_OnInitDialog(HWND hWnd, HWND hWndFocus, LPARAM lParam)
 
 	return TRUE;
 }
-void Quiz::addQuiz(char* quizName) {
+void Quiz::addQuiz(const char* quizName) {
 	MyDialog::ptr->ssql << "INSERT INTO quizes(name) VALUES('";
 	MyDialog::ptr->ssql << quizName << "')";
 	MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
@@ -996,12 +997,18 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 		AddQuestion();
 		break;
 	case IDC_PLUSBUTTON:
+		
 		TCHAR quizName[40];
 		GetWindowText(hCreateQuiz, quizName, 40);
-		if (lstrlen(quizName) == 0) {
+		string check = quizName;
+
+		check.erase(0, check.find_first_not_of(" \t"));
+		check.erase(check.find_last_not_of(" \t") + 1);
+		
+		if (check.size() == 0) {
 			break;
 		}
-		addQuiz(quizName);
+		addQuiz(check.c_str());
 		updateQuizCombo(MyDialog::ptr->gethPath());
 		updateQuizCombo(hChooseQuiz);
 		SendMessageA(hCreateQuiz, WM_SETTEXT, WPARAM(0), LPARAM(""));

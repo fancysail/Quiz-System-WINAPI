@@ -43,25 +43,25 @@ vector<Question*> Question::parseFile(string check, BOOL randQuestions) {
 	qPos1 = qPos2 = choicePos1 = choicePos2 = aPos1 = aPos2 = 0;
 	while (true) {
 		Question* question = new Question();
-		qPos1 = check.find("~q", qPos2);
-		qPos2 = check.find("q~", qPos1);
-		question->setQuestion(check.substr(qPos1 + 2, qPos2 - qPos1 - 2));
+		qPos1 = check.find("'/~q/'", qPos2);
+		qPos2 = check.find("'/q~/'", qPos1);
+		question->setQuestion(check.substr(qPos1 + 6, qPos2 - qPos1 - 6));
 
 		for (int i = 0; i < 3; i++) {
-			choicePos1 = check.find("~!", choicePos2);
-			choicePos2 = check.find("!~", choicePos1);
-			question->addChoices(check.substr(choicePos1 + 2, choicePos2 - choicePos1 - 2));
+			choicePos1 = check.find("'/~!/'", choicePos2);
+			choicePos2 = check.find("'/!~/'", choicePos1);
+			question->addChoices(check.substr(choicePos1 + 6, choicePos2 - choicePos1 - 6));
 		}
 
-		aPos1 = check.find("~^", aPos2);
-		aPos2 = check.find("^~", aPos1);
-		question->addChoices(check.substr(aPos1 + 2, aPos2 - aPos1 - 2));
+		aPos1 = check.find("'/~^/'", aPos2);
+		aPos2 = check.find("'/^~/'", aPos1);
+		question->addChoices(check.substr(aPos1 + 6, aPos2 - aPos1 - 6));
 		question->setRightAnswer(3);
 
 		randomizeChoices(question);
 
 		questions.push_back(question);
-		if (check.size() - 2 == aPos2)
+		if (check.size() - 6 == aPos2)
 			break;
 	}
 	if (randQuestions) {
