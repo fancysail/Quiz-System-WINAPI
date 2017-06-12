@@ -152,9 +152,6 @@
     <ClInclude Include="resource1.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="helper.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="Course-project-Client.rc" />
   </ItemGroup>
   <ItemGroup>

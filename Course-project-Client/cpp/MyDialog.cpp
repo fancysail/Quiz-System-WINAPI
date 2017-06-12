@@ -208,6 +208,8 @@ VOID MyDialog::countCurrentAnswer() {
 			changePercents();
 		}
 	}
+	//Signal for ThreadForStats to send percents
+	SetEvent(hEvent);
 }
 INT MyDialog::checkResult() {
 	INT scored = 0;
@@ -252,7 +254,7 @@ VOID MyDialog::changedQuestion() {
 			decreaseCountUserAnswered();
 			changePercents();
 		}
-		else if (quiz.at(m_index)->getUserAnswer() != NOT_CHECKED  &&  checked != NOT_CHECKED) {//In prev question Rechecked
+		else if (quiz.at(m_index)->getUserAnswer() != NOT_CHECKED  &&  checked != NOT_CHECKED && checked != quiz.at(m_index)->getUserAnswer()) {//In prev question Rechecked
 			quiz.at(m_index)->setUserAnswer(checked);
 			changePercents();
 		}
@@ -600,10 +602,10 @@ DWORD WINAPI ThreadForReceive(LPVOID lpParam)
 	WaitForSingleObject(ptr->gethConnect(), INFINITE);
 	if (!ptr->isConnected())
 		return 0;
-	char szBuff[8192] = "<QUIZ_REQUEST>";
+	char szBuff[16384] = "<QUIZ_REQUEST>";
 	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0);
 
-	INT result = recv(ptr->getClientInfo().socket, szBuff, 8192, 0);
+	INT result = recv(ptr->getClientInfo().socket, szBuff, 16384, 0);
 	ptr->setQuiz(Question::parseFile(szBuff, ptr->isRandQuestions()));
 	strcpy_s(szBuff, "<QUIZ_RECEIVED>");
 	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0);

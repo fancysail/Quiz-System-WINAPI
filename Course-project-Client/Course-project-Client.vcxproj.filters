@@ -29,11 +29,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="helper.txt">
-      <Filter>Source Files</Filter>
-    </Text>
-  </ItemGroup>
-  <ItemGroup>
     <ResourceCompile Include="Course-project-Client.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
