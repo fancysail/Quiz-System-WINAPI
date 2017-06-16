@@ -34,15 +34,46 @@ BOOL checkUserData(string &name, string &surname, string &fatherName, string &gr
 
 MyDialog* MyDialog::ptr = NULL;
 void updateQuizCombo(HWND& h) {
+	if (Quiz::ptr !=nullptr && Quiz::ptr->hChooseQuiz == h) {
+		Quiz::ptr->m_quizRelation.clear();
+	}
 	SendMessage(h, CB_RESETCONTENT, NULL, NULL);
 
 	MyDialog::ptr->ssql << "select * from quizes;";
 	MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
 	MyDialog::ptr->ssql.str("");
+	INT counter = 0;
 	if (!mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str())) {
 		MyDialog::ptr->rset = mysql_use_result(MyDialog::ptr->getDB().getConnection());
 		while ((MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset)) != NULL) {
+			if (Quiz::ptr != nullptr && Quiz::ptr->hChooseQuiz == h) {
+				Quiz::ptr->m_quizRelation.insert_or_assign(counter++, atoi(MyDialog::ptr->row[0]));
+			}
 			SendMessage(h, CB_ADDSTRING, 0, (LPARAM)MyDialog::ptr->row[1]);
+		}
+		MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);
+	}
+	mysql_free_result(MyDialog::ptr->rset);
+}
+void updateQuestionsCombo(HWND& h,INT quizId) {
+	Quiz::ptr->m_questionRelation.clear();
+	SendMessage(h, CB_RESETCONTENT, NULL, NULL);
+
+	MyDialog::ptr->ssql << "select * from questions where quizId = '"; 
+	MyDialog::ptr->ssql << quizId << "';";
+	MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
+	MyDialog::ptr->ssql.str("");
+	INT counter = 0;
+	string buff;
+	if (!mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str())) {
+		MyDialog::ptr->rset = mysql_use_result(MyDialog::ptr->getDB().getConnection());
+		while ((MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset)) != NULL) {
+			Quiz::ptr->m_questionRelation.insert_or_assign(counter, atoi(MyDialog::ptr->row[0]));
+			buff = to_string(++counter);
+			buff += ".";
+			buff += MyDialog::ptr->row[2];
+			SendMessage(h, CB_ADDSTRING, 0, (LPARAM)buff.c_str());
+			buff.clear();
 		}
 		MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);
 	}
@@ -944,9 +975,18 @@ void Quiz::enableAdd() {
 	int lC2 = SendMessage(hChoice2, WM_GETTEXTLENGTH, 0, 0);
 	int lC3 = SendMessage(hChoice3, WM_GETTEXTLENGTH, 0, 0);
 	int lC4 = SendMessage(hChoice4, WM_GETTEXTLENGTH, 0, 0);
-	if (ItemIndex != CB_ERR && lQ != 0 && lA != 0 && lC2 != 0 && lC3 != 0 && lC4 != 0)
+	if (ItemIndex != CB_ERR && lQ != 0 && lA != 0 && lC2 != 0 && lC3 != 0 && lC4 != 0) {
 		EnableWindow(hAdd, TRUE);
-	else EnableWindow(hAdd, FALSE);
+		int ItemIndex = SendMessage((HWND)hDBquestions, (UINT)CB_GETCURSEL,
+			(WPARAM)0, (LPARAM)0);
+		if (ItemIndex != CB_ERR) {
+			EnableWindow(hUpdate, TRUE);
+		}
+	}
+	else {
+		EnableWindow(hUpdate, FALSE);
+		EnableWindow(hAdd, FALSE);
+	}
 }
 void Quiz::MessageAboutError(DWORD dwError)
 {
@@ -990,8 +1030,11 @@ BOOL Quiz::Cls_OnInitDialog(HWND hWnd, HWND hWndFocus, LPARAM lParam)
 	hChoice3 = GetDlgItem(hWnd, IDC_CHOICE3);
 	hChoice4 = GetDlgItem(hWnd, IDC_CHOICE4);
 	hAdd = GetDlgItem(hWnd, IDC_ADD);
-
-	hPlus = CreateWindow("STATIC", NULL, SS_BITMAP | SS_NOTIFY | WS_CHILD | WS_VISIBLE | WS_TABSTOP , 420, 13, 45, 45, hWnd, (HMENU)IDC_PLUSBUTTON, GetModuleHandle(NULL), NULL);
+	hUpdate = GetDlgItem(hWnd, IDC_UPDATE);
+	hDelete = GetDlgItem(hWnd, IDC_DELETE);
+	hDBquestions = GetDlgItem(hWnd, IDC_DBQUESTIONS);
+	
+	hPlus = CreateWindow("STATIC", NULL, SS_BITMAP | SS_NOTIFY | WS_CHILD | WS_VISIBLE | WS_TABSTOP , 389, 13, 45, 45, hWnd, (HMENU)IDC_PLUSBUTTON, GetModuleHandle(NULL), NULL);
 	HBITMAP hBmp = (HBITMAP)LoadImage(NULL, "PLUS.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	if (hBmp == NULL) {
 		MessageBox(NULL, "Error while loading image", "Error", MB_OK | MB_ICONERROR);
@@ -1012,6 +1055,54 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 {
 	switch (id) {
 	case IDC_CHOOSEQUIZ:
+	{
+		if (CodeNotify == CBN_SELCHANGE) {
+			int ItemIndex = SendMessage((HWND)hChooseQuiz, (UINT)CB_GETCURSEL,
+				(WPARAM)0, (LPARAM)0);
+			
+			if (Quiz::ptr->m_quizRelation.size() > 0) {
+				updateQuestionsCombo(Quiz::ptr->hDBquestions, Quiz::ptr->m_quizRelation.at(ItemIndex));
+			}
+		}
+	}
+	break;
+	case IDC_DBQUESTIONS:
+	{
+		if (CodeNotify == CBN_SELCHANGE) {
+			EnableWindow(Quiz::ptr->hDelete, TRUE);
+			int ItemIndex = SendMessage((HWND)hChooseQuiz, (UINT)CB_GETCURSEL,
+				(WPARAM)0, (LPARAM)0);
+
+			MyDialog::ptr->ssql << "select * from questions where quizId = '";
+			MyDialog::ptr->ssql << Quiz::ptr->m_quizRelation.at(ItemIndex) << "' AND id = '";
+			ItemIndex = SendMessage((HWND)hDBquestions, (UINT)CB_GETCURSEL,
+				(WPARAM)0, (LPARAM)0);
+			MyDialog::ptr->ssql << Quiz::ptr->m_questionRelation.at(ItemIndex) << "';";
+			MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
+			MyDialog::ptr->ssql.str("");
+			INT counter = 0;
+			string buff;
+			if (!mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str())) {
+				MyDialog::ptr->rset = mysql_use_result(MyDialog::ptr->getDB().getConnection());
+				while ((MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset)) != NULL) {
+					SetWindowText(Quiz::ptr->hQuestion, MyDialog::ptr->row[2]);
+					SetWindowText(Quiz::ptr->hAnswer, MyDialog::ptr->row[3]);
+					SetWindowText(Quiz::ptr->hChoice2, MyDialog::ptr->row[4]);
+					SetWindowText(Quiz::ptr->hChoice3, MyDialog::ptr->row[5]);
+					SetWindowText(Quiz::ptr->hChoice4, MyDialog::ptr->row[6]);
+				}
+				MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);
+			}
+			mysql_free_result(MyDialog::ptr->rset);
+			if (ItemIndex != CB_ERR) {
+				EnableWindow(Quiz::ptr->hDelete, TRUE);
+			}
+			else { 
+				EnableWindow(Quiz::ptr->hDelete, FALSE); 
+			}
+		}
+	}
+		break;
 	case IDC_QUESTION:
 	case IDC_ANSWER:
 	case IDC_CHOICE2:
@@ -1020,6 +1111,143 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 		enableAdd();
 	}
 					  break;
+	case IDC_DELETE:
+	{
+		int ItemIndex = SendMessage((HWND)hDBquestions, (UINT)CB_GETCURSEL,
+			(WPARAM)0, (LPARAM)0);
+		string buff;
+		TCHAR buffHelp[120];
+		SendMessage((HWND)hDBquestions, (UINT)CB_GETLBTEXT,
+			(WPARAM)ItemIndex, (LPARAM)buffHelp);
+		string trim = buffHelp;
+		trim = trim.substr(trim.find(".") + 1, trim.length());
+		buff += "\t\tDelete this question?\n";
+		buff += "Question: ";
+		buff += trim;
+		buff +="\n";
+		GetWindowText(hAnswer, buffHelp, 120);
+		buff += "Answer: ";
+		buff += buffHelp;
+		buff += "\n";
+		GetWindowText(hChoice2, buffHelp, 120);
+		buff += "Wrong Answer 1: ";
+		buff += buffHelp;
+		buff += "\n";
+		GetWindowText(hChoice3, buffHelp, 120);
+		buff += "Wrong Answer 2: ";
+		buff += buffHelp;
+		buff += "\n";
+		GetWindowText(hChoice4, buffHelp, 120);
+		buff += "Wrong Answer 3: ";
+		buff += buffHelp;
+		INT answer = MessageBox(Quiz::ptr->hDialog , buff.c_str(), "Quiz Creator", MB_YESNO);
+		if (answer == IDYES) {
+			if (Quiz::ptr->m_quizRelation.size() > 0) {
+				MyDialog::ptr->ssql << "DELETE from questions where id = '";
+				MyDialog::ptr->ssql << m_questionRelation.at(ItemIndex) << "'";
+				ItemIndex = SendMessage((HWND)hChooseQuiz, (UINT)CB_GETCURSEL,
+					(WPARAM)0, (LPARAM)0);
+				MyDialog::ptr->ssql << "AND quizId ='" << m_quizRelation.at(ItemIndex) << "';";
+				MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
+				MyDialog::ptr->ssql.str("");
+				mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str());
+				updateQuestionsCombo(Quiz::ptr->hDBquestions, Quiz::ptr->m_quizRelation.at(ItemIndex));
+				SetWindowText(hQuestion, "");
+				SetWindowText(hAnswer, "");
+				SetWindowText(hChoice2, "");
+				SetWindowText(hChoice3, "");
+				SetWindowText(hChoice4, "");
+				EnableWindow(hDelete, FALSE);
+			}
+		}
+	}
+		break;
+	case IDC_UPDATE:
+	{
+		INT quizId = SendMessage((HWND)hChooseQuiz, (UINT)CB_GETCURSEL,
+			(WPARAM)0, (LPARAM)0);
+		string buff = "\t\tUpdate this question\n";
+		MyDialog::ptr->ssql << "select * from questions where quizId = '";
+		MyDialog::ptr->ssql << Quiz::ptr->m_quizRelation.at(quizId) << "' AND id = '";
+		INT questionId = SendMessage((HWND)hDBquestions, (UINT)CB_GETCURSEL,
+			(WPARAM)0, (LPARAM)0);
+		MyDialog::ptr->ssql << Quiz::ptr->m_questionRelation.at(questionId) << "';";
+		MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
+		MyDialog::ptr->ssql.str("");
+		
+		if (!mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str())) {
+			MyDialog::ptr->rset = mysql_use_result(MyDialog::ptr->getDB().getConnection());
+			while ((MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset)) != NULL) {
+				buff += "Question: ";
+				buff += MyDialog::ptr->row[2];
+				buff += "\n";
+				buff += "Answer: ";
+				buff += MyDialog::ptr->row[3];
+				buff += "\n";
+				buff += "Wrong Answer 1: ";
+				buff += MyDialog::ptr->row[4];
+				buff += "\n";
+				buff += "Wrong Answer 2: ";
+				buff += MyDialog::ptr->row[5];
+				buff += "\n";
+				buff += "Wrong Answer 3: ";
+				buff += MyDialog::ptr->row[6];
+				buff += "\n";
+				//Получаю здесь все варианты ответов 
+			}
+			MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);
+		}
+		mysql_free_result(MyDialog::ptr->rset);
+
+
+		TCHAR hQ[120];
+		TCHAR hA[80];
+		TCHAR hC1[80];
+		TCHAR hC2[80];
+		TCHAR hC3[80];
+		buff += "\n\t\tTo this\n";
+		GetWindowText(hQuestion, hQ, 120);
+		buff += "Question: ";
+		buff += hQ;
+		buff += "\n";
+		GetWindowText(hAnswer, hA, 80);
+		buff += "Answer: ";
+		buff += hA;
+		buff += "\n";
+		GetWindowText(hChoice2, hC1, 80);
+		buff += "Wrong Answer 1: ";
+		buff += hC1;
+		buff += "\n";
+		GetWindowText(hChoice3, hC2, 80);
+		buff += "Wrong Answer 2: ";
+		buff += hC2;
+		buff += "\n";
+		GetWindowText(hChoice4, hC3, 80);
+		buff += "Wrong Answer 3: ";
+		buff += hC3;
+		INT answer = MessageBox(Quiz::ptr->hDialog, buff.c_str(), "Quiz Creator", MB_YESNO);
+		if (answer == IDYES) {
+			if (Quiz::ptr->m_quizRelation.size() > 0) {
+				MyDialog::ptr->ssql << "UPDATE questions SET question = '" << hQ << "', ";
+				MyDialog::ptr->ssql << "rightAnswer = '" << hA << "', ";
+				MyDialog::ptr->ssql << "wrongAnswer2 = '" << hC1 << "', ";
+				MyDialog::ptr->ssql << "wrongAnswer3 = '" << hC2 << "', ";
+				MyDialog::ptr->ssql << "wrongAnswer4 = '" << hC3 << "' "; 
+				MyDialog::ptr->ssql << "where quizid = '" << m_quizRelation.at(quizId) << "' AND id = '" << m_questionRelation.at(questionId) << "';";
+				MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
+				MyDialog::ptr->ssql.str("");
+				mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str());
+				updateQuestionsCombo(Quiz::ptr->hDBquestions, Quiz::ptr->m_quizRelation.at(quizId));
+				SetWindowText(hQuestion, "");
+				SetWindowText(hAnswer, "");
+				SetWindowText(hChoice2, "");
+				SetWindowText(hChoice3, "");
+				SetWindowText(hChoice4, "");
+				EnableWindow(hUpdate, FALSE);
+			}
+		}
+	}
+		break;
 	case IDC_ADD:
 		AddQuestion();
 		break;
@@ -1043,7 +1271,6 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 		break;
 	}
 }
-
 INT_PTR CALLBACK Quiz::DlgProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	switch (Message)

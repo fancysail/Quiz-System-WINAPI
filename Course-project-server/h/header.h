@@ -12,6 +12,7 @@
 #include <Strsafe.h>
 #include <iomanip> 
 #include <sstream>
+#include <map>
 
 #include <tchar.h>
 #include <TlHelp32.h>

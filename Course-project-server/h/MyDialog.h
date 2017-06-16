@@ -9,7 +9,13 @@ class Quiz
 {
 public:
 	MyDialog*ptrMyDialog;
-	HWND hCreateQuiz,hChooseQuiz,hQuestion, hAnswer, hChoice2, hChoice3, hChoice4, hAdd, hPlus, hDialog;
+	HWND hCreateQuiz, hChooseQuiz, hQuestion, hAnswer, hChoice2, hChoice3, hChoice4, hAdd, hDelete, hUpdate, hPlus,hDBquestions, hDialog;
+	//ordinal number - primary key
+	std::map<INT, INT> m_questionRelation;
+	//ordinal number - primary key
+	std::map<INT, INT> m_quizRelation;
+	//update button enabled or disabled
+	BOOL isUpdate;
 
 	void MessageAboutError(DWORD dwError);
 	BOOL Cls_OnInitDialog(HWND hWnd, HWND hWndFocus, LPARAM lParam);

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1
--- Время создания: Июн 13 2017 г., 00:07
+-- Время создания: Июн 16 2017 г., 08:25
 -- Версия сервера: 10.1.22-MariaDB
 -- Версия PHP: 7.1.4
 
@@ -243,12 +243,12 @@ ALTER TABLE `questions`
 -- AUTO_INCREMENT для таблицы `quizes`
 --
 ALTER TABLE `quizes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 --
 -- AUTO_INCREMENT для таблицы `results`
 --
 ALTER TABLE `results`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT для таблицы `student`
 --
