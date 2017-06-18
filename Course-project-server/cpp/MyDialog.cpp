@@ -10,6 +10,7 @@
 #define IDC_CHECKBOX2 0x8817
 #define IDC_CREATE_QUIZ 0x8818
 #define IDC_PLUSBUTTON 0x8819
+#define IDC_MINUSBUTTON 0x8820
 
 
 struct PARAMS{
@@ -1035,11 +1036,18 @@ BOOL Quiz::Cls_OnInitDialog(HWND hWnd, HWND hWndFocus, LPARAM lParam)
 	hDBquestions = GetDlgItem(hWnd, IDC_DBQUESTIONS);
 	
 	hPlus = CreateWindow("STATIC", NULL, SS_BITMAP | SS_NOTIFY | WS_CHILD | WS_VISIBLE | WS_TABSTOP , 389, 13, 45, 45, hWnd, (HMENU)IDC_PLUSBUTTON, GetModuleHandle(NULL), NULL);
-	HBITMAP hBmp = (HBITMAP)LoadImage(NULL, "PLUS.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	if (hBmp == NULL) {
+	HBITMAP hBmp1 = (HBITMAP)LoadImage(NULL, "PLUS.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	if (hBmp1 == NULL) {
 		MessageBox(NULL, "Error while loading image", "Error", MB_OK | MB_ICONERROR);
 	}
-	SendMessage(Quiz::ptr->hPlus, STM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hBmp);
+	SendMessage(Quiz::ptr->hPlus, STM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hBmp1);
+
+	hMinus = CreateWindow("STATIC", NULL, SS_BITMAP | SS_NOTIFY | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 389, 52, 45, 45, hWnd, (HMENU)IDC_MINUSBUTTON, GetModuleHandle(NULL), NULL);
+	HBITMAP hBmp2 = (HBITMAP)LoadImage(NULL, "MINUS.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	if (hBmp2 == NULL) {
+		MessageBox(NULL, "Error while loading image", "Error", MB_OK | MB_ICONERROR);
+	}
+	SendMessage(Quiz::ptr->hMinus, STM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hBmp2);
 
 	updateQuizCombo(hChooseQuiz);
 	return TRUE;
@@ -1251,6 +1259,54 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 	case IDC_ADD:
 		AddQuestion();
 		break;
+	case IDC_MINUSBUTTON:
+	{
+		int ItemIndex = SendMessage((HWND)hChooseQuiz, (UINT)CB_GETCURSEL,
+			(WPARAM)0, (LPARAM)0);
+		if (ItemIndex == CB_ERR) {
+			break;
+		}
+		TCHAR ListItem[256];
+		SendMessage((HWND)hChooseQuiz, (UINT)CB_GETLBTEXT,
+			(WPARAM)ItemIndex, (LPARAM)ListItem);
+		string buff = "Delete Quiz: \"";
+		buff += ListItem;
+		buff += "\"?\nThe results of students will also be deleted!";
+
+		INT answer = MessageBox(Quiz::ptr->hDialog, buff.c_str(), "Quiz Creator", MB_YESNO);
+		if (answer == IDYES) {
+			if (Quiz::ptr->m_quizRelation.size() > 0) {
+				MyDialog::ptr->ssql << "DELETE from questions where quizid = '";
+				MyDialog::ptr->ssql << m_quizRelation.at(ItemIndex) << "';";
+				MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
+				MyDialog::ptr->ssql.str("");
+				mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str());
+
+				MyDialog::ptr->ssql << "DELETE from results where idQuiz = '";
+				MyDialog::ptr->ssql << m_quizRelation.at(ItemIndex) << "';";
+				MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
+				MyDialog::ptr->ssql.str("");
+				mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str());
+
+				MyDialog::ptr->ssql << "DELETE from quizes where id = '";
+				MyDialog::ptr->ssql << m_quizRelation.at(ItemIndex) << "';";
+				MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
+				MyDialog::ptr->ssql.str("");
+				mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str());
+				SetWindowText(hQuestion, "");
+				SetWindowText(hAnswer, "");
+				SetWindowText(hChoice2, "");
+				SetWindowText(hChoice3, "");
+				SetWindowText(hChoice4, "");
+				EnableWindow(hDelete, FALSE);
+				EnableWindow(hUpdate, FALSE);
+				EnableWindow(hAdd, FALSE);
+				updateQuizCombo(Quiz::ptr->hChooseQuiz);
+				SendMessage(Quiz::ptr->hDBquestions, CB_RESETCONTENT, NULL, NULL);
+			}
+		}
+	}
+	break;
 	case IDC_PLUSBUTTON:
 		TCHAR quizName[40];
 		GetWindowText(hCreateQuiz, quizName, 40);
@@ -1311,4 +1367,5 @@ void Quiz::AddQuestion() {
 	SendMessageA(hChoice2, WM_SETTEXT, WPARAM(0), LPARAM(""));
 	SendMessageA(hChoice3, WM_SETTEXT, WPARAM(0), LPARAM(""));
 	SendMessageA(hChoice4, WM_SETTEXT, WPARAM(0), LPARAM(""));
+	updateQuestionsCombo(Quiz::ptr->hDBquestions,m_quizRelation.at(ItemIndex));
 }

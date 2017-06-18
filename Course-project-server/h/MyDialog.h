@@ -9,7 +9,7 @@ class Quiz
 {
 public:
 	MyDialog*ptrMyDialog;
-	HWND hCreateQuiz, hChooseQuiz, hQuestion, hAnswer, hChoice2, hChoice3, hChoice4, hAdd, hDelete, hUpdate, hPlus,hDBquestions, hDialog;
+	HWND hCreateQuiz, hChooseQuiz, hQuestion, hAnswer, hChoice2, hChoice3, hChoice4, hAdd, hDelete, hUpdate, hPlus,hMinus,hDBquestions, hDialog;
 	//ordinal number - primary key
 	std::map<INT, INT> m_questionRelation;
 	//ordinal number - primary key
