@@ -64,7 +64,6 @@ private:
 	TCHAR m_password[20];
 	TCHAR m_time[8];
 
-	ifstream ifs;
 	string fileData;
 
 	INT horizontal, vertical;

@@ -7,11 +7,9 @@
 #include "../resource.h"
 #include <shlobj.h>
 #include <stdexcept>
-#include <fstream>
 #include <sstream>
 #include <Strsafe.h>
 #include <iomanip> 
-#include <sstream>
 #include <map>
 
 #include <tchar.h>

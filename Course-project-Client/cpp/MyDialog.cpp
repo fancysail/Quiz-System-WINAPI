@@ -127,14 +127,14 @@ VOID MyDialog::createAllElements(HWND hwnd) {
 	fillList();
 	//Установка остальных элементов
 	m_index = 0;
-	hQuestionNumber = createStatic("Question: ", 210, 7, 100, 16, &ptr->hDialog);
-	SetWindowText(hQuestionNumber, ("Question: " + std::to_string(1)).c_str());
+	hQuestionNumber = createStatic("Вопрос: ", 210, 7, 100, 16, &ptr->hDialog);
+	SetWindowText(hQuestionNumber, ("Вопрос: " + std::to_string(1)).c_str());
 	hPercents = createStatic("0%", 420, 7, 50, 16, &ptr->hDialog);
 	SetWindowText(hPercents, "0%");
 
 	groupBox = createGroupBox(210, 57, 495, 80, &hwnd);
 	hQuestion = createStatic(MyDialog::ptr->quiz.at(0)->getQuestion().c_str(), 4, 10, 485, 65, &groupBox);
-	hTimeLeft = createStatic(nullptr, 580, 7, 140, 16, &ptr->hDialog);
+	hTimeLeft = createStatic(nullptr, 555, 7, 140, 16, &ptr->hDialog);
 	SetWindowText(hTimeLeft, "");
 	groupBox1 = createGroupBox(210, 137, 495, 210, &hwnd);
 	//Установка радиобаттонов
@@ -150,11 +150,11 @@ VOID MyDialog::createAllElements(HWND hwnd) {
 	}
 
 	//Установка кнопок
-	buttons[0] = createButton("Reset", 210, 377, 80, 24, &ptr->hDialog, BUTTON_RESET);
-	buttons[1] = createButton("Review Questions", 300, 377, 120, 24, &ptr->hDialog, BUTTON_REVIEW);
-	buttons[2] = createButton("Previous", 430, 377, 100, 24, &ptr->hDialog, BUTTON_PREV);
-	buttons[3] = createButton("Next", 540, 377, 80, 24, &ptr->hDialog, BUTTON_NEXT);
-	buttons[4] = createButton("Submit", 630, 377, 75, 24, &ptr->hDialog, BUTTON_SUBMIT);
+	buttons[0] = createButton("Сбросить", 210, 377, 80, 24, &ptr->hDialog, BUTTON_RESET);
+	buttons[1] = createButton("Обзор", 300, 377, 120, 24, &ptr->hDialog, BUTTON_REVIEW);
+	buttons[2] = createButton("Предыдущий", 430, 377, 100, 24, &ptr->hDialog, BUTTON_PREV);
+	buttons[3] = createButton("Следующий", 540, 377, 80, 24, &ptr->hDialog, BUTTON_NEXT);
+	buttons[4] = createButton("Сдать", 630, 377, 75, 24, &ptr->hDialog, BUTTON_SUBMIT);
 
 	EnableWindow(buttons[2], FALSE);
 
@@ -277,7 +277,7 @@ VOID MyDialog::changedQuestion() {
 		SendMessage(hRadios[quiz.at(m_index)->getUserAnswer()], BM_SETCHECK, BST_CHECKED, NULL);
 	}
 	
-	SetWindowText(hQuestionNumber, ("Question: " + std::to_string(index + 1)).c_str());
+	SetWindowText(hQuestionNumber, ("Вопрос: " + std::to_string(index + 1)).c_str());
 	SetWindowText(hQuestion, quiz.at(index)->getQuestion().c_str());
 
 	for (INT i = 0; i < 4; i++) {
@@ -341,19 +341,19 @@ VOID MyDialog::submitTest() {
 	double scoredPercentage = (scored / (double)quiz.size()) * 100;
 	stringstream ss;
 
-	if (scoredPercentage > 90) { ss << "Congratulations!\n"; }
-	else if (scoredPercentage > 75) { ss << "Very Good!\n"; }
-	else if (scoredPercentage > 50) { ss << "Good!\n"; }
-	else if (scoredPercentage > 25) { ss << "Not impressed..\n"; }
-	else { ss << "Eh...\n"; }
+	if (scoredPercentage > 90) { ss << "Лучший!Браво!\n"; }
+	else if (scoredPercentage > 75) { ss << "Очень хорошо!\n"; }
+	else if (scoredPercentage > 50) { ss << "Хорошо!!\n"; }
+	else if (scoredPercentage > 25) { ss << "Не впечатлил..\n"; }
+	else { ss << "В следующий раз...\n"; }
 
 	ss << fixed << setprecision(1) << scoredPercentage;
 	ss << "%";
-	ss << " right answers";
+	ss << " правильных ответов";
 	std::string message = ss.str();
 	const char* c_message = message.c_str();
 
-	MessageBox(NULL, c_message, "Test Result", MB_OK | MB_ICONINFORMATION);
+	MessageBox(NULL, c_message, "Результат", MB_OK | MB_ICONINFORMATION);
 	RedrawWindow(hDialog, NULL, NULL, RDW_INVALIDATE);
 }
 VOID MyDialog::Cls_OnClose(HWND hwnd)
@@ -377,12 +377,15 @@ VOID MyDialog::Cls_OnClose(HWND hwnd)
 }
 BOOL MyDialog::Cls_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 {
+	HICON hIcon1 = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));
+	SendMessage(hwnd, WM_SETICON, 1, (LPARAM)hIcon1);
+
 	TCHAR GUID[] = TEXT("{D93CD3E0-672D-4def-9B44-99FD7E796DFB}");
 	HANDLE hMutex = CreateMutex(NULL, FALSE, GUID);
 	DWORD dwAnswer = WaitForSingleObject(hMutex, 0);
 	if (dwAnswer == WAIT_TIMEOUT)
 	{
-		MessageBox(hwnd, TEXT("Программа уже запущена!"), TEXT("Admin Quiz"), MB_OK | MB_ICONINFORMATION);
+		MessageBox(hwnd, TEXT("Программа уже запущена!"), TEXT("Quiz"), MB_OK | MB_ICONINFORMATION);
 		EndDialog(hwnd, 0);
 	}
 	GetDesktopResolution(horizontal, vertical);
@@ -453,7 +456,7 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, INT id, HWND hwndCtl, UINT codeNotify)
 
 		EnumChildWindows(hDialog, DestoryChildCallback, NULL);
 		windowMinWidth = 740;
-		winowMinHeight = 420;//457 420
+		winowMinHeight = 420;
 		MoveWindow(hwnd, (horizontal - (horizontal / 2) - windowMinWidth / 2), (vertical - (vertical / 2) - winowMinHeight / 2), windowMinWidth, winowMinHeight, TRUE);
 
 		createAllElements(hwnd);
@@ -634,9 +637,6 @@ DWORD WINAPI ThreadForReceive(LPVOID lpParam)
 			strcpy_s(szBuff, "<YES>");
 			send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0);
 		}
-		else {
-			//Smth gone wrong
-		}
 	}
 	result = recv(ptr->getClientInfo().socket, szBuff, 4096, 0);
 	if (!strcmp(szBuff, "<OK>")) {
@@ -698,7 +698,7 @@ DWORD WINAPI ThreadForTimer(LPVOID lpParam) {
 				ptr->getSeconds() = 59;
 			}
 			if (ptr->getm_minutes() < 0 && ptr->getSeconds() == 59) {
-				SetWindowText(ptr->gethTimeLeft(), TEXT("Time left 00:00"));
+				SetWindowText(ptr->gethTimeLeft(), TEXT("Осталось времени 00:00"));
 				ptr->submitTest();
 				EnableWindow(ptr->gethButtons()[0], FALSE);
 				for (INT i = 0; i < 4; i++) {
@@ -707,7 +707,7 @@ DWORD WINAPI ThreadForTimer(LPVOID lpParam) {
 				ptr->setSubmitted(TRUE);
 				break;
 			}
-			ptr->setm_stime("Time left ");
+			ptr->setm_stime("Осталось времени ");
 
 			if (ptr->getm_minutes() > 9) ptr->getm_stime() += to_string(ptr->getm_minutes());
 			else ptr->getm_stime() += "0" + to_string(ptr->getm_minutes());

@@ -159,6 +159,9 @@
     <ClCompile Include="cpp\MyDialogMain.cpp" />
     <ClCompile Include="cpp\Question.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\icon.ico" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

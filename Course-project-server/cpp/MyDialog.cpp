@@ -168,8 +168,8 @@ void HandleWM_NOTIFY(LPARAM lParam)
 			break;
 		case 1:
 			switch (MyDialog::ptr->userListView[plvdi->item.iItem]->getStatus()) {
-			case Status::CONNECTED:plvdi->item.pszText = "Connected"; break;
-			case Status::SUBMITTED:plvdi->item.pszText = "Submitted"; break;
+			case Status::CONNECTED:plvdi->item.pszText = "Присоединился"; break;
+			case Status::SUBMITTED:plvdi->item.pszText = "Сдал"; break;
 			}
 			break;
 		case 2: {
@@ -204,12 +204,15 @@ void GetDesktopResolution(int& horizontal, int& vertical)
 }
 BOOL MyDialog::Cls_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 {
+	HICON hIcon1 = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON2));
+	SendMessage(hwnd, WM_SETICON, 1, (LPARAM)hIcon1);
+
 	TCHAR GUID[] = TEXT("{D99CD3E0-670D-4def-9B74-99FD7E793DFB}");
 	HANDLE hMutex = CreateMutex(NULL, FALSE, GUID);
 	DWORD dwAnswer = WaitForSingleObject(hMutex, 0);
 	if (dwAnswer == WAIT_TIMEOUT)
 	{
-		MessageBox(hwnd, TEXT("The program is already running!"), TEXT("Admin Quiz"), MB_OK | MB_ICONINFORMATION);
+		MessageBox(hwnd, TEXT("Программа уже запущена!"), TEXT("Admin Quiz"), MB_OK | MB_ICONINFORMATION);
 		EndDialog(hwnd, 0);
 	}
 	GetDesktopResolution(horizontal, vertical);
@@ -365,17 +368,17 @@ VOID toggleStart() {
 		EnableWindow(MyDialog::ptr->gethStart(), FALSE);
 }
 VOID MyDialog::createAllElements() {
-	hStart = createButton("Create Quiz..", windowWidth/2 - 60, 15, 120, 22, &ptr->hDialog, IDC_CREATE_QUIZ,NULL);
+	hStart = createButton("Создать тест..", windowWidth/2 - 60, 15, 120, 22, &ptr->hDialog, IDC_CREATE_QUIZ,NULL);
 
-	createStatic("Group: ", 30, 25+25, 50, 16, &ptr->hDialog, NULL);
-	createStatic("Test: ", 30, 65 + 25, 50, 16, &ptr->hDialog, NULL);
-	createStatic("Time: ", 30, 105 + 25, 50, 16, &ptr->hDialog, NULL);
-	createStatic("min. ", 160, 105 + 25, 50, 22, &ptr->hDialog, NULL);
+	createStatic("Группа: ", 30, 25+25, 50, 16, &ptr->hDialog, NULL);
+	createStatic("Тест: ", 30, 65 + 25, 50, 16, &ptr->hDialog, NULL);
+	createStatic("Время: ", 30, 105 + 25, 50, 16, &ptr->hDialog, NULL);
+	createStatic("мин. ", 160, 105 + 25, 50, 22, &ptr->hDialog, NULL);
 
 	hPath = createCombo(100, 66+25, 290, 100, &ptr->hDialog, IDC_PATH);
 	updateQuizCombo(hPath);
 
-	hStart = createButton("Start Quiz", 160, 390 + 35, 80, 22, &ptr->hDialog, IDC_START, WS_DISABLED);
+	hStart = createButton("Старт", 160, 390 + 35, 80, 22, &ptr->hDialog, IDC_START, WS_DISABLED);
 
 	hGroupCombo = createCombo(100, 25+25, 290, 100, &ptr->hDialog, IDC_GROUPCOMBO);
 	hTime = createCombo(100, 102 + 25, 50, 110, &ptr->hDialog, IDC_TIME);
@@ -390,7 +393,7 @@ VOID MyDialog::createAllElements() {
 	hUserList = createListView(30, 143 + 25, 355, 241, &ptr->hDialog);
 	InitListViewColumns(hUserList);
 	
-	hCheckBox1 = createCheckBox("Randomize Questions", 205, 110 + 25, 140, 22, &ptr->hDialog, IDC_CHECKBOX1);
+	hCheckBox1 = createCheckBox("Случайный порядок", 205, 110 + 25, 140, 22, &ptr->hDialog, IDC_CHECKBOX1);
 
 	EnumChildWindows(hDialog, (WNDENUMPROC)SetFont, (LPARAM)GetStockObject(DEFAULT_GUI_FONT));
 }
@@ -404,7 +407,7 @@ BOOL MyDialog::loginCheck() {
 	if (!mysql_query(db.getConnection(), sql.c_str())) {
 		rset = mysql_use_result(db.getConnection());
 		if ((row = mysql_fetch_row(rset)) == NULL) {
-			MessageBox(hDialog, "Wrong input data!", "Error", MB_ICONEXCLAMATION);
+			MessageBox(hDialog, "Неправильные данные!", "Ошибка", MB_ICONEXCLAMATION);
 			EnableWindow(hLogin, FALSE);
 			row = mysql_fetch_row(rset);
 			return FALSE;
@@ -420,7 +423,7 @@ DWORD WINAPI DBconnect(LPVOID lpParam) {
 		return 1;
 	}
 	else {
-		MessageBox(MyDialog::ptr->gethDialogue(), "No database connection!", "Error", MB_ICONERROR);
+		MessageBox(MyDialog::ptr->gethDialogue(), "Нет соединения с БД!", "Error", MB_ICONERROR);
 		exit(1);
 	}
 	return 0;
@@ -1129,24 +1132,24 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 			(WPARAM)ItemIndex, (LPARAM)buffHelp);
 		string trim = buffHelp;
 		trim = trim.substr(trim.find(".") + 1, trim.length());
-		buff += "\t\tDelete this question?\n";
-		buff += "Question: ";
+		buff += "\t\tУдалить этот вопрос?\n";
+		buff += "Вопрос: ";
 		buff += trim;
 		buff +="\n";
 		GetWindowText(hAnswer, buffHelp, 120);
-		buff += "Answer: ";
+		buff += "Ответ: ";
 		buff += buffHelp;
 		buff += "\n";
 		GetWindowText(hChoice2, buffHelp, 120);
-		buff += "Wrong Answer 1: ";
+		buff += "Неверный ответ 1: ";
 		buff += buffHelp;
 		buff += "\n";
 		GetWindowText(hChoice3, buffHelp, 120);
-		buff += "Wrong Answer 2: ";
+		buff += "Неверный ответ 2: ";
 		buff += buffHelp;
 		buff += "\n";
 		GetWindowText(hChoice4, buffHelp, 120);
-		buff += "Wrong Answer 3: ";
+		buff += "Неверный ответ 3: ";
 		buff += buffHelp;
 		INT answer = MessageBox(Quiz::ptr->hDialog , buff.c_str(), "Quiz Creator", MB_YESNO);
 		if (answer == IDYES) {
@@ -1174,7 +1177,7 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 	{
 		INT quizId = SendMessage((HWND)hChooseQuiz, (UINT)CB_GETCURSEL,
 			(WPARAM)0, (LPARAM)0);
-		string buff = "\t\tUpdate this question\n";
+		string buff = "\t\tИзменить этот вопрос\n";
 		MyDialog::ptr->ssql << "select * from questions where quizId = '";
 		MyDialog::ptr->ssql << Quiz::ptr->m_quizRelation.at(quizId) << "' AND id = '";
 		INT questionId = SendMessage((HWND)hDBquestions, (UINT)CB_GETCURSEL,
@@ -1186,19 +1189,19 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 		if (!mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str())) {
 			MyDialog::ptr->rset = mysql_use_result(MyDialog::ptr->getDB().getConnection());
 			while ((MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset)) != NULL) {
-				buff += "Question: ";
+				buff += "Вопрос: ";
 				buff += MyDialog::ptr->row[2];
 				buff += "\n";
-				buff += "Answer: ";
+				buff += "Ответ: ";
 				buff += MyDialog::ptr->row[3];
 				buff += "\n";
-				buff += "Wrong Answer 1: ";
+				buff += "Неверный ответ 1: ";
 				buff += MyDialog::ptr->row[4];
 				buff += "\n";
-				buff += "Wrong Answer 2: ";
+				buff += "Неверный ответ 2: ";
 				buff += MyDialog::ptr->row[5];
 				buff += "\n";
-				buff += "Wrong Answer 3: ";
+				buff += "Неверный ответ 3: ";
 				buff += MyDialog::ptr->row[6];
 				buff += "\n";
 				//Получаю здесь все варианты ответов 
@@ -1213,25 +1216,25 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 		TCHAR hC1[80];
 		TCHAR hC2[80];
 		TCHAR hC3[80];
-		buff += "\n\t\tTo this\n";
+		buff += "\n\t\tНа этот\n";
 		GetWindowText(hQuestion, hQ, 120);
-		buff += "Question: ";
+		buff += "Вопрос: ";
 		buff += hQ;
 		buff += "\n";
 		GetWindowText(hAnswer, hA, 80);
-		buff += "Answer: ";
+		buff += "Ответ: ";
 		buff += hA;
 		buff += "\n";
 		GetWindowText(hChoice2, hC1, 80);
-		buff += "Wrong Answer 1: ";
+		buff += "Неверный ответ 1: ";
 		buff += hC1;
 		buff += "\n";
 		GetWindowText(hChoice3, hC2, 80);
-		buff += "Wrong Answer 2: ";
+		buff += "Неверный ответ 2: ";
 		buff += hC2;
 		buff += "\n";
 		GetWindowText(hChoice4, hC3, 80);
-		buff += "Wrong Answer 3: ";
+		buff += "Неверный ответ 3: ";
 		buff += hC3;
 		INT answer = MessageBox(Quiz::ptr->hDialog, buff.c_str(), "Quiz Creator", MB_YESNO);
 		if (answer == IDYES) {
@@ -1269,9 +1272,9 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 		TCHAR ListItem[256];
 		SendMessage((HWND)hChooseQuiz, (UINT)CB_GETLBTEXT,
 			(WPARAM)ItemIndex, (LPARAM)ListItem);
-		string buff = "Delete Quiz: \"";
+		string buff = "Удалить тест: \"";
 		buff += ListItem;
-		buff += "\"?\nThe results of students will also be deleted!";
+		buff += "\"?\nРезультаты студентов также будут удалены!";
 
 		INT answer = MessageBox(Quiz::ptr->hDialog, buff.c_str(), "Quiz Creator", MB_YESNO);
 		if (answer == IDYES) {
