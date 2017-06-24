@@ -698,13 +698,15 @@ DWORD WINAPI ThreadForTimer(LPVOID lpParam) {
 				ptr->getSeconds() = 59;
 			}
 			if (ptr->getm_minutes() < 0 && ptr->getSeconds() == 59) {
+				ptr->getSeconds()++;
 				SetWindowText(ptr->gethTimeLeft(), TEXT("Осталось времени 00:00"));
 				ptr->submitTest();
+				ptr->setSubmitted(TRUE);
+				SetEvent(ptr->hEvent);
 				EnableWindow(ptr->gethButtons()[0], FALSE);
 				for (INT i = 0; i < 4; i++) {
 					EnableWindow(ptr->gethRadios()[i], FALSE);
 				}
-				ptr->setSubmitted(TRUE);
 				break;
 			}
 			ptr->setm_stime("Осталось времени ");
