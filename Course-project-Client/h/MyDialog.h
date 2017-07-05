@@ -34,7 +34,7 @@ private:
 	//second window
 	HWND hRadios[4], hEditForRadios[4], buttons[5];
 	//first window
-	HWND hName, hSurname, hFatherName, hGroup, hLogin;
+	HWND hName, hSurname, hFatherName, hGroup, hLogin, hIp;
 	vector<Question*> quiz;
 
 	BOOL bconnected, bsubmitted, blogged, blistShown, brandQuestions;
@@ -56,7 +56,7 @@ private:
 	//time string
 	string m_stime;
 	TCHAR m_name[20], m_surname[20], m_group[20], m_fatherName[20];
-	CONST TCHAR m_serverIpAddres[10] = "127.0.0.1";
+	TCHAR m_serverIpAddres[20];
 public:
 	VOID setQuiz(vector<Question*> q) { quiz = q; }
 	VOID setQuizTime(INT m) { m_minutes = m; m_minutesCopy = m; }
@@ -64,7 +64,7 @@ public:
 	VOID setSubmitted(BOOL b) { bsubmitted = b; }
 	VOID setRandQuestions(BOOL b) { brandQuestions = b; }
 
-	CONST TCHAR* getServerIp() { return m_serverIpAddres; }
+	TCHAR* getServerIp() { return m_serverIpAddres; }
 	//current question number
 	INT getIndex() { return m_index; }
 	INT getCountUserAnswered() { return m_countUserAnswered; }

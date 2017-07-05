@@ -76,7 +76,8 @@ VOID GetDesktopResolution(int& horizontal, INT& vertical)
 }
 
 VOID toggleLogin() {
-	if (lstrlen(MyDialog::ptr->getName()) > 2 && lstrlen(MyDialog::ptr->getGroup()) > 3 && lstrlen(MyDialog::ptr->getSurname()) > 3 && lstrlen(MyDialog::ptr->getFatherName()) > 2) {
+	if (lstrlen(MyDialog::ptr->getName()) > 2 && lstrlen(MyDialog::ptr->getGroup()) > 3 && lstrlen(MyDialog::ptr->getSurname()) > 3 && 
+		lstrlen(MyDialog::ptr->getFatherName()) > 2 && lstrlen(MyDialog::ptr->getServerIp()) > 5) {
 		EnableWindow(MyDialog::ptr->gethLogin(), TRUE);
 	}
 	else {
@@ -401,6 +402,8 @@ BOOL MyDialog::Cls_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam)
 	hGroup = GetDlgItem(hwnd, IDC_GROUP);
 	hLogin = GetDlgItem(hwnd, IDC_LOGIN);
 	hFatherName = GetDlgItem(hwnd, IDC_FATHERNAME);
+	hIp = GetDlgItem(hwnd, IDC_IP);
+	SetWindowText(hIp, "127.0.0.1");
 
 	hEvent = CreateEvent(NULL, FALSE, FALSE, "{26E73077-4596-4321-9AA1-BC25CA222ABC}");
 	return TRUE;
@@ -479,6 +482,10 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, INT id, HWND hwndCtl, UINT codeNotify)
 		GetWindowText(MyDialog::ptr->hFatherName, MyDialog::ptr->m_fatherName, 20);
 		toggleLogin();
 	}
+	else if (id == IDC_IP) {
+		GetWindowText(MyDialog::ptr->hIp, MyDialog::ptr->m_serverIpAddres, 20);
+		toggleLogin();
+	}
 }
 
 INT_PTR CALLBACK MyDialog::DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -537,6 +544,7 @@ DWORD WINAPI ThreadForConnect(LPVOID lpParam)
 	}
 	ptr->getClientInfo().addr.sin_family = AF_INET;
 	ptr->getClientInfo().addr.sin_port = htons(49152);
+	TCHAR * ips = MyDialog::ptr->getServerIp();
 	ptr->getClientInfo().addr.sin_addr.S_un.S_addr = inet_addr(MyDialog::ptr->getServerIp());
 
 	if (connect(ptr->getClientInfo().socket, (sockaddr*)&(ptr->getClientInfo().addr), sizeof(ptr->getClientInfo().addr)) == SOCKET_ERROR)
