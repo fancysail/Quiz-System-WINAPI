@@ -1,5 +1,4 @@
 #include "../h/MyDialog.h"
-#define IDC_BROWSE 0x8809
 #define IDC_PATH 0x8810
 #define IDC_GROUPCOMBO 0x8811
 #define IDC_TIME 0x8812
@@ -11,6 +10,7 @@
 #define IDC_CREATE_QUIZ 0x8818
 #define IDC_PLUSBUTTON 0x8819
 #define IDC_MINUSBUTTON 0x8820
+#define IDC_REMOVE 0x8821
 
 
 struct PARAMS{
@@ -31,6 +31,21 @@ Checks database if user is valid
 @return Returns true if user is valid,FALSE if not.
 */
 BOOL checkUserData(string &name, string &surname, string &fatherName, string &group, ClientInfo & clientinfo);
+/**
+Reading whole file at once
+
+@param(memblock) result string
+*/
+void getCode(char*& memblock, string fileName) {
+	int size;
+	std::ifstream input(fileName, ios::in | ios::binary | ios::ate);
+	size = input.tellg();
+	memblock = new char[size + 1];
+	input.seekg(0, ios::beg);
+	input.read(memblock, size);
+	memblock[size] = '\0';
+	input.close();
+}
 
 
 MyDialog* MyDialog::ptr = NULL;
@@ -416,7 +431,6 @@ BOOL MyDialog::loginCheck() {
 	mysql_free_result(rset);
 	return TRUE;
 }
-
 DWORD WINAPI DBconnect(LPVOID lpParam) {
 	if (MyDialog::ptr->getDB().connect()) {
 		mysql_query(MyDialog::ptr->getDB().getConnection(), "SET NAMES CP1251");
@@ -428,7 +442,6 @@ DWORD WINAPI DBconnect(LPVOID lpParam) {
 	}
 	return 0;
 }
-
 MyDialog::MyDialog(void)
 {
 	ptr = this;
@@ -862,7 +875,7 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		TCHAR quizName[60];
 		SendMessage((HWND)hPath, (UINT)CB_GETLBTEXT,
 			(WPARAM)ItemIndex, (LPARAM)quizName);
-		ssql << "select question, wrongAnswer2, wrongAnswer3, wrongAnswer4, rightAnswer ";
+		ssql << "select question, wrongAnswer2, wrongAnswer3, wrongAnswer4, rightAnswer, code ";
 		ssql << "from questions where quizId = (select id from quizes where name = '";
 		ssql << quizName;
 		ssql << "');";
@@ -877,6 +890,12 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 				ssql << "'/~!/'" << row[2] << "'/!~/'";
 				ssql << "'/~!/'" << row[3] << "'/!~/'";
 				ssql << "'/~^/'" << row[4] << "'/^~/'";
+				if (row[5] == NULL) {
+					ssql << "'/~#/'" << "'/#~/'";
+				}
+				else {
+					ssql << "'/~#/'" << row[5] << "'/#~/'";
+				}
 				sql += ssql.str();
 				ssql.str("");
 			}
@@ -945,7 +964,28 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 		}
 	}
 }
-
+bool Quiz::OnBrowse()
+{
+	BROWSEINFO binfo = { 0 };
+	binfo.hwndOwner = hDialog;
+	binfo.ulFlags = BIF_NEWDIALOGSTYLE | BIF_EDITBOX | BIF_BROWSEINCLUDEFILES;
+	binfo.lpszTitle = "";
+	LPITEMIDLIST ptr = SHBrowseForFolder(&binfo);
+	if (ptr)
+	{
+		char path[MAX_PATH];
+		SHGetPathFromIDList(ptr, path);
+		if (strlen(path) > 59) {
+			Quiz::ptr->m_codeFileName.clear();
+			throw std::runtime_error("");
+		}
+		if (strlen(path)>4) {
+			Quiz::ptr->m_codeFileName = path;
+			return true;
+		}
+	}
+	else return false;
+}
 INT_PTR CALLBACK MyDialog::DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
@@ -1037,6 +1077,7 @@ BOOL Quiz::Cls_OnInitDialog(HWND hWnd, HWND hWndFocus, LPARAM lParam)
 	hUpdate = GetDlgItem(hWnd, IDC_UPDATE);
 	hDelete = GetDlgItem(hWnd, IDC_DELETE);
 	hDBquestions = GetDlgItem(hWnd, IDC_DBQUESTIONS);
+	hCodeFileName = GetDlgItem(hWnd, IDC_CODENAME);
 	
 	hPlus = CreateWindow("STATIC", NULL, SS_BITMAP | SS_NOTIFY | WS_CHILD | WS_VISIBLE | WS_TABSTOP , 389, 13, 45, 45, hWnd, (HMENU)IDC_PLUSBUTTON, GetModuleHandle(NULL), NULL);
 	HBITMAP hBmp1 = (HBITMAP)LoadImage(NULL, "PLUS.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
@@ -1052,6 +1093,14 @@ BOOL Quiz::Cls_OnInitDialog(HWND hWnd, HWND hWndFocus, LPARAM lParam)
 	}
 	SendMessage(Quiz::ptr->hMinus, STM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hBmp2);
 
+	hRemove = CreateWindow("STATIC", NULL, SS_BITMAP | SS_NOTIFY | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 150, 352, 45, 45, hWnd, (HMENU)IDC_REMOVE, GetModuleHandle(NULL), NULL);
+	HBITMAP hBmp3 = (HBITMAP)LoadImage(NULL, "removeICO.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	if (hBmp3 == NULL) {
+		MessageBox(NULL, "Error while loading image", "Error", MB_OK | MB_ICONERROR);
+	}
+	SendMessage(Quiz::ptr->hRemove, STM_SETIMAGE, (WPARAM)IMAGE_BITMAP, (LPARAM)hBmp3);
+	ShowWindow(Quiz::ptr->hRemove, SW_HIDE);
+
 	updateQuizCombo(hChooseQuiz);
 	return TRUE;
 }
@@ -1062,6 +1111,19 @@ void Quiz::addQuiz(const char* quizName) {
 	MyDialog::ptr->ssql.str("");
 	mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str());
 }
+string findFileName(string s) {
+	string s1 = s;
+	reverse(s1.begin(), s1.end());
+	int i = 0;
+	for (; i < s1.size(); i++) {
+		if (s1[i] == '\\') {
+			break;
+		}
+	}
+	s1 = s1.substr(0, i);
+	reverse(s1.begin(), s1.end());
+	return s1;
+}
 void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 {
 	switch (id) {
@@ -1070,7 +1132,7 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 		if (CodeNotify == CBN_SELCHANGE) {
 			int ItemIndex = SendMessage((HWND)hChooseQuiz, (UINT)CB_GETCURSEL,
 				(WPARAM)0, (LPARAM)0);
-			
+
 			if (Quiz::ptr->m_quizRelation.size() > 0) {
 				updateQuestionsCombo(Quiz::ptr->hDBquestions, Quiz::ptr->m_quizRelation.at(ItemIndex));
 			}
@@ -1108,12 +1170,12 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 			if (ItemIndex != CB_ERR) {
 				EnableWindow(Quiz::ptr->hDelete, TRUE);
 			}
-			else { 
-				EnableWindow(Quiz::ptr->hDelete, FALSE); 
+			else {
+				EnableWindow(Quiz::ptr->hDelete, FALSE);
 			}
 		}
 	}
-		break;
+	break;
 	case IDC_QUESTION:
 	case IDC_ANSWER:
 	case IDC_CHOICE2:
@@ -1135,7 +1197,7 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 		buff += "\t\tУдалить этот вопрос?\n";
 		buff += "Вопрос: ";
 		buff += trim;
-		buff +="\n";
+		buff += "\n";
 		GetWindowText(hAnswer, buffHelp, 120);
 		buff += "Ответ: ";
 		buff += buffHelp;
@@ -1151,7 +1213,7 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 		GetWindowText(hChoice4, buffHelp, 120);
 		buff += "Неверный ответ 3: ";
 		buff += buffHelp;
-		INT answer = MessageBox(Quiz::ptr->hDialog , buff.c_str(), "Quiz Creator", MB_YESNO);
+		INT answer = MessageBox(Quiz::ptr->hDialog, buff.c_str(), "Quiz Creator", MB_YESNO);
 		if (answer == IDYES) {
 			if (Quiz::ptr->m_quizRelation.size() > 0) {
 				MyDialog::ptr->ssql << "DELETE from questions where id = '";
@@ -1172,7 +1234,7 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 			}
 		}
 	}
-		break;
+	break;
 	case IDC_UPDATE:
 	{
 		INT quizId = SendMessage((HWND)hChooseQuiz, (UINT)CB_GETCURSEL,
@@ -1185,7 +1247,7 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 		MyDialog::ptr->ssql << Quiz::ptr->m_questionRelation.at(questionId) << "';";
 		MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
 		MyDialog::ptr->ssql.str("");
-		
+
 		if (!mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str())) {
 			MyDialog::ptr->rset = mysql_use_result(MyDialog::ptr->getDB().getConnection());
 			while ((MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset)) != NULL) {
@@ -1236,6 +1298,12 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 		GetWindowText(hChoice4, hC3, 80);
 		buff += "Неверный ответ 3: ";
 		buff += hC3;
+		if (!m_codeFileName.empty()) {
+			buff += "\nКод: ";
+			buff += m_codeFileName;
+		}
+
+
 		INT answer = MessageBox(Quiz::ptr->hDialog, buff.c_str(), "Quiz Creator", MB_YESNO);
 		if (answer == IDYES) {
 			if (Quiz::ptr->m_quizRelation.size() > 0) {
@@ -1243,7 +1311,17 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 				MyDialog::ptr->ssql << "rightAnswer = '" << hA << "', ";
 				MyDialog::ptr->ssql << "wrongAnswer2 = '" << hC1 << "', ";
 				MyDialog::ptr->ssql << "wrongAnswer3 = '" << hC2 << "', ";
-				MyDialog::ptr->ssql << "wrongAnswer4 = '" << hC3 << "' "; 
+				MyDialog::ptr->ssql << "wrongAnswer4 = '" << hC3 << "' ";
+				if (!m_codeFileName.empty()) {
+					MyDialog::ptr->ssql << ",";
+					char * memblock;
+					getCode(memblock, m_codeFileName);
+					ptrMyDialog->ssql << "questions.code = '" << memblock << "'";
+					delete[] memblock;
+					SendMessageA(hCodeFileName, WM_SETTEXT, WPARAM(0), LPARAM(""));
+					m_codeFileName.clear();
+					ShowWindow(hRemove, SW_HIDE);
+				}
 				MyDialog::ptr->ssql << "where quizid = '" << m_quizRelation.at(quizId) << "' AND id = '" << m_questionRelation.at(questionId) << "';";
 				MyDialog::ptr->sql = MyDialog::ptr->ssql.str();
 				MyDialog::ptr->ssql.str("");
@@ -1258,7 +1336,7 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 			}
 		}
 	}
-		break;
+	break;
 	case IDC_ADD:
 		AddQuestion();
 		break;
@@ -1311,13 +1389,14 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 	}
 	break;
 	case IDC_PLUSBUTTON:
+	{
 		TCHAR quizName[40];
 		GetWindowText(hCreateQuiz, quizName, 40);
 		string check = quizName;
 
 		check.erase(0, check.find_first_not_of(" \t"));
 		check.erase(check.find_last_not_of(" \t") + 1);
-		
+
 		if (check.size() == 0) {
 			break;
 		}
@@ -1329,7 +1408,49 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 		SendMessageA(hCreateQuiz, WM_SETTEXT, WPARAM(0), LPARAM(""));
 		break;
 	}
+	case IDC_BROWSE:
+	{
+		bool chose;
+		try {
+			chose = Quiz::ptr->OnBrowse();
+		}
+		catch (const std::exception& ex) {
+			//SetWindowText(hPath, "");
+			MessageBox(hDialog, TEXT(ex.what()), "", MB_ICONERROR);
+			return;
+		}
+		if (!chose)
+			break;
+		int len = Quiz::ptr->m_codeFileName.size();
+		char dot[5];
+		TCHAR name[90];
+		wsprintf(name,TEXT("%s"), Quiz::ptr->m_codeFileName.c_str());
+		rightExtension(name, dot);
+		string format;
+		format += "";
+		if (!strcmp(dot, ".txt")) {
+			//SetWindowText(hPath, Quiz::ptr->m_codeFileName.c_str());
+			string fileName = findFileName(Quiz::ptr->m_codeFileName);
+			SetWindowText(hCodeFileName, fileName.c_str());
+			ShowWindow(Quiz::ptr->hRemove, SW_SHOW);
+		}
+		else {
+			format += dot;
+			MessageBox(hDialog, TEXT(format.c_str()), "", MB_ICONERROR);
+			//SetWindowText(hPath, "");
+		}
+		break;
+	}
+	case IDC_REMOVE:
+	{
+		SetWindowText(hCodeFileName, "");
+		m_codeFileName.clear();
+		ShowWindow(hRemove, SW_HIDE);
+		break;
+	}
+	}
 }
+
 INT_PTR CALLBACK Quiz::DlgProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
 {
 	switch (Message)
@@ -1359,8 +1480,14 @@ void Quiz::AddQuestion() {
 	ptrMyDialog->ssql << "questions.wrongAnswer3 = '" << help << "',";
 	GetWindowText(hChoice4, help, 200);
 	ptrMyDialog->ssql << "questions.wrongAnswer4 = '" << help << "',";
-	ptrMyDialog->ssql << "questions.quizId = (select id from quizes WHERE quizes.name = '" << ListItem << "');";
 
+	if (!m_codeFileName.empty()) {
+		char * memblock = nullptr;
+		getCode(memblock,m_codeFileName);
+		ptrMyDialog->ssql << "questions.code = '" << memblock << "',";
+		delete[] memblock;
+	}
+	ptrMyDialog->ssql << "questions.quizId = (select id from quizes WHERE quizes.name = '" << ListItem << "');";
 	ptrMyDialog->sql = ptrMyDialog->ssql.str();
 	ptrMyDialog->ssql.str("");
 	mysql_query(ptrMyDialog->getDB().getConnection(), ptrMyDialog->sql.c_str());
@@ -1370,5 +1497,8 @@ void Quiz::AddQuestion() {
 	SendMessageA(hChoice2, WM_SETTEXT, WPARAM(0), LPARAM(""));
 	SendMessageA(hChoice3, WM_SETTEXT, WPARAM(0), LPARAM(""));
 	SendMessageA(hChoice4, WM_SETTEXT, WPARAM(0), LPARAM(""));
+	SendMessageA(hCodeFileName, WM_SETTEXT, WPARAM(0), LPARAM(""));
+	m_codeFileName.clear();
+	ShowWindow(hRemove, SW_HIDE);
 	updateQuestionsCombo(Quiz::ptr->hDBquestions,m_quizRelation.at(ItemIndex));
 }

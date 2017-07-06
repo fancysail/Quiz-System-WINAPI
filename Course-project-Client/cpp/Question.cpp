@@ -9,6 +9,18 @@ Question::Question(string question, string c1, string c2, string c3, string c4, 
 	m_question = question;
 	m_userAnswer = NOT_CHECKED;
 }
+Question::Question(string question, string c1, string c2, string c3, string c4, int answer, string code) {
+	m_choices.push_back(c1);
+	m_choices.push_back(c2);
+	m_choices.push_back(c3);
+	m_choices.push_back(c4);
+
+	m_rightAnswer = answer;
+	m_question = question;
+	m_code = code;
+	m_userAnswer = NOT_CHECKED;
+}
+
 void Question::randomizeQuestions(vector<Question*> &q){
 	int r1;
 	int r2;
@@ -59,6 +71,13 @@ vector<Question*> Question::parseFile(string check, BOOL randQuestions) {
 		question->setRightAnswer(3);
 
 		randomizeChoices(question);
+
+		aPos1 = check.find("'/~#/'", aPos2);
+		aPos2 = check.find("'/#~/'", aPos1);
+		string code = check.substr(aPos1 + 6, aPos2 - aPos1 - 6);
+		if (!code.empty()) {
+			question->setCode(code);
+		}
 
 		questions.push_back(question);
 		if (check.size() - 6 == aPos2)

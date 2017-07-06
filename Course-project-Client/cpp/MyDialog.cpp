@@ -157,6 +157,8 @@ VOID MyDialog::createAllElements(HWND hwnd) {
 	buttons[3] = createButton("Следующий", 540, 377, 80, 24, &ptr->hDialog, BUTTON_NEXT);
 	buttons[4] = createButton("Сдать", 630, 377, 75, 24, &ptr->hDialog, BUTTON_SUBMIT);
 
+	//buttons[4] = createButton("Код", 630, 377, 75, 24, &ptr->hDialog, BUTTON_SUBMIT);//Сделать неактивной по умолчанию
+
 	EnableWindow(buttons[2], FALSE);
 
 	std::pair<HWND, BOOL> pair;
@@ -613,10 +615,10 @@ DWORD WINAPI ThreadForReceive(LPVOID lpParam)
 	WaitForSingleObject(ptr->gethConnect(), INFINITE);
 	if (!ptr->isConnected())
 		return 0;
-	char szBuff[16384] = "<QUIZ_REQUEST>";
+	char szBuff[102400] = "<QUIZ_REQUEST>";
 	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0);
 
-	INT result = recv(ptr->getClientInfo().socket, szBuff, 16384, 0);
+	INT result = recv(ptr->getClientInfo().socket, szBuff, 102400, 0);
 	ptr->setQuiz(Question::parseFile(szBuff, ptr->isRandQuestions()));
 	strcpy_s(szBuff, "<QUIZ_RECEIVED>");
 	send(ptr->getClientInfo().socket, szBuff, strlen(szBuff) + 1, 0);

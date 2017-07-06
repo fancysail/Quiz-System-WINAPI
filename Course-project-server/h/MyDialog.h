@@ -26,6 +26,10 @@ public:
 	void AddQuestion();
 	void addQuiz(const char* quizName);
 	void enableAdd();
+	bool OnBrowse();
+	string m_codeFileName;
+	HWND hCodeFileName;
+	HWND hRemove;
 public:
 	static Quiz* ptr;
 	

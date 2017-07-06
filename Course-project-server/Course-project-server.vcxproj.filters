@@ -54,5 +54,8 @@
     <Image Include="..\icon.ico">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="..\..\..\Всё что касается курсовой WIN API\Course-work\Quiz-System-WINAPI\icon.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

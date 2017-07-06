@@ -11,6 +11,7 @@
 #include <Strsafe.h>
 #include <iomanip> 
 #include <map>
+#include <algorithm>
 
 #include <tchar.h>
 #include <TlHelp32.h>
