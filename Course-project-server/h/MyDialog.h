@@ -17,7 +17,6 @@ public:
 	//update button enabled or disabled
 	BOOL isUpdate;
 
-	void MessageAboutError(DWORD dwError);
 	BOOL Cls_OnInitDialog(HWND hWnd, HWND hWndFocus, LPARAM lParam);
 	void Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify);
 	void Cls_OnClose(HWND hWnd);
@@ -48,7 +47,6 @@ public:
 
 	static INT_PTR CALLBACK DlgProc(HWND hWnd, UINT mes, WPARAM wp, LPARAM lp);
 	static MyDialog*ptr;
-	VOID MessageAboutError(DWORD dwError);
 
 	BOOL Cls_OnInitDialog(HWND hwnd, HWND hwndFocus, LPARAM lParam);
 	VOID Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify);

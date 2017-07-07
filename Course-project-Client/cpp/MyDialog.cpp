@@ -508,7 +508,8 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, INT id, HWND hwndCtl, UINT codeNotify)
 		toggleLogin();
 	}
 	else if (id == BUTTON_CODE) {
-		MessageBox(NULL, MyDialog::ptr->getQuiz().at(m_index)->getCode().c_str() , "Код", MB_OK | MB_DEFAULT_DESKTOP_ONLY);
+		Code dlg(MyDialog::ptr->getQuiz().at(m_index)->getCode().c_str());
+		DialogBox(GetModuleHandle(NULL), MAKEINTRESOURCE(IDD_DIALOG2), hwnd, Code::DlgProc);
 	}
 }
 
@@ -758,4 +759,42 @@ DWORD WINAPI ThreadForTimer(LPVOID lpParam) {
 	CancelWaitableTimer(hTimer);
 	CloseHandle(hTimer);
 	return 0;
+}
+
+
+
+
+
+Code* Code::ptr = NULL;
+
+Code::Code(string szcode)
+{
+	ptr = this;
+	this->szcode = szcode;
+}
+Code::Code(void)
+{
+	ptr = this;
+}
+Code::~Code(void)
+{
+	ptr = nullptr;
+}
+void Code::Cls_OnClose(HWND hWnd) { EndDialog(hWnd, NULL); }
+BOOL Code::Cls_OnInitDialog(HWND hWnd, HWND hWndFocus, LPARAM lParam)
+{
+	hDialog = hWnd;
+	hEdit = GetDlgItem(hWnd, IDC_EDIT1);
+	SetWindowText(hEdit, szcode.c_str());
+	
+	return TRUE;
+}
+INT_PTR CALLBACK Code::DlgProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)
+{
+	switch (Message)
+	{
+		HANDLE_MSG(hWnd, WM_INITDIALOG, ptr->Cls_OnInitDialog);
+		HANDLE_MSG(hWnd, WM_CLOSE, ptr->Cls_OnClose);
+	}
+	return FALSE;
 }

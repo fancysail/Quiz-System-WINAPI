@@ -5,6 +5,24 @@ struct ClientInfo
 	sockaddr_in addr;
 	SOCKET socket;
 };
+
+class Code
+{
+public:
+	HWND hDialog,hEdit;
+	string szcode;
+
+	BOOL Cls_OnInitDialog(HWND hWnd, HWND hWndFocus, LPARAM lParam);
+	void Cls_OnClose(HWND hWnd);
+public:
+	static Code* ptr;
+
+	Code();
+	Code(string szcode);
+	~Code(void);
+	static INT_PTR CALLBACK DlgProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam);
+};
+
 class MyDialog
 {
 public:

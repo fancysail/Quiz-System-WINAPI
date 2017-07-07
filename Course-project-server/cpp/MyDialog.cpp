@@ -258,7 +258,7 @@ VOID MyDialog::Cls_OnClose(HWND hwnd)
 	WSACleanup();
 	EndDialog(hwnd, 0);
 }
-VOID MyDialog::MessageAboutError(DWORD dwError)
+VOID MessageAboutError(DWORD dwError,HWND& hDialog)
 {
 	LPVOID lpMsgBuf = NULL;
 	char szBuf[300];
@@ -599,7 +599,7 @@ DWORD WINAPI ThreadForReceive(LPVOID lpParam)
 		int result = recv(ptrinfo->socket, szBuff, 4096, 0);
 		if (result == SOCKET_ERROR || result == 0)
 		{
-			MyDialog::ptr->MessageAboutError(WSAGetLastError());
+			MessageAboutError(WSAGetLastError(), MyDialog::ptr->gethDialogue());
 			shutdown(ptrinfo->socket, SD_BOTH);
 			closesocket(ptrinfo->socket);
 			return 0;
@@ -717,7 +717,7 @@ DWORD WINAPI ThreadForAccept(LPVOID lpParam)
 	// The socket function creates a socket that is bound to a specific transport service provider.
 	if (s == SOCKET_ERROR)
 	{
-		MyDialog::ptr->MessageAboutError(WSAGetLastError());
+		MessageAboutError(WSAGetLastError(), MyDialog::ptr->gethDialogue());
 		WSACleanup();
 		EnableWindow(GetDlgItem(MyDialog::ptr->gethDialogue(), IDC_LOGIN), TRUE);
 		return 0;
@@ -735,7 +735,7 @@ DWORD WINAPI ThreadForAccept(LPVOID lpParam)
 	//The bind function associates a local address with a socket.
 	if (res == SOCKET_ERROR)
 	{
-		MyDialog::ptr->MessageAboutError(WSAGetLastError());
+		MessageAboutError(WSAGetLastError(), MyDialog::ptr->gethDialogue());
 		closesocket(s); // The closesocket function closes an existing socket.
 		WSACleanup();
 		EnableWindow(GetDlgItem(MyDialog::ptr->gethDialogue(), IDC_LOGIN), TRUE);
@@ -746,7 +746,7 @@ DWORD WINAPI ThreadForAccept(LPVOID lpParam)
 	// This function places a socket at a state where it is listening for an incoming connection.
 	if (res == SOCKET_ERROR)
 	{
-		MyDialog::ptr->MessageAboutError(WSAGetLastError());
+		MessageAboutError(WSAGetLastError(), MyDialog::ptr->gethDialogue());
 		closesocket(s); // The closesocket function closes an existing socket.
 		WSACleanup();
 		EnableWindow(GetDlgItem(MyDialog::ptr->gethDialogue(), IDC_LOGIN), TRUE);
@@ -770,7 +770,7 @@ DWORD WINAPI ThreadForAccept(LPVOID lpParam)
 
 		if (clientinfo.socket == INVALID_SOCKET)
 		{
-			MyDialog::ptr->MessageAboutError(WSAGetLastError());
+			MessageAboutError(WSAGetLastError(), MyDialog::ptr->gethDialogue());
 			break;
 		}
 
@@ -867,7 +867,7 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, int id, HWND hwndCtl, UINT codeNotify)
 	else if (id == IDC_START) {
 		if (WSAStartup(WINSOCK_VERSION ,&getWSD()))
 		{
-			MessageAboutError(WSAGetLastError());
+			MessageAboutError(WSAGetLastError(), MyDialog::ptr->gethDialogue());
 			return;
 		}
 		int ItemIndex = SendMessage((HWND)hPath, (UINT)CB_GETCURSEL,
@@ -1030,24 +1030,6 @@ void Quiz::enableAdd() {
 	else {
 		EnableWindow(hUpdate, FALSE);
 		EnableWindow(hAdd, FALSE);
-	}
-}
-void Quiz::MessageAboutError(DWORD dwError)
-{
-	LPVOID lpMsgBuf = NULL;
-	TCHAR szBuf[80];
-	BOOL fOK = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM//флаг сообщает функции, что нужна строка, соответствующая коду ошибки, определённому в системе
-		| FORMAT_MESSAGE_ALLOCATE_BUFFER, NULL,//нужно выделить соответствующий блок памяти для хранения текста
-		dwError,//код ошибки
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),//язык, на котором выводится описание ошибки (язык пользователя по умолчанию)
-		(LPTSTR)&lpMsgBuf,//адрес выделенного блока памяти записывается в эту переменную
-		0,//минимальный размер буфера для выделения памяти
-		NULL);
-	if (lpMsgBuf != NULL)
-	{
-		wsprintf(szBuf, TEXT("Ошибка %d: %s"), dwError, lpMsgBuf);
-		MessageBox(hDialog, szBuf, TEXT("Сообщение об ошибке"), MB_OK | MB_ICONSTOP);
-		LocalFree(lpMsgBuf);
 	}
 }
 Quiz::Quiz(MyDialog*p) 

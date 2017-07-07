@@ -160,6 +160,7 @@
     <ClCompile Include="cpp\Question.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\..\Всё что касается курсовой WIN API\Course-work\Quiz-System-WINAPI\icon.ico" />
     <Image Include="..\icon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
