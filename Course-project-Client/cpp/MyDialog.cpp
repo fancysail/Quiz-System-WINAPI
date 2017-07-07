@@ -6,6 +6,7 @@
 #define BUTTON_PREV 0x8811
 #define BUTTON_NEXT 0x8812
 #define BUTTON_SUBMIT 0x8813
+#define BUTTON_CODE 0x8814
 #define ID_TIMER1 0x8820
 #define ID_EDIT1 0x8820
 #define ID_EDIT2 0x8821
@@ -157,9 +158,17 @@ VOID MyDialog::createAllElements(HWND hwnd) {
 	buttons[3] = createButton("Следующий", 540, 377, 80, 24, &ptr->hDialog, BUTTON_NEXT);
 	buttons[4] = createButton("Сдать", 630, 377, 75, 24, &ptr->hDialog, BUTTON_SUBMIT);
 
+	buttons[5] = createButton("Код", 300, 340, 50, 24, &ptr->hDialog, BUTTON_CODE);
 	//buttons[4] = createButton("Код", 630, 377, 75, 24, &ptr->hDialog, BUTTON_SUBMIT);//Сделать неактивной по умолчанию
 
 	EnableWindow(buttons[2], FALSE);
+
+	if (!MyDialog::ptr->getQuiz().at(m_index)->getCode().empty()) {
+		EnableWindow(buttons[5], TRUE);
+	}
+	else {
+		EnableWindow(buttons[5], FALSE);
+	}
 
 	std::pair<HWND, BOOL> pair;
 
@@ -273,6 +282,13 @@ VOID MyDialog::changedQuestion() {
 
 	m_index = index;
 
+	if (!MyDialog::ptr->getQuiz().at(m_index)->getCode().empty()) {
+		EnableWindow(buttons[5], TRUE);
+	}
+	else {
+		EnableWindow(buttons[5], FALSE);
+	}
+
 	if (checked != NOT_CHECKED) {
 		SendMessage(hRadios[checked], BM_SETCHECK, BST_UNCHECKED, NULL);
 	}
@@ -296,11 +312,13 @@ VOID MyDialog::toggleListBox() {
 		MoveWindow(hQuestion, 4, 10, 685, 65, TRUE);
 		MoveWindow(groupBox1, 14, 100, 695, 210, TRUE);//137 С радиобаттонами 100
 
-		MoveWindow(buttons[0], 44, 340, 80, 24, TRUE);
-		MoveWindow(buttons[1], 159, 340, 120, 24, TRUE);
-		MoveWindow(buttons[2], 314, 340, 100, 24, TRUE);
-		MoveWindow(buttons[3], 450, 340, 120, 24, TRUE);
-		MoveWindow(buttons[4], 604, 340, 75, 24, TRUE);
+		MoveWindow(buttons[0], 40, 340, 80, 24, TRUE);
+		MoveWindow(buttons[1], 240, 340, 80, 24, TRUE);//-40
+		MoveWindow(buttons[2], 350, 340, 100, 24, TRUE);
+		MoveWindow(buttons[3], 480, 340, 100, 24, TRUE);//-20
+		MoveWindow(buttons[4], 610, 340, 75, 24, TRUE);
+
+		MoveWindow(buttons[5], 150, 340, 60, 24, TRUE);
 
 		for (INT i = 0; i < 4; i++) {
 			MoveWindow(hEditForRadios[i], 40, 100 + (16 + i * 45), 660, 46, TRUE);
@@ -316,10 +334,11 @@ VOID MyDialog::toggleListBox() {
 		MoveWindow(groupBox1, 210, 100, 495, 210, TRUE);
 
 		MoveWindow(buttons[0], 210, 340, 80, 24, TRUE);
-		MoveWindow(buttons[1], 300, 340, 120, 24, TRUE);
-		MoveWindow(buttons[2], 430, 340, 100, 24, TRUE);
+		MoveWindow(buttons[1], 360, 340, 80, 24, TRUE);
+		MoveWindow(buttons[2], 450, 340, 80, 24, TRUE);
 		MoveWindow(buttons[3], 540, 340, 80, 24, TRUE);
 		MoveWindow(buttons[4], 630, 340, 75, 24, TRUE);
+		MoveWindow(buttons[5], 300, 340, 50, 24, TRUE);
 
 		for (INT i = 0; i < 4; i++) {
 			MoveWindow(hEditForRadios[i], 210 + 30, 100 + (16 + i * 45), 460, 46, TRUE);
@@ -487,6 +506,9 @@ VOID MyDialog::Cls_OnCommand(HWND hwnd, INT id, HWND hwndCtl, UINT codeNotify)
 	else if (id == IDC_IP) {
 		GetWindowText(MyDialog::ptr->hIp, MyDialog::ptr->m_serverIpAddres, 20);
 		toggleLogin();
+	}
+	else if (id == BUTTON_CODE) {
+		MessageBox(NULL, MyDialog::ptr->getQuiz().at(m_index)->getCode().c_str() , "Код", MB_OK | MB_DEFAULT_DESKTOP_ONLY);
 	}
 }
 

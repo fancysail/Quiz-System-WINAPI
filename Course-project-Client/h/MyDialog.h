@@ -32,7 +32,7 @@ private:
 	//second window
 	HWND hListBox, hQuestionNumber, groupBox, hQuestion, hTimeLeft, groupBox1, hPercents;
 	//second window
-	HWND hRadios[4], hEditForRadios[4], buttons[5];
+	HWND hRadios[4], hEditForRadios[4], buttons[6];
 	//first window
 	HWND hName, hSurname, hFatherName, hGroup, hLogin, hIp;
 	vector<Question*> quiz;
