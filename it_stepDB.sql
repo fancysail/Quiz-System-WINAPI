@@ -1,201 +1,325 @@
-CREATE DATABASE  IF NOT EXISTS `it_step` /*!40100 DEFAULT CHARACTER SET utf8 */;
-USE `it_step`;
--- MySQL dump 10.13  Distrib 5.7.17, for Win64 (x86_64)
+-- phpMyAdmin SQL Dump
+-- version 4.7.0
+-- https://www.phpmyadmin.net/
 --
--- Host: localhost    Database: it_step
--- ------------------------------------------------------
--- Server version	5.7.18-log
+-- Хост: 127.0.0.1
+-- Время создания: Июл 10 2017 г., 11:40
+-- Версия сервера: 10.1.22-MariaDB
+-- Версия PHP: 7.1.4
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
+START TRANSACTION;
+SET time_zone = "+00:00";
+
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+/*!40101 SET NAMES utf8mb4 */;
 
 --
--- Table structure for table `groups`
+-- База данных: `it_step`
 --
 
-DROP TABLE IF EXISTS `groups`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
+-- --------------------------------------------------------
+
+--
+-- Структура таблицы `groups`
+--
+
 CREATE TABLE `groups` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `teacherId` int(10) unsigned NOT NULL,
-  `name` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `fk_teachedId_idx` (`teacherId`),
-  CONSTRAINT `fk_teachedId` FOREIGN KEY (`teacherId`) REFERENCES `teacher` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  `id` int(10) UNSIGNED NOT NULL,
+  `teacherId` int(10) UNSIGNED NOT NULL,
+  `name` varchar(20) COLLATE utf8_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
--- Dumping data for table `groups`
+-- Дамп данных таблицы `groups`
 --
 
-LOCK TABLES `groups` WRITE;
-/*!40000 ALTER TABLE `groups` DISABLE KEYS */;
-INSERT INTO `groups` VALUES (1,1,'ЕКО-16-П3');
-/*!40000 ALTER TABLE `groups` ENABLE KEYS */;
-UNLOCK TABLES;
+INSERT INTO `groups` (`id`, `teacherId`, `name`) VALUES
+(1, 1, 'ЕКО-16-П3');
+
+-- --------------------------------------------------------
 
 --
--- Table structure for table `questions`
+-- Структура таблицы `questions`
 --
 
-DROP TABLE IF EXISTS `questions`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `questions` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL,
   `quizId` int(11) NOT NULL,
   `question` varchar(120) COLLATE utf8_unicode_ci NOT NULL,
   `rightAnswer` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
   `wrongAnswer2` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
   `wrongAnswer3` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
   `wrongAnswer4` varchar(80) COLLATE utf8_unicode_ci NOT NULL,
-  `code` longblob,
-  PRIMARY KEY (`id`),
-  KEY `quizId_idx` (`quizId`),
-  CONSTRAINT `quizId` FOREIGN KEY (`quizId`) REFERENCES `quizes` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  `code` longblob
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
--- Dumping data for table `questions`
+-- Дамп данных таблицы `questions`
 --
 
-LOCK TABLES `questions` WRITE;
-/*!40000 ALTER TABLE `questions` DISABLE KEYS */;
-INSERT INTO `questions` VALUES (27,4,'Which of the following factors supports the statement that reusability is a desirable feature of a language?','Both A and B.','It reduces the compilation time.','It lowers the maintenance cost.','It decreases the testing time.',NULL),(28,4,'Which of the following is a mechanism of static polymorphism?','All of the above','Templates','Function overloading','Operator overloading','VOID receiveUserData(string &name, string &surname, string &fatherName, string &group, ClientInfo &clientinfo) {\r\n	char szBuff[100];\r\n	int result = recv(clientinfo.socket, szBuff, 100, 0);\r\n	if (!strcmp(szBuff, \"<CHECK_STUDENT>\")) {\r\n		strcpy_s(szBuff, \"<OK>\");\r\n		send(clientinfo.socket, szBuff, strlen(szBuff) + 1, 0);\r\n\r\n		result = recv(clientinfo.socket, szBuff, 100, 0);\r\n		name = szBuff;\r\n		strcpy_s(szBuff, \"<OK>\");\r\n		send(clientinfo.socket, szBuff, strlen(szBuff) + 1, 0);\r\n\r\n		result = recv(clientinfo.socket, szBuff, 100, 0);\r\n		surname = szBuff;\r\n		strcpy_s(szBuff, \"<OK>\");\r\n		send(clientinfo.socket, szBuff, strlen(szBuff) + 1, 0);\r\n\r\n		result = recv(clientinfo.socket, szBuff, 100, 0);\r\n		fatherName = szBuff;\r\n		strcpy_s(szBuff, \"<OK>\");\r\n		send(clientinfo.socket, szBuff, strlen(szBuff) + 1, 0);\r\n\r\n		result = recv(clientinfo.socket, szBuff, 100, 0);\r\n		group = szBuff;\r\n	}\r\n}'),(29,4,'What happens if the base and derived class contains definition of a function with same prototype?','Base class object will call base class function and derived class object will ca','Only derived class function will get called irrespective of object.','Only base class function will get called irrespective of object.','Compiler reports an error on compilation.',NULL),(30,4,'Which of the following is not a type of inheritance?','Distributive','Multilevel','Multiple','Hierarchical','BOOL checkUserData(string &name, string &surname, string &fatherName, string &group, ClientInfo & clientinfo) {\r\n	char szBuff[100];\r\n	INT studId = -1;\r\n	INT groupId = -1;\r\n	MyDialog::ptr->ssql << \"select student.id,student.Name,student.groupId from student where name=;\r\n	MyDialog::ptr->ssql << surname <<  << name <<  << fatherName <<  and student.groupId = (select groups.id from groups where groups.name=;\r\n	MyDialog::ptr->ssql << group << );\";\r\n	MyDialog::ptr->sql = MyDialog::ptr->ssql.str();\r\n	MyDialog::ptr->ssql.str(\"\");\r\n	if (!mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str())) {\r\n		MyDialog::ptr->rset = mysql_use_result(MyDialog::ptr->getDB().getConnection());\r\n\r\n		if ((MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset)) == NULL) {\r\n			strcpy(szBuff, \"<DOESNT_EXIST>\");\r\n			send(clientinfo.socket, szBuff, strlen(szBuff) + 1, 0);\r\n			shutdown(clientinfo.socket, SD_BOTH); // SD_BOTH cai?auaao eae i?eai, oae e ioi?aaeo aaiiuo\r\n			closesocket(clientinfo.socket);\r\n		}\r\n		else {\r\n			//Student connected\r\n			//If passed already\r\n			studId = atoi(MyDialog::ptr->row[0]);\r\n			groupId = atoi(MyDialog::ptr->row[2]);\r\n			mysql_free_result(MyDialog::ptr->rset);\r\n\r\n\r\n			MyDialog::ptr->ssql << \"select groups.name from groups where groups.id =  << groupId << ;\";\r\n			MyDialog::ptr->sql = MyDialog::ptr->ssql.str();\r\n			MyDialog::ptr->ssql.str(\"\");\r\n			if (!mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str())) {//If a student from the group chosen by the teacher;\r\n				MyDialog::ptr->rset = mysql_use_result(MyDialog::ptr->getDB().getConnection());\r\n				if ((MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset)) != NULL) {\r\n\r\n					if (!strcmp(MyDialog::ptr->getGroup(), MyDialog::ptr->row[0])) {\r\n						MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);\r\n						mysql_free_result(MyDialog::ptr->rset);\r\n\r\n						MyDialog::ptr->ssql << \"select results.date from results where results.idStudent =  << studId <<  \";\r\n						MyDialog::ptr->ssql << \"AND results.idQuiz =  << MyDialog::ptr->quizID << ;\";\r\n						MyDialog::ptr->sql = MyDialog::ptr->ssql.str();\r\n						MyDialog::ptr->ssql.str(\"\");\r\n\r\n						if (!mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str())) {\r\n							MyDialog::ptr->rset = mysql_use_result(MyDialog::ptr->getDB().getConnection());\r\n\r\n							if ((MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset)) == NULL) {//Never passed no record in results table yet\r\n								MyDialog::ptr->ssql << \"INSERT INTO results(results.idQuiz,results.idStudent) VALUES(;\r\n								MyDialog::ptr->ssql << MyDialog::ptr->quizID << , << studId << );\";\r\n								MyDialog::ptr->sql = MyDialog::ptr->ssql.str();\r\n								MyDialog::ptr->ssql.str(\"\");\r\n								mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str());\r\n\r\n								strcpy_s(szBuff, \"<OK>\");\r\n								send(clientinfo.socket, szBuff, strlen(szBuff) + 1, 0);\r\n								MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);\r\n								mysql_free_result(MyDialog::ptr->rset);\r\n								return TRUE;\r\n							}\r\n							else if (MyDialog::ptr->row[0] != NULL) {//Record exists, and Date field is filled\r\n								strcpy(szBuff, \"<ALREADY_PASSED>\");\r\n								send(clientinfo.socket, szBuff, strlen(szBuff) + 1, 0);\r\n								shutdown(clientinfo.socket, SD_BOTH); // SD_BOTH cai?auaao eae i?eai, oae e ioi?aaeo aaiiuo\r\n								closesocket(clientinfo.socket);\r\n							}\r\n							else {//Record exists, and Date field is empty\r\n								  //If connected from another pc or erased date field in database\r\n								string lookFor = surname;\r\n								lookFor += \" \";\r\n								lookFor += name;\r\n								lookFor += \" \";\r\n								lookFor += fatherName;\r\n								LVFINDINFO item = { LVFI_STRING, (LPCTSTR)lookFor.c_str() };\r\n								int indexUser = ListView_FindItem(MyDialog::ptr->getUserList(), -1, &item);\r\n\r\n								if (MyDialog::ptr->userListView.at(indexUser)->getStatus() == Status::NOT_CONNECTED) {//Retake\r\n									strcpy_s(szBuff, \"<OK>\");\r\n									send(clientinfo.socket, szBuff, strlen(szBuff) + 1, 0);\r\n									MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);\r\n									mysql_free_result(MyDialog::ptr->rset);\r\n									return TRUE;\r\n								}\r\n								else {//Taking right now\r\n									strcpy_s(szBuff, \"<ALREADY_LOGGED>\");\r\n									send(clientinfo.socket, szBuff, strlen(szBuff) + 1, 0);\r\n									MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);\r\n									mysql_free_result(MyDialog::ptr->rset);\r\n									return FALSE;\r\n								}\r\n							}\r\n						}\r\n\r\n					}\r\n					else {\r\n						MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);\r\n						mysql_free_result(MyDialog::ptr->rset);\r\n						return FALSE;\r\n					}\r\n				}\r\n			}\r\n		}\r\n	}\r\n	MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);\r\n	mysql_free_result(MyDialog::ptr->rset);\r\n	return FALSE;\r\n}'),(31,4,'Which of the following keyword is used to overload an operator?','operator','overload','friend','override',NULL),(32,4,'Which of the following statement is correct?','Object is an instance of a class.','Class is an instance of object.','Class is an instance of data type.','Object is an instance of data type.','INT_PTR CALLBACK MyDialog::DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)\r\n{\r\n	switch (message)\r\n	{\r\n		HANDLE_MSG(hwnd, WM_CLOSE, ptr->Cls_OnClose);\r\n		HANDLE_MSG(hwnd, WM_INITDIALOG, ptr->Cls_OnInitDialog);\r\n		HANDLE_MSG(hwnd, WM_COMMAND, ptr->Cls_OnCommand);\r\n		case WM_NOTIFY:\r\n		HandleWM_NOTIFY(lParam);\r\n		break;\r\n	}\r\n	return FALSE;\r\n}'),(33,4,'Which of the following function / type of function cannot be overloaded?','Virtual function','Static function','Member function','Both B and C',NULL),(34,4,'Which of the following statement is incorrect?','The default arguments are given in the function prototype and should be repeated','Compiler uses the prototype information to build a call, not the function defini','The default arguments are given in the function prototype.','The default value for an argument can be a global constant.',NULL),(35,4,'Which of the following statements is correct?1.Once the variable and the reference are linked they are tied together.2.O','Only 1 is correct.','Only 2 is correct.','Both 1 and 2 are correct.','Both 1 and 2 are incorrect.',NULL),(36,4,'Which of the following statement is correct?','A reference is a constant pointer.','A reference is not a constant pointer.','An array of references is acceptable.','It is possible to create a reference to a reference.',NULL),(37,4,'Which of the following statement is correct?','An array of references is not acceptable.','Once a reference variable has been defined to refer to a particular variable it ','An array of references is acceptable.','Reference is like a structure.',NULL),(38,4,'Which of the following statement is correct with respect to the use of friend keyword inside a class?','A class may be declared as a friend.','A private data member can be declared as a friend.','An object may be declared as a friend.','We can use friend keyword as a class name.',NULL),(39,4,'Which of the following statements is correct?','Both data and functions can be either private or public.','Data items in a class must be private.','Member functions of a class must be private.','Constructor of a class cannot be private.',NULL),(40,4,'Which of the following means \"The use of an object of one class in definition of another class\"?','Composition','Inheritance','Encapsulation','Abstraction',NULL),(41,4,'Destructor has the same name as the constructor and it is preceded by ______ .','~','?','!','$',NULL),(42,4,'When are the Global objects destroyed?','When the program terminates.','When the control comes out of the block in which they are being used.','When the control comes out of the function in which they are being used.','As soon as local objects die.',NULL),(43,4,'How many default constructors per class are possible?','Only one','Two','Three','Unlimited',NULL),(44,4,'Which of the following statement is correct about destructors?','A destructor has no return type.','A destructor has void return type.','A destructor has integer return type.','A destructors return type is always same as that of main().',NULL),(45,4,'Which of the following type of class allows only one object of it to be created?','Singleton class','Abstract class','Virtual class','Friend class',NULL),(46,4,'How many instances of an abstract class can be created?','0','5','13','1',NULL),(47,4,'Which of the following statement will be correct if the function has three arguments passed to it?','The trailing argument will be the default argument.','The first argument will be the default argument.','The middle argument will be the default argument.','All the argument will be the default argument.',NULL),(48,4,'Отработает ли программа','Да','Нет','Да/нет','Нет/да','void updateQuizCombo(HWND& h) {\r\n	if (Quiz::ptr !=nullptr && Quiz::ptr->hChooseQuiz == h) {\r\n		Quiz::ptr->m_quizRelation.clear();\r\n	}\r\n	SendMessage(h, CB_RESETCONTENT, NULL, NULL);\r\n\r\n	MyDialog::ptr->ssql << \"select * from quizes;\";\r\n	MyDialog::ptr->sql = MyDialog::ptr->ssql.str();\r\n	MyDialog::ptr->ssql.str(\"\");\r\n	INT counter = 0;\r\n	if (!mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str())) {\r\n		MyDialog::ptr->rset = mysql_use_result(MyDialog::ptr->getDB().getConnection());\r\n		while ((MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset)) != NULL) {\r\n			if (Quiz::ptr != nullptr && Quiz::ptr->hChooseQuiz == h) {\r\n				Quiz::ptr->m_quizRelation.insert_or_assign(counter++, atoi(MyDialog::ptr->row[0]));\r\n			}\r\n			SendMessage(h, CB_ADDSTRING, 0, (LPARAM)MyDialog::ptr->row[1]);\r\n		}\r\n		MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);\r\n	}\r\n	mysql_free_result(MyDialog::ptr->rset);\r\n}\r\nvoid updateQuestionsCombo(HWND& h,INT quizId) {\r\n	Quiz::ptr->m_questionRelation.clear();\r\n	SendMessage(h, CB_RESETCONTENT, NULL, NULL);\r\n\r\n	MyDialog::ptr->ssql << \"select * from questions where quizId = ; \r\n	MyDialog::ptr->ssql << quizId << ;\";\r\n	MyDialog::ptr->sql = MyDialog::ptr->ssql.str();\r\n	MyDialog::ptr->ssql.str(\"\");\r\n	INT counter = 0;\r\n	string buff;\r\n	if (!mysql_query(MyDialog::ptr->getDB().getConnection(), MyDialog::ptr->sql.c_str())) {\r\n		MyDialog::ptr->rset = mysql_use_result(MyDialog::ptr->getDB().getConnection());\r\n		while ((MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset)) != NULL) {\r\n			Quiz::ptr->m_questionRelation.insert_or_assign(counter, atoi(MyDialog::ptr->row[0]));\r\n			buff = to_string(++counter);\r\n			buff += \".\";\r\n			buff += MyDialog::ptr->row[2];\r\n			SendMessage(h, CB_ADDSTRING, 0, (LPARAM)buff.c_str());\r\n			buff.clear();\r\n		}\r\n		MyDialog::ptr->row = mysql_fetch_row(MyDialog::ptr->rset);\r\n	}\r\n	mysql_free_result(MyDialog::ptr->rset);\r\n}');
-/*!40000 ALTER TABLE `questions` ENABLE KEYS */;
-UNLOCK TABLES;
+INSERT INTO `questions` (`id`, `quizId`, `question`, `rightAnswer`, `wrongAnswer2`, `wrongAnswer3`, `wrongAnswer4`, `code`) VALUES
+(27, 4, 'Which of the following factors supports the statement that reusability is a desirable feature of a language?', 'Both A and B.', 'It reduces the compilation time.', 'It lowers the maintenance cost.', 'It decreases the testing time.', NULL),
+(28, 4, 'Which of the following is a mechanism of static polymorphism?', 'All of the above', 'Templates', 'Function overloading', 'Operator overloading', 0x564f49442072656365697665557365724461746128737472696e6720266e616d652c20737472696e6720267375726e616d652c20737472696e6720266661746865724e616d652c20737472696e67202667726f75702c20436c69656e74496e666f2026636c69656e74696e666f29207b0d0a096368617220737a427566665b3130305d3b0d0a09696e7420726573756c74203d207265637628636c69656e74696e666f2e736f636b65742c20737a427566662c203130302c2030293b0d0a096966202821737472636d7028737a427566662c20223c434845434b5f53545544454e543e222929207b0d0a09097374726370795f7328737a427566662c20223c4f4b3e22293b0d0a090973656e6428636c69656e74696e666f2e736f636b65742c20737a427566662c207374726c656e28737a4275666629202b20312c2030293b0d0a0d0a0909726573756c74203d207265637628636c69656e74696e666f2e736f636b65742c20737a427566662c203130302c2030293b0d0a09096e616d65203d20737a427566663b0d0a09097374726370795f7328737a427566662c20223c4f4b3e22293b0d0a090973656e6428636c69656e74696e666f2e736f636b65742c20737a427566662c207374726c656e28737a4275666629202b20312c2030293b0d0a0d0a0909726573756c74203d207265637628636c69656e74696e666f2e736f636b65742c20737a427566662c203130302c2030293b0d0a09097375726e616d65203d20737a427566663b0d0a09097374726370795f7328737a427566662c20223c4f4b3e22293b0d0a090973656e6428636c69656e74696e666f2e736f636b65742c20737a427566662c207374726c656e28737a4275666629202b20312c2030293b0d0a0d0a0909726573756c74203d207265637628636c69656e74696e666f2e736f636b65742c20737a427566662c203130302c2030293b0d0a09096661746865724e616d65203d20737a427566663b0d0a09097374726370795f7328737a427566662c20223c4f4b3e22293b0d0a090973656e6428636c69656e74696e666f2e736f636b65742c20737a427566662c207374726c656e28737a4275666629202b20312c2030293b0d0a0d0a0909726573756c74203d207265637628636c69656e74696e666f2e736f636b65742c20737a427566662c203130302c2030293b0d0a090967726f7570203d20737a427566663b0d0a097d0d0a7d),
+(29, 4, 'What happens if the base and derived class contains definition of a function with same prototype?', 'Base class object will call base class function and derived class object will ca', 'Only derived class function will get called irrespective of object.', 'Only base class function will get called irrespective of object.', 'Compiler reports an error on compilation.', NULL),
+(30, 4, 'Which of the following is not a type of inheritance?', 'Distributive', 'Multilevel', 'Multiple', 'Hierarchical', 0x424f4f4c20636865636b557365724461746128737472696e6720266e616d652c20737472696e6720267375726e616d652c20737472696e6720266661746865724e616d652c20737472696e67202667726f75702c20436c69656e74496e666f202620636c69656e74696e666f29207b0d0a096368617220737a427566665b3130305d3b0d0a09494e5420737475644964203d202d313b0d0a09494e542067726f75704964203d202d313b0d0a094d794469616c6f673a3a7074722d3e7373716c203c3c202273656c6563742073747564656e742e69642c73747564656e742e4e616d652c73747564656e742e67726f757049642066726f6d2073747564656e74207768657265206e616d653d3b0d0a094d794469616c6f673a3a7074722d3e7373716c203c3c207375726e616d65203c3c20203c3c206e616d65203c3c20203c3c206661746865724e616d65203c3c2020616e642073747564656e742e67726f75704964203d202873656c6563742067726f7570732e69642066726f6d2067726f7570732077686572652067726f7570732e6e616d653d3b0d0a094d794469616c6f673a3a7074722d3e7373716c203c3c2067726f7570203c3c20293b223b0d0a094d794469616c6f673a3a7074722d3e73716c203d204d794469616c6f673a3a7074722d3e7373716c2e73747228293b0d0a094d794469616c6f673a3a7074722d3e7373716c2e737472282222293b0d0a0969662028216d7973716c5f7175657279284d794469616c6f673a3a7074722d3e676574444228292e676574436f6e6e656374696f6e28292c204d794469616c6f673a3a7074722d3e73716c2e635f73747228292929207b0d0a09094d794469616c6f673a3a7074722d3e72736574203d206d7973716c5f7573655f726573756c74284d794469616c6f673a3a7074722d3e676574444228292e676574436f6e6e656374696f6e2829293b0d0a0d0a090969662028284d794469616c6f673a3a7074722d3e726f77203d206d7973716c5f66657463685f726f77284d794469616c6f673a3a7074722d3e727365742929203d3d204e554c4c29207b0d0a09090973747263707928737a427566662c20223c444f45534e545f45584953543e22293b0d0a09090973656e6428636c69656e74696e666f2e736f636b65742c20737a427566662c207374726c656e28737a4275666629202b20312c2030293b0d0a09090973687574646f776e28636c69656e74696e666f2e736f636b65742c2053445f424f5448293b202f2f2053445f424f5448206361693f617561616f2065616520693f6561692c206f6165206520696f693f6161656f2061616969756f0d0a090909636c6f7365736f636b657428636c69656e74696e666f2e736f636b6574293b0d0a09097d0d0a0909656c7365207b0d0a0909092f2f53747564656e7420636f6e6e65637465640d0a0909092f2f49662070617373656420616c72656164790d0a090909737475644964203d2061746f69284d794469616c6f673a3a7074722d3e726f775b305d293b0d0a09090967726f75704964203d2061746f69284d794469616c6f673a3a7074722d3e726f775b325d293b0d0a0909096d7973716c5f667265655f726573756c74284d794469616c6f673a3a7074722d3e72736574293b0d0a0d0a0d0a0909094d794469616c6f673a3a7074722d3e7373716c203c3c202273656c6563742067726f7570732e6e616d652066726f6d2067726f7570732077686572652067726f7570732e6964203d20203c3c2067726f75704964203c3c203b223b0d0a0909094d794469616c6f673a3a7074722d3e73716c203d204d794469616c6f673a3a7074722d3e7373716c2e73747228293b0d0a0909094d794469616c6f673a3a7074722d3e7373716c2e737472282222293b0d0a09090969662028216d7973716c5f7175657279284d794469616c6f673a3a7074722d3e676574444228292e676574436f6e6e656374696f6e28292c204d794469616c6f673a3a7074722d3e73716c2e635f73747228292929207b2f2f496620612073747564656e742066726f6d207468652067726f75702063686f73656e2062792074686520746561636865723b0d0a090909094d794469616c6f673a3a7074722d3e72736574203d206d7973716c5f7573655f726573756c74284d794469616c6f673a3a7074722d3e676574444228292e676574436f6e6e656374696f6e2829293b0d0a0909090969662028284d794469616c6f673a3a7074722d3e726f77203d206d7973716c5f66657463685f726f77284d794469616c6f673a3a7074722d3e72736574292920213d204e554c4c29207b0d0a0d0a09090909096966202821737472636d70284d794469616c6f673a3a7074722d3e67657447726f757028292c204d794469616c6f673a3a7074722d3e726f775b305d2929207b0d0a0909090909094d794469616c6f673a3a7074722d3e726f77203d206d7973716c5f66657463685f726f77284d794469616c6f673a3a7074722d3e72736574293b0d0a0909090909096d7973716c5f667265655f726573756c74284d794469616c6f673a3a7074722d3e72736574293b0d0a0d0a0909090909094d794469616c6f673a3a7074722d3e7373716c203c3c202273656c65637420726573756c74732e646174652066726f6d20726573756c747320776865726520726573756c74732e696453747564656e74203d20203c3c20737475644964203c3c2020223b0d0a0909090909094d794469616c6f673a3a7074722d3e7373716c203c3c2022414e4420726573756c74732e69645175697a203d20203c3c204d794469616c6f673a3a7074722d3e7175697a4944203c3c203b223b0d0a0909090909094d794469616c6f673a3a7074722d3e73716c203d204d794469616c6f673a3a7074722d3e7373716c2e73747228293b0d0a0909090909094d794469616c6f673a3a7074722d3e7373716c2e737472282222293b0d0a0d0a09090909090969662028216d7973716c5f7175657279284d794469616c6f673a3a7074722d3e676574444228292e676574436f6e6e656374696f6e28292c204d794469616c6f673a3a7074722d3e73716c2e635f73747228292929207b0d0a090909090909094d794469616c6f673a3a7074722d3e72736574203d206d7973716c5f7573655f726573756c74284d794469616c6f673a3a7074722d3e676574444228292e676574436f6e6e656374696f6e2829293b0d0a0d0a0909090909090969662028284d794469616c6f673a3a7074722d3e726f77203d206d7973716c5f66657463685f726f77284d794469616c6f673a3a7074722d3e727365742929203d3d204e554c4c29207b2f2f4e6576657220706173736564206e6f207265636f726420696e20726573756c7473207461626c65207965740d0a09090909090909094d794469616c6f673a3a7074722d3e7373716c203c3c2022494e5345525420494e544f20726573756c747328726573756c74732e69645175697a2c726573756c74732e696453747564656e74292056414c554553283b0d0a09090909090909094d794469616c6f673a3a7074722d3e7373716c203c3c204d794469616c6f673a3a7074722d3e7175697a4944203c3c202c203c3c20737475644964203c3c20293b223b0d0a09090909090909094d794469616c6f673a3a7074722d3e73716c203d204d794469616c6f673a3a7074722d3e7373716c2e73747228293b0d0a09090909090909094d794469616c6f673a3a7074722d3e7373716c2e737472282222293b0d0a09090909090909096d7973716c5f7175657279284d794469616c6f673a3a7074722d3e676574444228292e676574436f6e6e656374696f6e28292c204d794469616c6f673a3a7074722d3e73716c2e635f7374722829293b0d0a0d0a09090909090909097374726370795f7328737a427566662c20223c4f4b3e22293b0d0a090909090909090973656e6428636c69656e74696e666f2e736f636b65742c20737a427566662c207374726c656e28737a4275666629202b20312c2030293b0d0a09090909090909094d794469616c6f673a3a7074722d3e726f77203d206d7973716c5f66657463685f726f77284d794469616c6f673a3a7074722d3e72736574293b0d0a09090909090909096d7973716c5f667265655f726573756c74284d794469616c6f673a3a7074722d3e72736574293b0d0a090909090909090972657475726e20545255453b0d0a090909090909097d0d0a09090909090909656c736520696620284d794469616c6f673a3a7074722d3e726f775b305d20213d204e554c4c29207b2f2f5265636f7264206578697374732c20616e642044617465206669656c642069732066696c6c65640d0a090909090909090973747263707928737a427566662c20223c414c52454144595f5041535345443e22293b0d0a090909090909090973656e6428636c69656e74696e666f2e736f636b65742c20737a427566662c207374726c656e28737a4275666629202b20312c2030293b0d0a090909090909090973687574646f776e28636c69656e74696e666f2e736f636b65742c2053445f424f5448293b202f2f2053445f424f5448206361693f617561616f2065616520693f6561692c206f6165206520696f693f6161656f2061616969756f0d0a0909090909090909636c6f7365736f636b657428636c69656e74696e666f2e736f636b6574293b0d0a090909090909097d0d0a09090909090909656c7365207b2f2f5265636f7264206578697374732c20616e642044617465206669656c6420697320656d7074790d0a090909090909090920202f2f496620636f6e6e65637465642066726f6d20616e6f74686572207063206f72206572617365642064617465206669656c6420696e2064617461626173650d0a0909090909090909737472696e67206c6f6f6b466f72203d207375726e616d653b0d0a09090909090909096c6f6f6b466f72202b3d202220223b0d0a09090909090909096c6f6f6b466f72202b3d206e616d653b0d0a09090909090909096c6f6f6b466f72202b3d202220223b0d0a09090909090909096c6f6f6b466f72202b3d206661746865724e616d653b0d0a09090909090909094c5646494e44494e464f206974656d203d207b204c5646495f535452494e472c20284c504354535452296c6f6f6b466f722e635f7374722829207d3b0d0a0909090909090909696e7420696e64657855736572203d204c697374566965775f46696e644974656d284d794469616c6f673a3a7074722d3e676574557365724c69737428292c202d312c20266974656d293b0d0a0d0a0909090909090909696620284d794469616c6f673a3a7074722d3e757365724c697374566965772e617428696e64657855736572292d3e6765745374617475732829203d3d205374617475733a3a4e4f545f434f4e4e454354454429207b2f2f526574616b650d0a0909090909090909097374726370795f7328737a427566662c20223c4f4b3e22293b0d0a09090909090909090973656e6428636c69656e74696e666f2e736f636b65742c20737a427566662c207374726c656e28737a4275666629202b20312c2030293b0d0a0909090909090909094d794469616c6f673a3a7074722d3e726f77203d206d7973716c5f66657463685f726f77284d794469616c6f673a3a7074722d3e72736574293b0d0a0909090909090909096d7973716c5f667265655f726573756c74284d794469616c6f673a3a7074722d3e72736574293b0d0a09090909090909090972657475726e20545255453b0d0a09090909090909097d0d0a0909090909090909656c7365207b2f2f54616b696e67207269676874206e6f770d0a0909090909090909097374726370795f7328737a427566662c20223c414c52454144595f4c4f474745443e22293b0d0a09090909090909090973656e6428636c69656e74696e666f2e736f636b65742c20737a427566662c207374726c656e28737a4275666629202b20312c2030293b0d0a0909090909090909094d794469616c6f673a3a7074722d3e726f77203d206d7973716c5f66657463685f726f77284d794469616c6f673a3a7074722d3e72736574293b0d0a0909090909090909096d7973716c5f667265655f726573756c74284d794469616c6f673a3a7074722d3e72736574293b0d0a09090909090909090972657475726e2046414c53453b0d0a09090909090909097d0d0a090909090909097d0d0a0909090909097d0d0a0d0a09090909097d0d0a0909090909656c7365207b0d0a0909090909094d794469616c6f673a3a7074722d3e726f77203d206d7973716c5f66657463685f726f77284d794469616c6f673a3a7074722d3e72736574293b0d0a0909090909096d7973716c5f667265655f726573756c74284d794469616c6f673a3a7074722d3e72736574293b0d0a09090909090972657475726e2046414c53453b0d0a09090909097d0d0a090909097d0d0a0909097d0d0a09097d0d0a097d0d0a094d794469616c6f673a3a7074722d3e726f77203d206d7973716c5f66657463685f726f77284d794469616c6f673a3a7074722d3e72736574293b0d0a096d7973716c5f667265655f726573756c74284d794469616c6f673a3a7074722d3e72736574293b0d0a0972657475726e2046414c53453b0d0a7d),
+(31, 4, 'Which of the following keyword is used to overload an operator?', 'operator', 'overload', 'friend', 'override', NULL),
+(32, 4, 'Which of the following statement is correct?', 'Object is an instance of a class.', 'Class is an instance of object.', 'Class is an instance of data type.', 'Object is an instance of data type.', 0x494e545f5054522043414c4c4241434b204d794469616c6f673a3a446c6750726f632848574e442068776e642c2055494e54206d6573736167652c2057504152414d2077506172616d2c204c504152414d206c506172616d290d0a7b0d0a0973776974636820286d657373616765290d0a097b0d0a090948414e444c455f4d53472868776e642c20574d5f434c4f53452c207074722d3e436c735f4f6e436c6f7365293b0d0a090948414e444c455f4d53472868776e642c20574d5f494e49544449414c4f472c207074722d3e436c735f4f6e496e69744469616c6f67293b0d0a090948414e444c455f4d53472868776e642c20574d5f434f4d4d414e442c207074722d3e436c735f4f6e436f6d6d616e64293b0d0a09096361736520574d5f4e4f544946593a0d0a090948616e646c65574d5f4e4f54494659286c506172616d293b0d0a0909627265616b3b0d0a097d0d0a0972657475726e2046414c53453b0d0a7d),
+(33, 4, 'Which of the following function / type of function cannot be overloaded?', 'Virtual function', 'Static function', 'Member function', 'Both B and C', NULL),
+(34, 4, 'Which of the following statement is incorrect?', 'The default arguments are given in the function prototype and should be repeated', 'Compiler uses the prototype information to build a call, not the function defini', 'The default arguments are given in the function prototype.', 'The default value for an argument can be a global constant.', NULL),
+(35, 4, 'Which of the following statements is correct?1.Once the variable and the reference are linked they are tied together.2.O', 'Only 1 is correct.', 'Only 2 is correct.', 'Both 1 and 2 are correct.', 'Both 1 and 2 are incorrect.', NULL),
+(36, 4, 'Which of the following statement is correct?', 'A reference is a constant pointer.', 'A reference is not a constant pointer.', 'An array of references is acceptable.', 'It is possible to create a reference to a reference.', NULL),
+(37, 4, 'Which of the following statement is correct?', 'An array of references is not acceptable.', 'Once a reference variable has been defined to refer to a particular variable it ', 'An array of references is acceptable.', 'Reference is like a structure.', NULL),
+(38, 4, 'Which of the following statement is correct with respect to the use of friend keyword inside a class?', 'A class may be declared as a friend.', 'A private data member can be declared as a friend.', 'An object may be declared as a friend.', 'We can use friend keyword as a class name.', NULL),
+(39, 4, 'Which of the following statements is correct?', 'Both data and functions can be either private or public.', 'Data items in a class must be private.', 'Member functions of a class must be private.', 'Constructor of a class cannot be private.', NULL),
+(40, 4, 'Which of the following means \"The use of an object of one class in definition of another class\"?', 'Composition', 'Inheritance', 'Encapsulation', 'Abstraction', NULL),
+(41, 4, 'Destructor has the same name as the constructor and it is preceded by ______ .', '~', '?', '!', '$', NULL),
+(42, 4, 'When are the Global objects destroyed?', 'When the program terminates.', 'When the control comes out of the block in which they are being used.', 'When the control comes out of the function in which they are being used.', 'As soon as local objects die.', NULL),
+(43, 4, 'How many default constructors per class are possible?', 'Only one', 'Two', 'Three', 'Unlimited', NULL),
+(44, 4, 'Which of the following statement is correct about destructors?', 'A destructor has no return type.', 'A destructor has void return type.', 'A destructor has integer return type.', 'A destructors return type is always same as that of main().', NULL),
+(45, 4, 'Which of the following type of class allows only one object of it to be created?', 'Singleton class', 'Abstract class', 'Virtual class', 'Friend class', NULL),
+(46, 4, 'How many instances of an abstract class can be created?', '0', '5', '13', '1', NULL),
+(47, 4, 'Which of the following statement will be correct if the function has three arguments passed to it?', 'The trailing argument will be the default argument.', 'The first argument will be the default argument.', 'The middle argument will be the default argument.', 'All the argument will be the default argument.', NULL),
+(48, 4, 'Отработает ли программа', 'Да', 'Нет', 'Да/нет', 'Нет/да', 0x766f6964207570646174655175697a436f6d626f2848574e4426206829207b0d0a09696620285175697a3a3a70747220213d6e756c6c707472202626205175697a3a3a7074722d3e6843686f6f73655175697a203d3d206829207b0d0a09095175697a3a3a7074722d3e6d5f7175697a52656c6174696f6e2e636c65617228293b0d0a097d0d0a0953656e644d65737361676528682c2043425f5245534554434f4e54454e542c204e554c4c2c204e554c4c293b0d0a0d0a094d794469616c6f673a3a7074722d3e7373716c203c3c202273656c656374202a2066726f6d207175697a65733b223b0d0a094d794469616c6f673a3a7074722d3e73716c203d204d794469616c6f673a3a7074722d3e7373716c2e73747228293b0d0a094d794469616c6f673a3a7074722d3e7373716c2e737472282222293b0d0a09494e5420636f756e746572203d20303b0d0a0969662028216d7973716c5f7175657279284d794469616c6f673a3a7074722d3e676574444228292e676574436f6e6e656374696f6e28292c204d794469616c6f673a3a7074722d3e73716c2e635f73747228292929207b0d0a09094d794469616c6f673a3a7074722d3e72736574203d206d7973716c5f7573655f726573756c74284d794469616c6f673a3a7074722d3e676574444228292e676574436f6e6e656374696f6e2829293b0d0a09097768696c652028284d794469616c6f673a3a7074722d3e726f77203d206d7973716c5f66657463685f726f77284d794469616c6f673a3a7074722d3e72736574292920213d204e554c4c29207b0d0a090909696620285175697a3a3a70747220213d206e756c6c707472202626205175697a3a3a7074722d3e6843686f6f73655175697a203d3d206829207b0d0a090909095175697a3a3a7074722d3e6d5f7175697a52656c6174696f6e2e696e736572745f6f725f61737369676e28636f756e7465722b2b2c2061746f69284d794469616c6f673a3a7074722d3e726f775b305d29293b0d0a0909097d0d0a09090953656e644d65737361676528682c2043425f414444535452494e472c20302c20284c504152414d294d794469616c6f673a3a7074722d3e726f775b315d293b0d0a09097d0d0a09094d794469616c6f673a3a7074722d3e726f77203d206d7973716c5f66657463685f726f77284d794469616c6f673a3a7074722d3e72736574293b0d0a097d0d0a096d7973716c5f667265655f726573756c74284d794469616c6f673a3a7074722d3e72736574293b0d0a7d0d0a766f6964207570646174655175657374696f6e73436f6d626f2848574e442620682c494e54207175697a496429207b0d0a095175697a3a3a7074722d3e6d5f7175657374696f6e52656c6174696f6e2e636c65617228293b0d0a0953656e644d65737361676528682c2043425f5245534554434f4e54454e542c204e554c4c2c204e554c4c293b0d0a0d0a094d794469616c6f673a3a7074722d3e7373716c203c3c202273656c656374202a2066726f6d207175657374696f6e73207768657265207175697a4964203d203b200d0a094d794469616c6f673a3a7074722d3e7373716c203c3c207175697a4964203c3c203b223b0d0a094d794469616c6f673a3a7074722d3e73716c203d204d794469616c6f673a3a7074722d3e7373716c2e73747228293b0d0a094d794469616c6f673a3a7074722d3e7373716c2e737472282222293b0d0a09494e5420636f756e746572203d20303b0d0a09737472696e6720627566663b0d0a0969662028216d7973716c5f7175657279284d794469616c6f673a3a7074722d3e676574444228292e676574436f6e6e656374696f6e28292c204d794469616c6f673a3a7074722d3e73716c2e635f73747228292929207b0d0a09094d794469616c6f673a3a7074722d3e72736574203d206d7973716c5f7573655f726573756c74284d794469616c6f673a3a7074722d3e676574444228292e676574436f6e6e656374696f6e2829293b0d0a09097768696c652028284d794469616c6f673a3a7074722d3e726f77203d206d7973716c5f66657463685f726f77284d794469616c6f673a3a7074722d3e72736574292920213d204e554c4c29207b0d0a0909095175697a3a3a7074722d3e6d5f7175657374696f6e52656c6174696f6e2e696e736572745f6f725f61737369676e28636f756e7465722c2061746f69284d794469616c6f673a3a7074722d3e726f775b305d29293b0d0a09090962756666203d20746f5f737472696e67282b2b636f756e746572293b0d0a09090962756666202b3d20222e223b0d0a09090962756666202b3d204d794469616c6f673a3a7074722d3e726f775b325d3b0d0a09090953656e644d65737361676528682c2043425f414444535452494e472c20302c20284c504152414d29627566662e635f7374722829293b0d0a090909627566662e636c65617228293b0d0a09097d0d0a09094d794469616c6f673a3a7074722d3e726f77203d206d7973716c5f66657463685f726f77284d794469616c6f673a3a7074722d3e72736574293b0d0a097d0d0a096d7973716c5f667265655f726573756c74284d794469616c6f673a3a7074722d3e72736574293b0d0a7d),
+(49, 5, 'Что произойдёт в результате попытки преобразования dynamic_cast:', 'Указатель b обнулится', 'Указатель b будет инициализирован адресом a', 'Будет возбуждено исключение std::bad_cast', 'Поведение не определено', 0x23696e636c756465203c696f73747265616d3e200d0a7573696e67206e616d657370616365207374643b200d0a200d0a636c61737320417b200d0a7075626c69633a200d0a202020207669727475616c207e412829207b7d200d0a7d3b200d0a200d0a636c61737320423a207075626c696320417b207d3b200d0a200d0a696e74206d61696e28297b200d0a2020202041202a2061203d206e6577204128293b200d0a202020207472797b200d0a202020202020202042202a2062203d2064796e616d69635f636173743c42202a3e2861293b200d0a202020207d6361746368282e2e2e297b2020202020202020200d0a202020207d20202020200d0a2020202072657475726e20303b200d0a7d20),
+(50, 5, 'Что напечатает следующий код:', 'classD', 'classB', 'возникнет ошибка компиляции', 'возникнет ошибка выполнения', 0x23696e636c756465203c696f73747265616d3e200d0a7573696e67206e616d657370616365207374643b200d0a200d0a636c6173732042207b200d0a202020207075626c69633a207669727475616c20766f6964206d7367202829207b20636f7574203c3c2022636c61737342223b207d200d0a7d3b200d0a200d0a636c6173732044203a207075626c69632042207b200d0a202020207075626c69633a207669727475616c20766f6964206d73672829207b20636f7574203c3c2022636c61737344223b207d200d0a7d3b200d0a200d0a696e74206d61696e2829207b200d0a2020202042202a20766172203d206e657720443b200d0a202020207661722d3e6d736728293b200d0a202020202f2f202e2e2e2e200d0a2020202072657475726e20303b200d0a7d),
+(51, 5, 'Что произойдет при компиляции и выполнении кода?', 'Будет ошибка компоновки', 'Будет выведено A()B()~B()~A()', 'Будет выведено A()B()~A()~B()', 'Будет ошибка компиляции', 0x23696e636c756465203c696f73747265616d3e200d0a7573696e67206e616d657370616365207374643b200d0a200d0a636c6173732041207b200d0a7075626c69633a200d0a20202020412829207b2066282241282922293b207d200d0a202020207e412829207b206628227e41282922293b207d200d0a70726f7465637465643a200d0a202020207669727475616c20766f6964206628636f6e737420636861722a2073747229203d20303b200d0a7d3b200d0a200d0a636c6173732042203a207075626c69632041207b200d0a7075626c69633a200d0a20202020422829207b2066282242282922293b207d200d0a202020207e422829207b206628227e42282922293b207d200d0a70726f7465637465643a200d0a20202020766f6964206628636f6e737420636861722a2073747229207b20636f75743c3c20737472203c3c20656e646c3b207d200d0a7d3b200d0a200d0a696e74206d61696e2829207b200d0a202020204220623b200d0a2020202072657475726e20303b200d0a7d),
+(52, 5, 'Что выведет в консоль следующий код:', '133', '123', '333', 'Ошибка компиляции.', 0x23696e636c756465203c696f73747265616d3e200d0a7573696e67206e616d657370616365207374643b200d0a200d0a636c61737320417b200d0a7075626c69633a20202020200d0a20202020696e7420666f6f28297b2072657475726e20313b207d200d0a7d3b200d0a636c61737320423a207075626c696320417b200d0a7075626c69633a20202020200d0a202020207669727475616c20696e7420666f6f28297b2072657475726e20323b207d200d0a7d3b200d0a636c61737320433a207075626c696320427b200d0a7075626c69633a20202020200d0a20202020696e7420666f6f28297b2072657475726e20333b207d200d0a7d3b200d0a200d0a696e74206d61696e2829207b20200d0a20202020412a206f626a203d206e657720433b200d0a20202020200d0a20202020636f7574203c3c206f626a2d3e666f6f28293b200d0a20202020636f7574203c3c202828422a296f626a292d3e666f6f28293b200d0a20202020636f7574203c3c202828432a296f626a292d3e666f6f28293b200d0a202020200d0a2020202072657475726e20303b20200d0a7d),
+(53, 5, 'Какие независимые друг от друга изменения позволят коду отработать корректно:', 'добавить в строку 2 код: void Counter::Count() { }', 'добавить в строку 2 код: void Count() { }', 'изменить public на private в строке 1', 'код компилируется и выполняется и без изменений', 0x636c61737320436f756e746572207b200d0a20207075626c69633a202f2f2031200d0a20202020766f696420436f756e7428293b0d0a7d3b200d0a200d0a696e74206d61696e2829207b200d0a2020436f756e746572206f626a3b200d0a20206f626a2e436f756e7428293b200d0a202072657475726e20303b200d0a7d200d0a200d0a2f2f203220),
+(54, 5, 'Что будет выведено в stdout при выполнении следующего кода:', 'A', 'B', 'BA', 'Ничего, программа аварийно завершится', 0x23696e636c7564653c696f73747265616d3e200d0a200d0a7374727563742041207b200d0a20202020202020207e412829207b200d0a202020202020202020202020202020207374643a3a636f7574203c3c202241223b200d0a20202020202020207d200d0a7d3b200d0a200d0a7374727563742042203a20207075626c69632041207b200d0a2020202020202020422829207b200d0a202020202020202020202020202020207468726f7720313b200d0a20202020202020207d200d0a200d0a20202020202020207e422829207b200d0a202020202020202020202020202020207374643a3a636f7574203c3c202242223b200d0a20202020202020207d200d0a7d3b200d0a200d0a200d0a696e74206d61696e2829207b200d0a2020202020202020747279207b200d0a202020202020202020202020202020204220623b200d0a20202020202020207d200d0a20202020202020206361746368282e2e2e29207b207d200d0a7d),
+(55, 5, 'Какой режим наследования использован ?', 'private', 'protected', 'public', 'Ни один из перечисленных', 0x636c6173732042207b202f2a2e2e2e2a2f207d3b200d0a636c61737320413a2042207b202f2a2e2e2e2a2f207d3b),
+(56, 5, 'Что выведет данная программа?', 'base()derived()derived f()', 'base()derived()derived f()~derived()~base()', 'base()derived()base f()~derived()~base()', 'Ошибка компиляции', 0x23696e636c756465203c696f73747265616d3e200d0a636c6173732062617365200d0a7b200d0a7075626c69633a200d0a2020202062617365282920200d0a202020207b200d0a20202020202020207374643a3a636f7574203c3c2022626173652829223b200d0a202020207d200d0a202020207669727475616c207e62617365282920200d0a202020207b200d0a20202020202020207374643a3a636f7574203c3c20227e626173652829223b200d0a202020207d200d0a20202020766f696420662829200d0a202020207b200d0a20202020202020207374643a3a636f7574203c3c20226261736520662829223b200d0a202020207d200d0a7d3b200d0a636c61737320646572697665643a207075626c69632062617365200d0a7b200d0a7075626c69633a200d0a20202020646572697665642829200d0a202020207b200d0a20202020202020207374643a3a636f7574203c3c2022646572697665642829223b200d0a202020207d200d0a202020207e646572697665642829200d0a202020207b200d0a20202020202020207374643a3a636f7574203c3c20227e646572697665642829223b200d0a202020207d200d0a20202020766f696420662829200d0a202020207b200d0a20202020202020207374643a3a636f7574203c3c20226465726976656420662829223b200d0a202020207d200d0a7d3b200d0a696e74206d61696e2829200d0a7b200d0a20202020626173652a206f62203d206e657720646572697665643b200d0a2020202064796e616d69635f636173743c646572697665642a3e286f62292d3e6628293b20200d0a2020202072657475726e20303b200d0a7d),
+(57, 5, 'Что выведется в консоль при выполнении данной программы?', '121', '0120', '1210', '0121', 0x23696e636c756465203c696f73747265616d3e200d0a7573696e67206e616d657370616365207374643b0d0a0d0a636c61737320610d0a7b0d0a7075626c69633a0d0a0973746174696320696e7420733b0d0a09612829207b202b2b733b20636f7574203c3c20733b207d0d0a097e612829207b202d2d733b20636f7574203c3c20733b207d0d0a0d0a7d3b0d0a0d0a696e7420613a3a733b0d0a0d0a636c6173732062203a7075626c696320610d0a7b0d0a7075626c69633a0d0a09622829203a612829207b202b2b733b20636f7574203c3c20733b207d0d0a097e622829207b202d2d733b20636f7574203c3c20733b207d0d0a7d3b0d0a0d0a0d0a696e74206d61696e28290d0a7b0d0a0961202a6f6e65203d206e657720623b0d0a0964656c657465206f6e653b0d0a0963696e2e67657428293b0d0a7d),
+(58, 5, 'В каких из перечисленных строк произойдут ошибки компиляции:', '2,3', '1,2,3', '1,3', 'Код скомпилируется успешно', 0x636c6173732042617365207b200d0a202020207075626c69633a200d0a2020202020202020766f6964206d6574686f643128293b200d0a2020202070726f7465637465643a200d0a2020202020202020766f6964206d6574686f643228293b200d0a20202020707269766174653a200d0a2020202020202020766f6964206d6574686f643328293b200d0a7d3b200d0a200d0a636c617373204368696c64203a207075626c69632042617365207b200d0a2020202070726f7465637465643a200d0a2020202020202020766f6964206d6574686f64312829207b207d200d0a2020202020202020766f6964206d6574686f64322829207b207d200d0a2020202020202020766f6964206d6574686f64332829207b207d200d0a7d3b200d0a200d0a696e74206d61696e2829207b20200d0a20202020426173652a2062617365203d206e6577204368696c6428293b200d0a20202020626173652d3e6d6574686f643128293b2020202020202020202f2f2031200d0a20202020626173652d3e6d6574686f643228293b2020202020202020202f2f2032200d0a20202020626173652d3e6d6574686f643328293b2020202020202020202f2f2033200d0a2020202072657475726e20303b20200d0a7d),
+(59, 5, 'Если класс имеет хотя бы один абстрактный метод (чисто виртуальная функция), то такой класс называется:', 'Абстрактным', 'Виртуальным', 'Динамическим', 'Наличие абстрактного метода не выделяет класс', NULL),
+(60, 5, 'Что будет выведено в консоль при попытке выполнить следующую программу:', 'код не скомпилируется', '0', 'зависит от платформы и настроек компилятора', '4', 0x23696e636c756465203c696f73747265616d3e200d0a200d0a7573696e67206e616d657370616365207374643b200d0a200d0a636c6173732041207b200d0a2020696e74206a3b200d0a7075626c69633a200d0a20204128696e74206929203a206a286929207b207d200d0a200d0a2020766f6964207072696e742829200d0a20207b200d0a20202020636f7574203c3c2073697a656f66286a29203c3c20656e646c3b200d0a20207d200d0a7d3b200d0a200d0a636c6173732042203a207669727475616c207075626c69632041207b200d0a7075626c69633a200d0a20204228696e74206929203a2041286929207b207d200d0a7d3b200d0a200d0a636c6173732043203a207075626c69632042207b200d0a7075626c69633a200d0a20204328696e74206929203a2042286929207b207d200d0a7d3b200d0a200d0a696e74206d61696e28696e74206172676e2c2063686172202a20617267765b5d29200d0a7b200d0a20204320632831293b200d0a2020632e7072696e7428293b200d0a202072657475726e20303b200d0a7d),
+(61, 5, 'Что напечатает следующий код при создании экземпляра класса X:', 'ZYX', 'YXZ', 'XYZ', 'YX', 0x23696e636c756465203c696f73747265616d3e200d0a7573696e67206e616d657370616365207374643b200d0a200d0a636c6173732059207b200d0a20207075626c69633a200d0a20202020592829207b20636f7574203c3c202259223b207d200d0a7d3b200d0a636c617373205a207b200d0a20207075626c69633a200d0a202020205a2829207b20636f7574203c3c20225a223b207d200d0a7d3b200d0a636c6173732058203a207075626c6963205a207b200d0a2020707269766174653a200d0a2020202059206d5f6f626a593b200d0a20207075626c69633a200d0a20202020582829207b20636f7574203c3c202258223b207d200d0a7d3b),
+(62, 5, 'Что будет выведено на экран?', 'B', 'A', 'Ничего, возникнет ошибка компиляции.', 'Ничего, возникнет ошибка во время выполнени', 0x23696e636c756465203c696f73747265616d3e200d0a200d0a636c6173732041207b200d0a202020207075626c69633a200d0a20202020202020207669727475616c20766f696420662829207b207374643a3a636f7574203c3c202241223b207d200d0a7d3b200d0a200d0a636c6173732042203a207075626c69632041207b200d0a20202020707269766174653a200d0a2020202020202020766f696420662829207b207374643a3a636f7574203c3c202242223b207d200d0a7d3b200d0a200d0a766f69642067284126206129207b20612e6628293b207d200d0a200d0a696e74206d61696e202829207b200d0a202020204220623b200d0a20202020672862293b200d0a7d),
+(63, 5, 'Каким будет результат выполнения следующего кода:', 'Произойдет ошибка компиляции', '1', '2', 'Результат не определен', 0x23696e636c7564652022737464696f2e6822200d0a200d0a636c61737320436f756e746572207b200d0a20207075626c69633a200d0a20202020766f696420436f756e742829207b207072696e746628222564222c2031293b207d200d0a7d3b200d0a200d0a696e74206d61696e2829207b200d0a2020436f756e746572206f626a3b200d0a20206f626a2e436f756e7428293b200d0a202072657475726e20303b200d0a7d200d0a200d0a766f696420436f756e7465723a3a436f756e742829207b207072696e746628222564222c2032293b207d20),
+(64, 5, 'Что напечатает следующий код:', 'b', 'Возникнет ошибка компиляции', 'Возникнет ошибка времени выполнения', 'a', 0x23696e636c756465203c737464696f2e683e200d0a200d0a636c6173732041207b207d3b200d0a636c6173732042203a207075626c69632041207b207d3b200d0a636c6173732043203a207075626c69632042207b207d3b200d0a200d0a766f6964206d6574686f642841206129207b207072696e746628226122293b207d200d0a766f6964206d6574686f642842206229207b207072696e746628226222293b207d200d0a200d0a696e74206d61696e2829207b200d0a20204320633b200d0a20206d6574686f642863293b200d0a202072657475726e20303b200d0a7d20),
+(65, 5, 'Каков результат компиляции и выполнения следующего кода:', 'Ошибка компиляции', 'Circle Triangle', 'Оба объекта будут созданы, но при вызове метода shape2->show() будет возбуждено ', 'Объект shape1 будет создан, но при попытке создания объекта shape2 будет возбужд', 0x23696e636c756465203c696f73747265616d3e200d0a7573696e67206e616d657370616365207374643b200d0a200d0a636c617373205368617065200d0a7b200d0a202020207669727475616c20766f69642073686f772829203d20303b200d0a7d3b200d0a636c61737320436972636c653a207075626c6963205368617065200d0a7b200d0a20202020766f69642073686f772829200d0a202020207b200d0a20202020202020207374643a3a636f75743c3c22436972636c650a223b200d0a202020207d200d0a7d3b200d0a636c61737320547269616e676c653a205368617065200d0a7b200d0a20202020766f69642073686f772829200d0a202020207b200d0a20202020202020207374643a3a636f75743c3c22547269616e676c650a223b200d0a202020207d200d0a7d3b200d0a200d0a696e74206d61696e28696e7420617267632c20636861722a20617267765b5d2920200d0a7b200d0a2020202053686170652a207368617065313b200d0a20202020736861706531203d206e657720436972636c6528293b200d0a202020207368617065312d3e73686f7728293b200d0a2020202053686170652a20736861706532203d206e657720547269616e676c6528293b200d0a202020207368617065322d3e73686f7728293b200d0a2020202064656c657465207368617065313b200d0a2020202064656c657465207368617065323b200d0a2020202072657475726e20303b200d0a7d),
+(66, 5, 'Что будет, если передать указатель на неполиморфный тип в качестве аргумента оператору typeid?', 'Будет предоставлена информация о статическом типе аргумента', 'Будет возбуждено исключение bad::typeid', 'Ошибка компиляции', 'Ошибка времени выполнения', NULL),
+(67, 5, 'Что произойдет, если определение класса будет находиться в файле в двух местах?', 'Ошибка компиляции', 'Первое объявление класса будет проигнорировано', 'Второе объявление класса будет проигнорировано', 'Ошибка компоновки', NULL),
+(69, 5, 'Что напечатает следующий код', 'bac', 'cba', 'abc', 'вывод зависит от версии компилятора', 0x23696e636c756465203c696f73747265616d3e200d0a7573696e67206e616d657370616365207374643b200d0a200d0a636c6173732042207b200d0a202020207075626c69633a20422863686172206329207b20636f7574203c3c20633b7d200d0a7d3b200d0a200d0a636c6173732044207b200d0a202020207075626c6963203a20422062422c2062412c2062433b200d0a202020204428766f696429203a20624128276127292c20624228276227292c2062432827632729207b207d200d0a7d3b200d0a200d0a696e74206d61696e2829207b200d0a20202020442064496e7374616e63653b200d0a202020202e2e2e200d0a2020202072657475726e20313b200d0a7d);
+
+-- --------------------------------------------------------
 
 --
--- Table structure for table `quizes`
+-- Структура таблицы `quizes`
 --
 
-DROP TABLE IF EXISTS `quizes`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `quizes` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL,
   `name` varchar(45) COLLATE utf8_unicode_ci NOT NULL,
-  `description` varchar(45) COLLATE utf8_unicode_ci DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name_UNIQUE` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  `description` varchar(45) COLLATE utf8_unicode_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
--- Dumping data for table `quizes`
+-- Дамп данных таблицы `quizes`
 --
 
-LOCK TABLES `quizes` WRITE;
-/*!40000 ALTER TABLE `quizes` DISABLE KEYS */;
-INSERT INTO `quizes` VALUES (2,'quizFirst',NULL),(4,'C++ Programming Test#1',NULL);
-/*!40000 ALTER TABLE `quizes` ENABLE KEYS */;
-UNLOCK TABLES;
+INSERT INTO `quizes` (`id`, `name`, `description`) VALUES
+(2, 'quizFirst', NULL),
+(4, 'C++ Programming Test#1', NULL),
+(5, 'ООП С++', NULL);
+
+-- --------------------------------------------------------
 
 --
--- Table structure for table `results`
+-- Структура таблицы `results`
 --
 
-DROP TABLE IF EXISTS `results`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `results` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `id` int(10) UNSIGNED NOT NULL,
   `idQuiz` int(11) NOT NULL,
   `idStudent` int(11) NOT NULL,
   `score` float DEFAULT '0',
   `time` varchar(6) COLLATE utf8_unicode_ci DEFAULT NULL,
-  `date` date DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`),
-  KEY `quizId_idx` (`idQuiz`),
-  KEY `quizId` (`idQuiz`),
-  KEY `fk_studentId_idx` (`idStudent`),
-  CONSTRAINT `fk_quizId` FOREIGN KEY (`idQuiz`) REFERENCES `quizes` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  CONSTRAINT `fk_studentId` FOREIGN KEY (`idStudent`) REFERENCES `student` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  `date` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
--- Dumping data for table `results`
+-- Дамп данных таблицы `results`
 --
 
-LOCK TABLES `results` WRITE;
-/*!40000 ALTER TABLE `results` DISABLE KEYS */;
-/*!40000 ALTER TABLE `results` ENABLE KEYS */;
-UNLOCK TABLES;
+INSERT INTO `results` (`id`, `idQuiz`, `idStudent`, `score`, `time`, `date`) VALUES
+(29, 5, 7, 55, '01:52', '2017-07-10'),
+(30, 4, 7, 27.3, '01:00', '2017-07-10');
+
+-- --------------------------------------------------------
 
 --
--- Table structure for table `student`
+-- Структура таблицы `student`
 --
 
-DROP TABLE IF EXISTS `student`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `student` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(11) NOT NULL,
   `Name` varchar(40) CHARACTER SET utf8 NOT NULL,
-  `groupId` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`),
-  KEY `fk_groupId_idx` (`groupId`),
-  CONSTRAINT `fk_groupId` FOREIGN KEY (`groupId`) REFERENCES `groups` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  `groupId` int(10) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
--- Dumping data for table `student`
+-- Дамп данных таблицы `student`
 --
 
-LOCK TABLES `student` WRITE;
-/*!40000 ALTER TABLE `student` DISABLE KEYS */;
-INSERT INTO `student` VALUES (1,'Сайдалиев Даниил Сергеевич',1),(2,'Минченко Антон Андреевич',1),(3,'Кравчук Олег Витольтович',1),(4,'Пурдик Аркадий Олегович',1),(5,'Буженко Александр Александрович',1),(6,'Демченко Александр Игоревич',1),(7,'Шулянский Владислав Сергеевич',1),(8,'Дубровский Вадим Русланович',1),(9,'Шевченко Иван Игоревич',1),(10,'Замчий Юлия Михайловна',1),(11,'Скляров Владислав Александрович',1),(12,'Николенко Александр Сергеевич',1),(13,'Казанин Виктор Андреевич',1),(14,'Кичук Андрей Владимирович',1),(15,'Мирошник Владислав Евгеньевич',1),(16,'Мисоцкий Виктор Юрьевич',1),(17,'Шевчук Павел Александрович',1),(18,'Рашковский Никита Алексеевич',1),(19,'Белкин Денис Александрович',1);
-/*!40000 ALTER TABLE `student` ENABLE KEYS */;
-UNLOCK TABLES;
+INSERT INTO `student` (`id`, `Name`, `groupId`) VALUES
+(1, 'Сайдалиев Даниил Сергеевич', 1),
+(2, 'Минченко Антон Андреевич', 1),
+(3, 'Кравчук Олег Витольтович', 1),
+(4, 'Пурдик Аркадий Олегович', 1),
+(5, 'Буженко Александр Александрович', 1),
+(6, 'Демченко Александр Игоревич', 1),
+(7, 'Шулянский Владислав Сергеевич', 1),
+(8, 'Дубровский Вадим Русланович', 1),
+(9, 'Шевченко Иван Игоревич', 1),
+(10, 'Замчий Юлия Михайловна', 1),
+(11, 'Скляров Владислав Александрович', 1),
+(12, 'Николенко Александр Сергеевич', 1),
+(13, 'Казанин Виктор Андреевич', 1),
+(14, 'Кичук Андрей Владимирович', 1),
+(15, 'Мирошник Владислав Евгеньевич', 1),
+(16, 'Мисоцкий Виктор Юрьевич', 1),
+(17, 'Шевчук Павел Александрович', 1),
+(18, 'Рашковский Никита Алексеевич', 1),
+(19, 'Белкин Денис Александрович', 1);
+
+-- --------------------------------------------------------
 
 --
--- Table structure for table `teacher`
+-- Структура таблицы `teacher`
 --
 
-DROP TABLE IF EXISTS `teacher`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `teacher` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `id` int(10) UNSIGNED NOT NULL,
   `Name` varchar(45) COLLATE utf8_unicode_ci NOT NULL,
-  `Password` varchar(20) COLLATE utf8_unicode_ci NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  `Password` varchar(20) COLLATE utf8_unicode_ci NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
--- Dumping data for table `teacher`
+-- Дамп данных таблицы `teacher`
 --
 
-LOCK TABLES `teacher` WRITE;
-/*!40000 ALTER TABLE `teacher` DISABLE KEYS */;
-INSERT INTO `teacher` VALUES (1,'Виталий Полянский','vitalyadmin');
-/*!40000 ALTER TABLE `teacher` ENABLE KEYS */;
-UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+INSERT INTO `teacher` (`id`, `Name`, `Password`) VALUES
+(1, 'Виталий Полянский', 'vitalyadmin');
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+--
+-- Индексы сохранённых таблиц
+--
+
+--
+-- Индексы таблицы `groups`
+--
+ALTER TABLE `groups`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_teachedId_idx` (`teacherId`);
+
+--
+-- Индексы таблицы `questions`
+--
+ALTER TABLE `questions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `quizId_idx` (`quizId`);
+
+--
+-- Индексы таблицы `quizes`
+--
+ALTER TABLE `quizes`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `name_UNIQUE` (`name`);
+
+--
+-- Индексы таблицы `results`
+--
+ALTER TABLE `results`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `id_UNIQUE` (`id`),
+  ADD KEY `quizId_idx` (`idQuiz`),
+  ADD KEY `quizId` (`idQuiz`),
+  ADD KEY `fk_studentId_idx` (`idStudent`);
+
+--
+-- Индексы таблицы `student`
+--
+ALTER TABLE `student`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `id_UNIQUE` (`id`),
+  ADD KEY `fk_groupId_idx` (`groupId`);
+
+--
+-- Индексы таблицы `teacher`
+--
+ALTER TABLE `teacher`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `id_UNIQUE` (`id`);
+
+--
+-- AUTO_INCREMENT для сохранённых таблиц
+--
+
+--
+-- AUTO_INCREMENT для таблицы `groups`
+--
+ALTER TABLE `groups`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+--
+-- AUTO_INCREMENT для таблицы `questions`
+--
+ALTER TABLE `questions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=70;
+--
+-- AUTO_INCREMENT для таблицы `quizes`
+--
+ALTER TABLE `quizes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+--
+-- AUTO_INCREMENT для таблицы `results`
+--
+ALTER TABLE `results`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+--
+-- AUTO_INCREMENT для таблицы `student`
+--
+ALTER TABLE `student`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+--
+-- AUTO_INCREMENT для таблицы `teacher`
+--
+ALTER TABLE `teacher`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+--
+-- Ограничения внешнего ключа сохраненных таблиц
+--
+
+--
+-- Ограничения внешнего ключа таблицы `groups`
+--
+ALTER TABLE `groups`
+  ADD CONSTRAINT `fk_teachedId` FOREIGN KEY (`teacherId`) REFERENCES `teacher` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
+-- Ограничения внешнего ключа таблицы `questions`
+--
+ALTER TABLE `questions`
+  ADD CONSTRAINT `quizId` FOREIGN KEY (`quizId`) REFERENCES `quizes` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
+-- Ограничения внешнего ключа таблицы `results`
+--
+ALTER TABLE `results`
+  ADD CONSTRAINT `fk_quizId` FOREIGN KEY (`idQuiz`) REFERENCES `quizes` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+  ADD CONSTRAINT `fk_studentId` FOREIGN KEY (`idStudent`) REFERENCES `student` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+--
+-- Ограничения внешнего ключа таблицы `student`
+--
+ALTER TABLE `student`
+  ADD CONSTRAINT `fk_groupId` FOREIGN KEY (`groupId`) REFERENCES `groups` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+COMMIT;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Dump completed on 2017-07-07 20:06:00

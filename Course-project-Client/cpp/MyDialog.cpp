@@ -1,4 +1,5 @@
 #include "../h/MyDialog.h"
+#include "../h/RichEditUtils.h"
 #define ID_LISTBOX 0x8801
 #define NOT_CHECKED 99
 #define BUTTON_RESET 0x8809
@@ -31,6 +32,7 @@ DWORD WINAPI ThreadForTimer(LPVOID lpParam);
 MyDialog::MyDialog(VOID)
 {
 	ptr = this;
+	LoadLibrary("RichEd20.dll");
 }
 VOID MessageAboutError(DWORD dwError)
 {
@@ -762,11 +764,7 @@ DWORD WINAPI ThreadForTimer(LPVOID lpParam) {
 }
 
 
-
-
-
 Code* Code::ptr = NULL;
-
 Code::Code(string szcode)
 {
 	ptr = this;
@@ -784,9 +782,12 @@ void Code::Cls_OnClose(HWND hWnd) { EndDialog(hWnd, NULL); }
 BOOL Code::Cls_OnInitDialog(HWND hWnd, HWND hWndFocus, LPARAM lParam)
 {
 	hDialog = hWnd;
-	hEdit = GetDlgItem(hWnd, IDC_EDIT1);
-	SetWindowText(hEdit, szcode.c_str());
-	
+	hEdit = CreateWindow(RICHEDIT_CLASS, "",
+		WS_CHILD | ES_SAVESEL | ES_NOHIDESEL | WS_CHILDWINDOW | WS_VISIBLE | ES_MULTILINE | WS_VSCROLL | WS_HSCROLL | ES_WANTRETURN | WS_DISABLED,
+		0, 0, 720, 834, hWnd, 0, GetModuleHandle(0), 0);
+
+	rich_edit::append(hEdit, RGB(0, 0, 0), szcode.c_str());
+	SendMessage(hEdit,EM_SETREADONLY, 1, 0);
 	return TRUE;
 }
 INT_PTR CALLBACK Code::DlgProc(HWND hWnd, UINT Message, WPARAM wParam, LPARAM lParam)

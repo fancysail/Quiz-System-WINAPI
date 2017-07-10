@@ -150,6 +150,7 @@
     <ClInclude Include="h\MyDialog.h" />
     <ClInclude Include="h\Question.h" />
     <ClInclude Include="resource1.h" />
+    <ClInclude Include="RichEditUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Course-project-Client.rc" />

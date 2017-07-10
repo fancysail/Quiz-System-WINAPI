@@ -27,6 +27,9 @@
     <ClInclude Include="h\Question.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RichEditUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Course-project-Client.rc">
