@@ -32,7 +32,7 @@ DWORD WINAPI ThreadForTimer(LPVOID lpParam);
 MyDialog::MyDialog(VOID)
 {
 	ptr = this;
-	LoadLibrary("RichEd20.dll");
+	LoadLibrary("riched32.dll");
 }
 VOID MessageAboutError(DWORD dwError)
 {
@@ -98,19 +98,22 @@ VOID fillList() {
 	}
 }
 
-HWND& createEditControl(INT x, INT y, INT width, INT height, HWND* parent, INT id) {
-	HWND editControl = CreateWindowEx(WS_EX_CLIENTEDGE, "EDIT", nullptr, WS_CHILD | WS_VISIBLE | ES_READONLY | ES_MULTILINE | ES_WANTRETURN | WS_BORDER,
-		x, y, width, height, *parent, (HMENU)id, nullptr, 0);
+HWND& createRichEdit(INT x, INT y, INT width, INT height, HWND* parent, INT id) {
+	HWND editControl = CreateWindowEx(WS_EX_CLIENTEDGE, "RichEdit", nullptr,
+		ES_NUMBER | WS_CHILD | WS_VISIBLE | WS_TABSTOP | ES_MULTILINE | ES_READONLY | WS_VSCROLL  ,
+		x, y, width, height, *parent, NULL, GetModuleHandle(NULL), NULL);
+
+	SendMessage(editControl, EM_SETBKGNDCOLOR, 0, RGB(233, 233, 233));
 	return editControl;
 }
 HWND& createGroupBox(INT x, INT y, INT width, INT height, HWND* parent) {
-	HWND groupBox = CreateWindow("Button", nullptr, WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
+	HWND groupBox = CreateWindowEx(0, TEXT("Button"),nullptr, WS_CHILD | WS_VISIBLE | BS_GROUPBOX,
 		x, y, width, height, *parent, 0, nullptr, 0);
 	return groupBox;
 }
 HWND& createStatic(const char* text, INT x, INT y, INT width, INT height, HWND*parent) {
 	HWND hStatic = CreateWindowEx(0, TEXT("STATIC"), TEXT(text), WS_CHILD | WS_VISIBLE |
-		WS_EX_CLIENTEDGE | SS_CENTER, x, y, width, height, *parent, 0, nullptr, 0);
+		WS_EX_CLIENTEDGE | SS_CENTER , x, y, width, height, *parent, 0, nullptr, 0);
 	return hStatic;
 }
 HWND& createRadioButton(const char* text, INT x, INT y, INT width, INT height, HWND* parent) {
@@ -119,7 +122,7 @@ HWND& createRadioButton(const char* text, INT x, INT y, INT width, INT height, H
 	return hRadio;
 }
 HWND& createButton(const char* text, INT x, INT y, INT width, INT height, HWND* parent, INT id, int style = 0) {
-	HWND hButton = CreateWindowEx(WS_EX_CLIENTEDGE, TEXT("Button"), TEXT(text), WS_CHILD | WS_VISIBLE | WS_GROUP | style,
+	HWND hButton = CreateWindowEx(NULL, TEXT("Button"), TEXT(text), WS_CHILD | WS_VISIBLE | WS_GROUP | style,
 		x, y, width, height, *parent, (HMENU)id, GetModuleHandle(NULL), 0);
 	return hButton;
 }
@@ -149,7 +152,7 @@ VOID MyDialog::createAllElements(HWND hwnd) {
 	}
 	//Edits для Radio Чтобы текст был в несколько строк
 	for (INT i = 0; i < 4; i++) {
-		hEditForRadios[i] = createEditControl(210 + 30, 137 + (16 + i * 46), 660, 46, &hwnd, ID_EDIT1 + i);
+		hEditForRadios[i] = createRichEdit(210 + 30, 137 + (16 + i * 46), 660, 46, &hwnd, ID_EDIT1 + i);
 		SetWindowText(hEditForRadios[i], MyDialog::ptr->quiz.at(0)->getChoiceAt(i).c_str());
 	}
 
@@ -159,9 +162,7 @@ VOID MyDialog::createAllElements(HWND hwnd) {
 	buttons[2] = createButton("Предыдущий", 430, 377, 100, 24, &ptr->hDialog, BUTTON_PREV);
 	buttons[3] = createButton("Следующий", 540, 377, 80, 24, &ptr->hDialog, BUTTON_NEXT);
 	buttons[4] = createButton("Сдать", 630, 377, 75, 24, &ptr->hDialog, BUTTON_SUBMIT);
-
 	buttons[5] = createButton("Код", 300, 340, 50, 24, &ptr->hDialog, BUTTON_CODE);
-	//buttons[4] = createButton("Код", 630, 377, 75, 24, &ptr->hDialog, BUTTON_SUBMIT);//Сделать неактивной по умолчанию
 
 	EnableWindow(buttons[2], FALSE);
 
@@ -184,7 +185,7 @@ VOID MyDialog::disconnectMsg() {
 	send(getClientInfo().socket, SZbuff, strlen(SZbuff) + 1, 0);
 	int result = recv(ptr->getClientInfo().socket, SZbuff, 100, 0);
 	if (!strcmp(SZbuff, "<OK>")) {
-		//отправляю время
+		//sending time
 		string t;
 		INT spentMinutes = getQuizTime() - getSpentTime()-1;
 		INT spentSeconds = 60 - seconds;
@@ -274,7 +275,6 @@ VOID MyDialog::changedQuestion() {
 		}
 	}
 	//END Which radiobutton was chosen in a previous question
-
 
 	if (index == 0)  EnableWindow(buttons[2], FALSE);
 	else EnableWindow(buttons[2], TRUE);

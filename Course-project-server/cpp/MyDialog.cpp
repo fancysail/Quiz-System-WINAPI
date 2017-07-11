@@ -1450,17 +1450,17 @@ void Quiz::AddQuestion() {
 	SendMessage((HWND)hChooseQuiz, (UINT)CB_GETLBTEXT,
 		(WPARAM)ItemIndex, (LPARAM)ListItem);
 
-	char help[200];
+	char help[500];
 	ptrMyDialog->ssql << "insert into questions ";
-	GetWindowText(hQuestion, help, 200);
+	GetWindowText(hQuestion, help, 500);
 	ptrMyDialog->ssql << "SET questions.question = '" << help << "',";
-	GetWindowText(hAnswer, help, 200);
+	GetWindowText(hAnswer, help, 500);
 	ptrMyDialog->ssql << "questions.rightAnswer = '" << help << "',";
-	GetWindowText(hChoice2, help, 200);
+	GetWindowText(hChoice2, help, 500);
 	ptrMyDialog->ssql << "questions.wrongAnswer2 = '" << help << "',";
-	GetWindowText(hChoice3, help, 200);
+	GetWindowText(hChoice3, help, 500);
 	ptrMyDialog->ssql << "questions.wrongAnswer3 = '" << help << "',";
-	GetWindowText(hChoice4, help, 200);
+	GetWindowText(hChoice4, help, 500);
 	ptrMyDialog->ssql << "questions.wrongAnswer4 = '" << help << "',";
 
 	if (!m_codeFileName.empty()) {

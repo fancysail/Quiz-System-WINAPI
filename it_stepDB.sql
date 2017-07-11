@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Хост: 127.0.0.1
--- Время создания: Июл 10 2017 г., 11:40
+-- Время создания: Июл 11 2017 г., 21:22
 -- Версия сервера: 10.1.22-MariaDB
 -- Версия PHP: 7.1.4
 
@@ -141,14 +141,6 @@ CREATE TABLE `results` (
   `time` varchar(6) COLLATE utf8_unicode_ci DEFAULT NULL,
   `date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-
---
--- Дамп данных таблицы `results`
---
-
-INSERT INTO `results` (`id`, `idQuiz`, `idStudent`, `score`, `time`, `date`) VALUES
-(29, 5, 7, 55, '01:52', '2017-07-10'),
-(30, 4, 7, 27.3, '01:00', '2017-07-10');
 
 -- --------------------------------------------------------
 
