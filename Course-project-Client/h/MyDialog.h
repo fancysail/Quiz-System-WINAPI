@@ -99,6 +99,7 @@ public:
 	ClientInfo& getClientInfo() { return clientInfo; }
 	WSADATA& getWSD() { return wsd; }
 	vector<Question*> getQuiz() { return quiz; }
+	HWND* getRichEdits() { return hEditForRadios; }
 
 	BOOL isConnected() { return bconnected; }
 	BOOL isSubmitted() { return bsubmitted; }

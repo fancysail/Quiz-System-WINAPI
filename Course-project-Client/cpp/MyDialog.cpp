@@ -187,7 +187,7 @@ VOID MyDialog::disconnectMsg() {
 	if (!strcmp(SZbuff, "<OK>")) {
 		//sending time
 		string t;
-		INT spentMinutes = getQuizTime() - getSpentTime()-1;
+		INT spentMinutes = getQuizTime() - getSpentTime() - 1;
 		INT spentSeconds = 60 - seconds;
 		if (spentMinutes < 10) {
 			t += "0";
@@ -245,6 +245,26 @@ VOID MyDialog::changePercents() {
 	//Signal for ThreadForStats to send percents
 	SetEvent(hEvent);
 	SetWindowText(hPercents, TEXT(cstr2));
+}
+void paintBackground() {
+	if (MyDialog::ptr->isSubmitted()) {
+		for (int i = 0; i < 4; i++) {
+			SendMessage(MyDialog::ptr->getRichEdits()[i], EM_SETBKGNDCOLOR, 0, RGB(230, 230, 230));
+		}
+
+		if (MyDialog::ptr->getQuiz().at(MyDialog::ptr->getIndex())->getUserAnswer() == NOT_CHECKED) {
+			SendMessage(MyDialog::ptr->getRichEdits()[MyDialog::ptr->getQuiz().at(MyDialog::ptr->getIndex())->getUserAnswer()], EM_SETBKGNDCOLOR, 0, RGB(230, 230, 230));
+			return;
+		}
+		if (MyDialog::ptr->getQuiz().at(MyDialog::ptr->getIndex())->getUserAnswer() ==
+			MyDialog::ptr->getQuiz().at(MyDialog::ptr->getIndex())->getRightAnswer()) {
+			SendMessage(MyDialog::ptr->getRichEdits()[MyDialog::ptr->getQuiz().at(MyDialog::ptr->getIndex())->getUserAnswer()], EM_SETBKGNDCOLOR, 0, RGB(102, 239, 97));
+		}
+		else {
+			SendMessage(MyDialog::ptr->getRichEdits()[MyDialog::ptr->getQuiz().at(MyDialog::ptr->getIndex())->getUserAnswer()], EM_SETBKGNDCOLOR, 0, RGB(246, 83, 83));
+		}
+		return;
+	}
 }
 VOID MyDialog::changedQuestion() {
 	INT index = SendMessage(hListBox, LB_GETCURSEL, 0, 0);
@@ -304,6 +324,7 @@ VOID MyDialog::changedQuestion() {
 	for (INT i = 0; i < 4; i++) {
 		SetWindowText(hEditForRadios[i], quiz.at(index)->getChoiceAt(i).c_str());
 	}
+	paintBackground();
 }
 VOID MyDialog::toggleListBox() {
 	if (blistShown) {
@@ -379,6 +400,7 @@ VOID MyDialog::submitTest() {
 
 	MessageBox(NULL, c_message, "Результат", MB_OK | MB_ICONINFORMATION);
 	RedrawWindow(hDialog, NULL, NULL, RDW_INVALIDATE);
+	paintBackground();
 }
 VOID MyDialog::Cls_OnClose(HWND hwnd)
 {
@@ -522,34 +544,6 @@ INT_PTR CALLBACK MyDialog::DlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARA
 		HANDLE_MSG(hwnd, WM_CLOSE, ptr->Cls_OnClose);
 		HANDLE_MSG(hwnd, WM_INITDIALOG, ptr->Cls_OnInitDialog);
 		HANDLE_MSG(hwnd, WM_COMMAND, ptr->Cls_OnCommand);
-	case WM_CTLCOLORSTATIC:
-	{
-		TCHAR senderClass[256];
-		GetClassName((HWND)lParam, senderClass, 256);
-		if (!strcmp(senderClass, "Edit"))
-		{
-			HDC hdcStatic = (HDC)wParam;
-
-			if (MyDialog::ptr->isSubmitted()) {
-				if (MyDialog::ptr->getQuiz().at(MyDialog::ptr->getIndex())->getUserAnswer() ==
-					MyDialog::ptr->getQuiz().at(MyDialog::ptr->getIndex())->getRightAnswer()) {
-					//green background
-					if ((HWND)lParam == ptr->hEditForRadios[ptr->getQuiz().at(ptr->getIndex())->getUserAnswer()]) {
-						SetBkColor(hdcStatic, RGB(102, 239, 97));
-						return (INT_PTR)CreateSolidBrush(RGB(102, 239, 97));
-					}
-				}
-				else if ((HWND)lParam == ptr->hEditForRadios[ptr->getQuiz().at(ptr->getIndex())->getUserAnswer()]) {
-					//red background
-					SetBkColor(hdcStatic, RGB(246, 83, 83));
-					return (INT_PTR)CreateSolidBrush(RGB(246, 83, 83));
-				}
-			}
-			SetBkColor(hdcStatic, RGB(230, 230, 230));
-			return (INT_PTR)CreateSolidBrush(RGB(230, 230, 230));
-		}
-	}
-	break;
 	}
 	return FALSE;
 }
@@ -737,6 +731,7 @@ DWORD WINAPI ThreadForTimer(LPVOID lpParam) {
 				SetWindowText(ptr->gethTimeLeft(), TEXT("Осталось времени 00:00"));
 				ptr->submitTest();
 				ptr->setSubmitted(TRUE);
+				paintBackground();
 				SetEvent(ptr->hEvent);
 				EnableWindow(ptr->gethButtons()[0], FALSE);
 				for (INT i = 0; i < 4; i++) {
