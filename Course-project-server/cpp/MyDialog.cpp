@@ -1118,6 +1118,8 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 			if (Quiz::ptr->m_quizRelation.size() > 0) {
 				updateQuestionsCombo(Quiz::ptr->hDBquestions, Quiz::ptr->m_quizRelation.at(ItemIndex));
 			}
+			EnableWindow(hUpdate, FALSE);
+			EnableWindow(hDelete, FALSE);
 		}
 	}
 	break;
