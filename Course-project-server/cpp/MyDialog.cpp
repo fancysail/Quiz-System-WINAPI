@@ -725,7 +725,7 @@ DWORD WINAPI ThreadForAccept(LPVOID lpParam)
 	sockaddr_in local;
 	local.sin_addr.S_un.S_addr = INADDR_ANY; // IP address.
 	local.sin_family = AF_INET; // Address family (must be AF_INET).
-	local.sin_port = htons(49152); // IP port (1 - 1023 - зарезервированы, HTTP - 80, FTP - 21) 
+	local.sin_port = htons(52679); // IP port (1 - 1023 - зарезервированы, HTTP - 80, FTP - 21) 
 								   // The htons function returns the value in TCP/IP network byte order.
 
 								   //После создания сокета определенного протокола следует связать его с IP-интерфейсом и портом.

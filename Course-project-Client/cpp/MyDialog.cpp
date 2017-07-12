@@ -398,7 +398,7 @@ VOID MyDialog::submitTest() {
 	std::string message = ss.str();
 	const char* c_message = message.c_str();
 
-	MessageBox(NULL, c_message, "Результат", MB_OK | MB_ICONINFORMATION);
+	MessageBox(MyDialog::ptr->gethDialogue(), c_message, "Результат", MB_OK | MB_ICONINFORMATION);
 	RedrawWindow(hDialog, NULL, NULL, RDW_INVALIDATE);
 	paintBackground();
 }
@@ -564,7 +564,7 @@ DWORD WINAPI ThreadForConnect(LPVOID lpParam)
 		return 0;
 	}
 	ptr->getClientInfo().addr.sin_family = AF_INET;
-	ptr->getClientInfo().addr.sin_port = htons(49152);
+	ptr->getClientInfo().addr.sin_port = htons(52679);
 	TCHAR * ips = MyDialog::ptr->getServerIp();
 	ptr->getClientInfo().addr.sin_addr.S_un.S_addr = inet_addr(MyDialog::ptr->getServerIp());
 
