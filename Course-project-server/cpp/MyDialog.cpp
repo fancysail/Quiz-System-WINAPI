@@ -1420,6 +1420,7 @@ void Quiz::Cls_OnCommand(HWND hWnd, int id, HWND hWndCtl, UINT CodeNotify)
 		}
 		else {
 			format += dot;
+			Quiz::ptr->m_codeFileName.clear();
 			MessageBox(hDialog, TEXT(format.c_str()), "", MB_ICONERROR);
 			//SetWindowText(hPath, "");
 		}
